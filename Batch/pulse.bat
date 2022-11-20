@@ -1,1 +1,0 @@
-echo Disabled for now
