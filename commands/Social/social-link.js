@@ -237,7 +237,7 @@ module.exports = {
                 const role = interaction.options.getRole('role')
 
                 // Create a regex to check if the feedchannel is already linked to the channel
-                const regex = new RegExp(`^${channel}.*?,.*?,${feedChannel}$`);
+                const regex = new RegExp(`^${channel}.*?,.*?,${feedChannel.id}$`);
 
                 // Read the file
                 const youtubeData = fs.readFileSync(path.resolve('./db/socialalert/youtube.csv'), 'utf8');
@@ -247,7 +247,7 @@ module.exports = {
                 }
 
                 // Add the channel to the file
-                fs.writeFileSync(path.resolve('./db/socialalert/youtube.csv'), `${youtubeData}\n${channel},${role || 'None'},${feedChannel}`)
+                fs.writeFileSync(path.resolve('./db/socialalert/youtube.csv'), `${youtubeData}\n${channel},${role.id || 'None'},${feedChannel.id}`)
 
                 await interaction.reply({ content: `Successfully added ${channel} to the YouTube feed for <#${feedChannel.id}>.`, ephemeral: true })
 
