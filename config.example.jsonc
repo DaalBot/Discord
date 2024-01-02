@@ -1,0 +1,66 @@
+// Rename this file to config.json, fill in the values and then remove all lines starting with "//" (comments)
+{
+    // Wether or not to make discord.js spit out debug info
+    "debug": false,
+
+    // Prefix for legacy commands
+    "prefix": "$",
+
+    // Where the bot is stored on the host machine
+    "botPath": "/path/to/bot/root/folder",
+
+    // The username of the user the bot is running under
+    "username": "to", // Very old might not be needed but put it in anyway
+
+    // Where to send logs (channel ID)
+    "Logchannel": "1234",
+
+    // No clue what this does but its a array of channel ids so put atleast one in i guess
+    "LogIDs": [
+        "1234"
+    ],
+
+    // List of common user IDs
+    "users": {
+        "name": "1234"
+    },
+
+    "servers": {
+        "name": {
+            "id": "1234"
+        }
+    },
+
+    // WOKCommands config
+    "WOKCommands":{
+        // Prefix for WOK legacy commands
+        "prefix": "$",
+    
+        // Test servers for "testOnly" commands
+        "TestServers": [
+            "1234"
+        ],
+    
+        // Owners for "ownerOnly" commands
+        "BotOwners": [
+            "1234",
+            "5678"
+        ]
+    },
+
+    // List of statuses to randomly pick from
+    /*
+        {GUILDS} - Number of guilds the bot is in
+        {USERS} - Number of users the bot can see
+        {HUMANS} - Number of humans the bot can see (not bots)
+        {BOTS} - Number of bots the bot can see
+        {STATUS_COUNT} - Number of statuses in this array
+    */
+    "activities": [
+        "Watching {GUILDS} servers",
+        "Watching {USERS} users",
+        "Watching {HUMANS} humans",
+        "Watching {BOTS} bots",
+        "Watching {STATUS_COUNT} statuses"
+    ]
+}
