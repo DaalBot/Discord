@@ -5,6 +5,7 @@ module.exports = {
     
     slash: false,
     ownerOnly: true,
+    testOnly: true,
 
     callback: async ({ message }) => {
         message.channel.delete();

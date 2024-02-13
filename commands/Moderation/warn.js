@@ -1,6 +1,6 @@
 // JAVASCRIPT:
 const warnSchema = require('../../models/warn-schema')
-const { EmbedBuilder } = require('discord.js')
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js')
 const daalbot = require('../../daalbot.js');
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
   description: "Warns a user",
 
   permissions: [
-    daalbot.DJS.PermissionFlagsBits.ModerateMembers,
+    `${daalbot.DJS.PermissionFlagsBits.ModerateMembers}`,
   ],
 
   slash: true,
@@ -17,51 +17,51 @@ module.exports = {
 
   options: [
     {
-      type: "SUB_COMMAND",
+      type: ApplicationCommandOptionType.Subcommand,
       name: "add",
       description: "Adds a warning to the user",
       options: [
         {
           name: "user",
-          type: "USER",
+          type: ApplicationCommandOptionType.User,
           description: "The user to add a warning to",
           required: true,
         },
         {
           name: "reason",
-          type: "STRING",
+          type: ApplicationCommandOptionType.String,
           description: "The reason for the warning",
           required: true,
         },
       ],
     },
     {
-      type: "SUB_COMMAND",
+      type: ApplicationCommandOptionType.Subcommand,
       name: "remove",
       description: "Removes a warning from the user",
       options: [
         {
           name: "user",
-          type: "USER",
+          type: ApplicationCommandOptionType.User,
           description: "The user to remove a warning from",
           required: true,
         },
         {
           name: "id",
-          type: "STRING",
+          type: ApplicationCommandOptionType.String,
           description: "The ID of the warning to remove",
           required: true,
         },
       ],
     },
     {
-      type: "SUB_COMMAND",
+      type: ApplicationCommandOptionType.Subcommand,
       name: "list",
       description: "Lists all warnings for the user",
       options: [
         {
           name: "user",
-          type: "USER",
+          type: ApplicationCommandOptionType.User,
           description: "The user to list warnings for",
           required: true,
         },

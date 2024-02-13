@@ -8,7 +8,10 @@ module.exports = {
     description: 'Sets the roles to add when a member joins for the server.',
     category: 'Guild',
 
-    permissions: ['MANAGE_GUILD'],
+    permissions: [
+        `${Discord.PermissionFlagsBits.ManageRoles}`,
+        `${Discord.PermissionFlagsBits.ManageGuild}`
+    ],
 
     slash: true,
     testOnly: false,
@@ -18,12 +21,12 @@ module.exports = {
         {
             name: 'add',
             description: 'Adds a role to the autorole list.',
-            type: 'SUB_COMMAND',
+            type: Discord.ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'role',
                     description: 'The role to add to the autorole list.',
-                    type: 'ROLE',
+                    type: Discord.ApplicationCommandOptionType.Role,
                     required: true
                 }
             ]
@@ -31,12 +34,12 @@ module.exports = {
         {
             name: 'remove',
             description: 'Removes a role from the autorole list.',
-            type: 'SUB_COMMAND',
+            type: Discord.ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'role',
                     description: 'The role to remove from the autorole list.',
-                    type: 'ROLE',
+                    type: Discord.ApplicationCommandOptionType.Role,
                     required: true
                 }
             ]
@@ -44,7 +47,7 @@ module.exports = {
         {
             name: 'list',
             description: 'Lists the roles in the autorole list.',
-            type: 'SUB_COMMAND'
+            type: Discord.ApplicationCommandOptionType.Subcommand
         }
     ],
 

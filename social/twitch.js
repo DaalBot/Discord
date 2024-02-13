@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const client = require('../client.js')
 const { EmbedBuilder, ChannelType } = require('discord.js')
+const daalbot = require('../daalbot.js')
 
 const startingBearer = process.env.TWITCH_BEARER // The bearer that is in the .env file when the bot starts
 let Bearer = process.env.TWITCH_BEARER // The bearer that will be updated if it's invalid
@@ -99,7 +100,7 @@ async function main() {
                 const embed = new EmbedBuilder()
                     .setTitle(`${user.user_name} is now live on Twitch!`)
                     .setURL(`https://twitch.tv/${user.user_name}`)
-                    .setImage(user.thumbnail_url.replace('{width}', '1920').replace('{height}', '1080') + `?r=${Math.random() * 10000}`) // Add a random number to the end of the url to prevent caching :D
+                    .setImage(await daalbot.images.createPermLink(user.thumbnail_url.replace('{width}', '1920').replace('{height}', '1080') + `?r=${Math.random() * 10000}`)) // Add a random number to the end of the url to prevent caching :D
                     .setColor('#9B5AB4')
                     .addFields(
                         { name: 'Title', value: user.title, inline: true },

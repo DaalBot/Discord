@@ -9,30 +9,30 @@ module.exports = {
     category: 'Guild',
 
     // Note: Switch this to " type: 'SLASH' " when updating to V14
-    slash: true,
+    type: 'SLASH',
     testOnly: true,
 
     guildOnly: true,
 
     permissions: [
-        DJS.PermissionFlagsBits.ManageGuild
+        `${DJS.PermissionFlagsBits.ManageGuild}`
     ],
 
     options: [
         {
             name: 'create',
             description: 'Creates an event.',
-            type: 'SUB_COMMAND'
+            type: DJS.ApplicationCommandOptionType.Subcommand
         },
         {
             name: 'delete',
             description: 'Deletes an event.',
-            type: 'SUB_COMMAND'
+            type: DJS.ApplicationCommandOptionType.Subcommand
         },
         {
             name: 'list',
             description: 'Lists all events.',
-            type: 'SUB_COMMAND'
+            type: DJS.ApplicationCommandOptionType.Subcommand
         }
     ],
 

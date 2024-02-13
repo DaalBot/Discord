@@ -5,8 +5,14 @@ const daalbot = require('../../daalbot.js');
 const config = require('../../config.json');
 const path = require('path');
 
+const blacklistedUsers = [
+    '628400349979344919' // StickyBot (pins message to bottom of channel by sending it again and deleting the old one)
+];
+
 client.on('messageDelete', async (message) => {
     try {
+        if (blacklistedUsers.includes(message.author.id)) return; // Prevent spam from bots
+
         const enabled = fs.readFileSync(path.resolve(`./db/logging/${message.guild.id}/MESSAGEDELETE.enabled`), 'utf8');
         if (enabled == 'true') {
             if (fs.existsSync(path.resolve(`./db/logging/${message.channel.guild.id}/MESSAGEDELETE.exclude`))) {

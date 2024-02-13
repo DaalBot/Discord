@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const daalbot = require('../../daalbot');
+const { ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = {
     name: 'xp',
@@ -10,7 +11,7 @@ module.exports = {
     slash: true,
 
     permissions: [
-        daalbot.DJS.PermissionFlagsBits.ManageChannels
+        `${daalbot.DJS.PermissionFlagsBits.ManageChannels}`
     ],
 
     guildOnly: true,
@@ -20,19 +21,19 @@ module.exports = {
         {
             name: 'user',
             description: 'The user to modify the XP of',
-            type: 'USER',
+            type: ApplicationCommandOptionType.User,
             required: true
         },
         {
             name: 'amount',
             description: 'The amount of XP',
-            type: 'INTEGER',
+            type: ApplicationCommandOptionType.Integer,
             required: true
         },
         {
             name: 'action',
             description: 'The action to perform',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: true,
             choices: [
                 {

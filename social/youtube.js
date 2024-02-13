@@ -7,6 +7,14 @@ const daalbot = require('../daalbot.js');
 const csvman = require('@npiny/csvman');
 
 // Function to send a YouTube alert to a Discord channel
+/**
+ * Sends a YouTube alert message to a Discord channel.
+ * @param {string} link - The link to the YouTube video.
+ * @param {string} DChannel - The ID of the Discord channel.
+ * @param {string} role - The ID of the role to mention in the alert message.
+ * @param {string} channelName - The name of the YouTube channel.
+ * @returns {Promise<void>}
+ */
 async function sendYoutubeAlert(link, DChannel, role, channelName) {
     /**
      * @type {DJS.TextChannel}
@@ -34,7 +42,7 @@ setInterval(async () => {
     const dChannelData = youtubeData.getColumnData('DChannel').data;
 
     // Read the file that contains previously detected videos
-    const oldDetected = (await fs.readFile(path.resolve('./db/socialalert/youtube.detected'), 'utf-8')).split('\n');
+    let oldDetected = (await fs.readFile(path.resolve('./db/socialalert/youtube.detected'), 'utf-8')).trim();
 
     // Loop through the YouTube channel data
     for (let i = 0; i < yChannelData.length; i++) {
@@ -68,14 +76,14 @@ setInterval(async () => {
         const channelName = await daalbot.youtube.channelIdToName(channel.channel);
 
         // Get the old uploads for the current channel
-        const channelOldUploads = oldDetected.find((c) => c.split('|')[0] === channel.channel)?.split('|')[1] ?? [];
+        const channelOldUploads = oldDetected.split('\n').find((c) => c.split('|')[0] === channel.channel)?.split('|')[1] ?? '';
         // Get the new uploads for the current channel
         const newUploads = (await daalbot.youtube.getChannelUploads(channel.channel, true)).join(',');
 
         // Check if there are any new uploads
         if (channelOldUploads != newUploads) {
             // Find the row for the channel in the old detected file
-            const channelRowIndex = oldDetected.findIndex((c) => c.split('|')[0] === channel.channel);
+            const channelRowIndex = oldDetected.split('\n').findIndex((c) => c.split('|')[0] === channel.channel);
 
             // Check if the video was already detected
             const newUploadsArr = newUploads.split(',');
@@ -111,14 +119,14 @@ setInterval(async () => {
                 oldDetected[channelRowIndex] = `${channel.channel}|${newUploads}`;
             } else {
                 // Add a new row
-                oldDetected.push(`${channel.channel}|${newUploads}`);
+                oldDetected += `${newUploads}`;
             }
 
             // Write the updated data to the file
-            await fs.writeFile(path.resolve('./db/socialalert/youtube.detected'), oldDetected.join('\n'));
+            await fs.writeFile(path.resolve('./db/socialalert/youtube.detected'), oldDetected);
         }
     }
 
     // Wipe the lock file
     await fs.writeFile(path.resolve('./db/socialalert/youtube.lock'), '');
-}, 5 * 60 * 1000);
+}, 15 * 1000);

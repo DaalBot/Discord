@@ -1,4 +1,4 @@
-const { ActivityType } = require('discord.js')
+const { ActivityType, ApplicationCommandOptionType } = require('discord.js')
 const daalbot = require('../../daalbot.js')
 
 module.exports = {
@@ -13,13 +13,13 @@ module.exports = {
         {
             name: 'status',
             description: 'The new status',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: true
         },
         {
             name: 'type',
             description: 'The type of status (piny.tv/ActivityTypes)',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: false,
         }
     ],

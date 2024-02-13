@@ -1,3 +1,5 @@
+const { PermissionFlagsBits, ApplicationCommandOptionType } = require("discord.js");
+
 module.exports = {
     name: 'customcommand',
     description: 'Modify the custom commands for your server.',
@@ -7,11 +9,13 @@ module.exports = {
         {
             name: 'create',
             description: 'Create a custom command.',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
         }
     ],
 
-    permissions: ['ADMINISTRATOR'],
+    permissions: [
+        `${PermissionFlagsBits.Administrator}`
+    ],
     testOnly: true,
     guildOnly: true,
     slash: true,

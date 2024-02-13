@@ -105,6 +105,11 @@
     ]
   },
 
+    "handler": {
+        "testServer": "1017715574639431680",
+        "verbose": false
+    },
+
     "activities": [
         "1/{STATUS_COUNT} Chance!",
         "Don't be stupid",

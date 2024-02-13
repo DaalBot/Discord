@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 const config = require('../../config.json');
 const events = [
@@ -35,19 +35,19 @@ module.exports = {
     guildOnly: true,
 
     permissions: [
-        daalbot.DJS.PermissionFlagsBits.ViewAuditLog
+        `${daalbot.DJS.PermissionFlagsBits.ViewAuditLog}`
     ],
 
     options: [
         {
             name: 'channel',
             description: 'The channel to send the logs to.',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'channel',
                     description: 'The channel to send the logs to.',
-                    type: 'CHANNEL',
+                    type: ApplicationCommandOptionType.Channel,
                     required: true
                 }
             ]
@@ -55,12 +55,12 @@ module.exports = {
         {
             name: 'toggle',
             description: 'Toggles the logging of a specific event.',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'event',
                     description: 'The event to toggle logging for.',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: true,
                     choices: events.map((event) => ({
                         name: event,
@@ -70,7 +70,7 @@ module.exports = {
                 {
                     name: 'enabled',
                     description: 'Enable or disable logging for this event.',
-                    type: 'BOOLEAN',
+                    type: ApplicationCommandOptionType.Boolean,
                     required: true
                 }
             ]
@@ -78,25 +78,25 @@ module.exports = {
         {
             name: 'exclude',
             description: 'Excludes a channel from being logged.',
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
 
             options: [
                 {
                     name: 'channel',
                     description: 'The channel to exclude from logging.',
-                    type: 'CHANNEL',
+                    type: ApplicationCommandOptionType.Channel,
                     required: true
                 },
                 {
                     name: 'enabled',
                     description: 'Enable or disable logging for this event.',
-                    type: 'BOOLEAN',
+                    type: ApplicationCommandOptionType.Boolean,
                     required: true
                 },
                 {
                     name: 'event',
                     description: 'The event to toggle logging for.',
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     required: true,
                     
                     choices: events.map((event) => ({

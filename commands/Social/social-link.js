@@ -14,7 +14,7 @@ module.exports = {
     guildOnly: true,
 
     permissions: [
-        PermissionFlagsBits.ManageWebhooks
+        `${PermissionFlagsBits.ManageWebhooks}`
     ],
 
     type: 'SLASH',
@@ -245,6 +245,10 @@ module.exports = {
                 if (youtubeData.split('\n').filter(i => regex.test(i)).length > 0) {
                     return await interaction.reply({ content: 'That channel is already linked to that channel.', ephemeral: true })
                 }
+
+                // Get the channel name / Check if the channel exists
+                const channelData = await daalbot.youtube.channelIdToName(channel)
+                if (channelData == null) return await interaction.reply({ content: 'That channel does not exist.', ephemeral: true })
 
                 // Add the channel to the file
                 fs.writeFileSync(path.resolve('./db/socialalert/youtube.csv'), `${youtubeData}\n${channel},${role.id || 'None'},${feedChannel.id}`)

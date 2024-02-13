@@ -10,7 +10,7 @@ module.exports = {
         {
             name: 'type',
             description: 'What type of information you want to lookup',
-            type: 'STRING',
+            type: Discord.ApplicationCommandOptionType.String,
             required: true,
             choices: [
                 {
@@ -30,7 +30,7 @@ module.exports = {
         {
             name: 'id',
             description: 'The ID of the information you want to lookup',
-            type: 'STRING',
+            type: Discord.ApplicationCommandOptionType.String,
             required: true,
         }
     ],

@@ -10,49 +10,49 @@ module.exports = {
         {
             name: 'code',
             description: 'The code to execute',
-            type: 'STRING',
+            type: DJS.ApplicationCommandOptionType.String,
             required: true
         },
         {
             name: 'attachment',
             description: 'attachment',
-            type: 'ATTACHMENT',
+            type: DJS.ApplicationCommandOptionType.Attachment,
             required: false
         },
         {
             name: 'string',
             description: 'string',
-            type: 'STRING',
+            type: DJS.ApplicationCommandOptionType.String,
             required: false
         },
         {
             name: 'number',
             description: 'number',
-            type: 'NUMBER',
+            type: DJS.ApplicationCommandOptionType.Number,
             required: false
         },
         {
             name: 'boolean',
             description: 'boolean',
-            type: 'BOOLEAN',
+            type: DJS.ApplicationCommandOptionType.Boolean,
             required: false
         },
         {
             name: 'user',
             description: 'user',
-            type: 'USER',
+            type: DJS.ApplicationCommandOptionType.User,
             required: false
         },
         {
             name: 'channel',
             description: 'channel',
-            type: 'CHANNEL',
+            type: DJS.ApplicationCommandOptionType.Channel,
             required: false
         },
         {
             name: 'role',
             description: 'role',
-            type: 'ROLE',
+            type: DJS.ApplicationCommandOptionType.Role,
             required: false
         }
     ],

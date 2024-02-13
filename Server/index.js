@@ -22,7 +22,7 @@ app.get('/api/status', (req, res) => {
 
         res.send(`${JSONDataString} <style>body { background-color: #1e1e1e; color: #ffffff; font-size: 2.5rem; font-family: system-ui; }</style><script>setTimeout(() => { window.location.reload() }, 5000)</script>`)
     } else {
-        // Page is either being loaded by a http library or a browser that doesnt support mozzila stuff so just send the data
+        // Page is either being loaded by a http library or a browser that doesnt support mozilla stuff so just send the data
         res.json({
             guilds: client.guilds.cache.size,
             uptime: client.uptime,

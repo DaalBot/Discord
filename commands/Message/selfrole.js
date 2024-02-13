@@ -13,7 +13,7 @@ module.exports = {
 
     guildOnly: true,
     permissions: [
-        DJS.PermissionFlagsBits.ManageRoles,
+        `${DJS.PermissionFlagsBits.ManageRoles}`,
     ],
 
     options: [

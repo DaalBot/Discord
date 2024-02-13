@@ -17,8 +17,6 @@ const embedColours = [
     'Aqua',
 ]
 
-Discord.ApplicationCommandOptionType.Channel
-
 module.exports = {
     name: 'ticket',
     description: 'Manages tickets for the server.',
@@ -29,7 +27,7 @@ module.exports = {
     guildOnly: true,
 
     permissions: [
-        Discord.PermissionFlagsBits.ManageGuild
+        `${Discord.PermissionFlagsBits.ManageGuild}`
     ],
 
     options: [

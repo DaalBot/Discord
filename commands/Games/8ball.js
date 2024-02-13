@@ -1,3 +1,5 @@
+const { ApplicationCommandOptionType } = require("discord.js");
+
 const outcomes = [
     "It is decidedly so",
     "Without a doubt",
@@ -22,7 +24,7 @@ module.exports = {
         {
             name: 'question',
             description: 'The question you want to ask the magic 8ball',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: true
         }
     ],

@@ -8,25 +8,25 @@ module.exports = {
     description: 'Locksdown the server',
     category: 'Guild',
 
-    slash: true,
+    type: 'SLASH',
     testOnly: true,
 
     options: [
         {
             name: 'start',
             description: 'Starts the lockdown',
-            type: 'SUB_COMMAND',
+            type: DJS.ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'reason',
                     description: 'The reason for the lockdown',
-                    type: 'STRING',
+                    type: DJS.ApplicationCommandOptionType.String,
                     required: true
                 },
                 {
                     name: 'role',
                     description: 'The role to remove send perms from',
-                    type: 'ROLE',
+                    type: DJS.ApplicationCommandOptionType.Role,
                     required: true
                 }
             ]
@@ -34,7 +34,7 @@ module.exports = {
         {
             name: 'end',
             description: 'Ends the lockdown',
-            type: 'SUB_COMMAND'
+            type: DJS.ApplicationCommandOptionType.Subcommand
         }
     ],
 

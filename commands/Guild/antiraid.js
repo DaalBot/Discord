@@ -12,23 +12,25 @@ module.exports = {
     testOnly: true,
 
     guildOnly: true,
-    permissions: ['MANAGE_GUILD'],
+    permissions: [
+        `${Discord.PermissionFlagsBits.ManageGuild}`
+    ],
 
     options: [
         {
             name: 'toggle',
             description: 'Toggle the anti raid system.',
-            type: 'SUB_COMMAND_GROUP',
+            type: Discord.ApplicationCommandOptionType.SubcommandGroup,
             options: [
                 {
                     name: 'all',
                     description: 'Toggles the entire anti raid system.',
-                    type: 'SUB_COMMAND',
+                    type: Discord.ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
                             name: 'enabled',
                             description: 'Whether or not the anti raid system is enabled.',
-                            type: 'BOOLEAN',
+                            type: Discord.ApplicationCommandOptionType.Boolean,
                             required: true
                         }
                     ]
@@ -36,12 +38,12 @@ module.exports = {
                 {
                     name: 'names',
                     description: 'Toggles the anti raid system for known raid names.',
-                    type: 'SUB_COMMAND',
+                    type: Discord.ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
                             name: 'enabled',
                             description: 'Whether or not the anti raid system for names is enabled.',
-                            type: 'BOOLEAN',
+                            type: Discord.ApplicationCommandOptionType.Boolean,
                             required: true
                         }
                     ]
@@ -49,12 +51,12 @@ module.exports = {
                 {
                     name: 'treshold',
                     description: 'Toggles the anti raid system for the treshold.',
-                    type: 'SUB_COMMAND',
+                    type: Discord.ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
                             name: 'enabled',
                             description: 'Whether or not the anti raid system for the treshold is enabled.',
-                            type: 'BOOLEAN',
+                            type: Discord.ApplicationCommandOptionType.Boolean,
                             required: true
                         }
                     ]
@@ -64,23 +66,23 @@ module.exports = {
         {
             name: 'settings',
             description: 'Configure the anti raid system.',
-            type: 'SUB_COMMAND_GROUP',
+            type: Discord.ApplicationCommandOptionType.SubcommandGroup,
             options: [
                 {
                     name: 'threshold',
                     description: 'Set the threshold for the anti raid system.',
-                    type: 'SUB_COMMAND',
+                    type: Discord.ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
                             name: 'threshold',
                             description: 'Set the threshold for the anti raid system.',
-                            type: 'INTEGER',
+                            type: Discord.ApplicationCommandOptionType.Integer,
                             required: true
                         },
                         {
                             name: 'time',
                             description: 'Sets the time before the threshold resets. (in seconds)',
-                            type: 'INTEGER',
+                            type: Discord.ApplicationCommandOptionType.Integer,
                             required: true
                         }
                     ]
@@ -88,12 +90,12 @@ module.exports = {
                 {
                     name: 'action',
                     description: 'The action to take when the anti raid system is triggered.',
-                    type: 'SUB_COMMAND',
+                    type: Discord.ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
                             name: 'action',
                             description: 'The action to take when the anti raid system is triggered.',
-                            type: 'STRING',
+                            type: Discord.ApplicationCommandOptionType.String,
                             required: true,
                             choices: [
                                 {

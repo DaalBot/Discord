@@ -1,3 +1,5 @@
+const client = require('../../client.js')
+
 module.exports = {
     category: 'Testing',
     description: 'Simulates a join.',
@@ -5,8 +7,9 @@ module.exports = {
     slash: 'both',
     testOnly: true,
   
-    callback: ({ member, client }) => {
+    callback: ({ interaction }) => {
         client.emit('guildMemberAdd', member)
-        return 'Join simulated!'
+        
+        interaction.reply('Simulated join.')
     },
 }

@@ -1,3 +1,5 @@
+const { ApplicationCommandOptionType } = require("discord.js");
+
 const actions = ['rock', 'paper', 'scissors']
 
 function getRandomInt(max) {
@@ -15,7 +17,7 @@ function getRandomInt(max) {
         {
             name: 'move',
             description: `The move to play against the cpu`,
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: true,
             choices: actions.map((action) => ({
               name: action,

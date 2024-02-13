@@ -14,7 +14,7 @@ module.exports = {
         guildOnly: true,
 
         permissions: [
-            PermissionFlagsBits.ManageMessages
+            `${PermissionFlagsBits.ManageMessages}`
         ],
 
         options: [

@@ -1,3 +1,5 @@
+const { ApplicationCommandOptionType } = require("discord.js");
+
 module.exports = {
     category: 'Roleplay',
     description: 'Revives a user',
@@ -9,7 +11,7 @@ module.exports = {
         {
             name: 'user',
             description: 'The user to revive',
-            type: 'USER',
+            type: ApplicationCommandOptionType.User,
             required: true,
         }
     ],

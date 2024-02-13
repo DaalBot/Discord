@@ -15,7 +15,7 @@ module.exports = {
     guildOnly: true,
 
     permissions: [
-        Discord.PermissionFlagsBits.ManageGuild
+        `${Discord.PermissionFlagsBits.ManageGuild}`
     ],
 
     options: [

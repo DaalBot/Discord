@@ -19,7 +19,7 @@ client.on('messageCreate', async message => {
 
         embed.setAuthor({
             name: 'Feature Friday Playtesting',
-            iconURL: `https://pinymedia.web.app/FCHQ.png`
+            iconURL: `https://media.piny.dev/FCHQ.png`
         })
 
         let desc = '';

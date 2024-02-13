@@ -12,26 +12,26 @@ module.exports = {
     guildOnly: true,
     
     permissions: [
-        DJS.PermissionFlagsBits.ManageGuild
+        `${DJS.PermissionFlagsBits.ManageGuild}`
     ],
 
     options: [
         {
             name: 'channel',
             description: 'The channel to send the welcome message in',
-            type: 'CHANNEL',
+            type: DJS.ApplicationCommandOptionType.Channel,
             required: true,
         },
         {
             name: 'message',
             description: 'The message to send when a user joins the server (Use {user} to ping the user)',
-            type: 'STRING',
+            type: DJS.ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: 'embed',
             description: 'Embed json (/embed to create)',
-            type: 'STRING',
+            type: DJS.ApplicationCommandOptionType.String,
             required: false,
         }
     ],

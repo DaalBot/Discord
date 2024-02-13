@@ -1,18 +1,18 @@
+const { ApplicationCommandOptionType } = require('discord.js')
 const config = require('../../config.json')
 module.exports = {
     category: 'Pen',
     description: 'penlog',
   
     slash: true,
-    testOnly: false,
-
+    testOnly: true,
     ownerOnly: true,
 
     options: [
         {
             name: 'text',
             description: 'the text to log',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: true 
         }
     ],

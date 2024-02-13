@@ -26,8 +26,8 @@ module.exports = {
     description: 'Creates a verification message in the server',
     guildOnly: true,
     permissions: [
-        PermissionFlagsBits.ManageRoles,
-        PermissionFlagsBits.ManageChannels
+        `${PermissionFlagsBits.ManageRoles}`,
+        `${PermissionFlagsBits.ManageChannels}`
     ],
     testOnly: false,
     type: 'SLASH',

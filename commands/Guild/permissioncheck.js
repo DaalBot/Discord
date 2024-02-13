@@ -17,7 +17,7 @@ module.exports = {
         {
             name: 'check',
             description: 'Checks if the bot has the correct permissions.',
-            type: 'SUB_COMMAND'
+            type: Discord.ApplicationCommandOptionType.Subcommand
         }
     ],
 

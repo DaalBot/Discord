@@ -10,7 +10,7 @@ module.exports = {
     testOnly: false,
 
     permissions: [
-        DJS.PermissionFlagsBits.ManageGuildExpressions
+        `${DJS.PermissionFlagsBits.ManageGuildExpressions}`
     ],
 
     slash: true,
@@ -18,13 +18,13 @@ module.exports = {
         {
             name: 'emote',
             description: 'The emote to add.',
-            type: 'STRING',
+            type: DJS.ApplicationCommandOptionType.String,
             required: true
         },
         {
             name: 'name',
             description: 'The name of the emote.',
-            type: 'STRING',
+            type: DJS.ApplicationCommandOptionType.String,
             required: false
         }
     ],

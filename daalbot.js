@@ -281,6 +281,10 @@ async function API_get_role(guild, id) {
     }
 }
 
+/**
+ * @param {string} url 
+ * @returns {Promise<string>}
+*/
 async function createPermanentImgLink(url) {
     try {
         const options = {
@@ -414,7 +418,8 @@ async function youtube_GetChannelUploads(channelId, minified = false) {
         } else {
             return data.relatedStreams;
         }
-    } catch {
+    } catch(e) {
+        console.error(e);
         return null;
     }
 }
@@ -443,11 +448,9 @@ async function youtube_channelIdToName(channelId) {
 
 const timestampEvents = new EventEmitter();
 
-// Constantly emit the current timestamp so that other files can set up listeners for a timestamp they need and get a callback when it happens
-// Tick every 100ms (10tps)
 setInterval(() => {
     timestampEvents.emit(Date.now())
-}, 100);
+}, 1 * 1000);
 
 const youtube = {
     getChannelUploads: youtube_GetChannelUploads,

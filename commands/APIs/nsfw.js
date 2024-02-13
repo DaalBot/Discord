@@ -1,6 +1,6 @@
 const axios = require('axios');
 const validTypes = 'hass,pgif,4k,hentai,anal,hanal,gonewild,ass,pussy,thigh,hthigh,paizuri,tentacle,boobs,hboobs'.split(',');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 
 const get = async (url) => {
@@ -16,20 +16,20 @@ module.exports = {
     description: 'Sends a NSFW image depending on the options provided.',
     category: 'APIs',
 
-    slash: true,
+    type: 'SLASH',
     testOnly: true,
 
     options: [
         {
             name: 'type',
             description: 'The type of NSFW image you want to see.',
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             required: true
         },
         {
             name: 'gif',
             description: 'Whether or not you want the result to be a gif.',
-            type: 'BOOLEAN',
+            type: ApplicationCommandOptionType.Boolean,
             required: true
         }
     ],

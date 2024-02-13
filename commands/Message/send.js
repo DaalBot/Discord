@@ -5,12 +5,8 @@ module.exports = {
   description: 'Sends a message.',
 
   permissions: [
-    PermissionFlagsBits.ManageMessages,
+    `${PermissionFlagsBits.ManageMessages}`,
   ],
-
-  minArgs: 2,
-  expectedArgs: '<channel> <text>',
-  expectedArgsTypes: ['CHANNEL', 'STRING'],
 
   type: 'SLASH',
   testOnly: false,

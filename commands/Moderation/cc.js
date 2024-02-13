@@ -5,35 +5,36 @@ module.exports = {
     description: 'Deletes multiple messages at once.',
   
     permissions: [
-      DJS.PermissionFlagsBits.ManageMessages,
+      `${DJS.PermissionFlagsBits.ManageMessages}`
     ],
-  
-    minArgs: 1,
-    maxArgs: 1,
-    expectedArgs: '[amount]',
   
     guildOnly: true,
     slash: true,
     testOnly: false,
-  
-    callback: async ({ message, interaction, channel, args }) => {
-      const amount = parseInt(args.shift())
-  
-      if (message) {
-        await message.delete()
+
+    options: [
+      {
+        name: 'amount',
+        description: 'The amount of messages to delete.',
+        type: DJS.ApplicationCommandOptionType.Integer,
+        required: true
       }
+    ],
+  
+    callback: async ({ interaction }) => {
+      const amount = interaction.options.getInteger('amount');
+      const channel = interaction.channel;
   
       // Bulk delete
       if (amount > 100 || amount < 1) {
         return 'Please pick a number from 1 to 100'
-        
-        
       }
 
       const { size } = await channel.bulkDelete(amount, true)
   
-      return `Deleted ${size} message(s).`
-      
-      
+      interaction.reply({
+        content: `Deleted ${size} messages.`,
+        ephemeral: true
+      })
     },
   }

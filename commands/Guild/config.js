@@ -1,4 +1,4 @@
-const { PermissionFlagsBits } = require('discord.js');
+const { PermissionFlagsBits, ApplicationCommandOptionType, ChannelType } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 
 module.exports = {
@@ -9,24 +9,28 @@ module.exports = {
     guildOnly: true,
     
     slash: true,
-    permissions: [PermissionFlagsBits.ManageGuild],
+    permissions: [
+        `${PermissionFlagsBits.ManageGuild}`
+    ],
 
     options: [
         {
             name: 'channels',
             description: 'Configure the channels for the bot',
-            type: 'SUB_COMMAND_GROUP',
+            type: ApplicationCommandOptionType.SubcommandGroup,
             options: [
                 {
                     name: 'levels',
                     description: 'Configure the channel for level up messages',
-                    type: 'SUB_COMMAND',
+                    type: ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
                             name: 'channel',
                             description: 'The channel to send level up messages to',
-                            type: 'CHANNEL',
-                            channel_types: [0],
+                            type: ApplicationCommandOptionType.Channel,
+                            channel_types: [
+                                ChannelType.GuildText
+                            ],
                             required: true
                         }
                     ]
@@ -34,13 +38,15 @@ module.exports = {
                 {
                     name: 'logs',
                     description: 'Set the channel for the bot to send alerts to',
-                    type: 'SUB_COMMAND',
+                    type: ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
                             name: 'channel',
                             description: 'The channel to send alerts to',
-                            type: 'CHANNEL',
-                            channel_types: [0],
+                            type: ApplicationCommandOptionType.Channel,
+                            channel_types: [
+                                ChannelType.GuildText
+                            ],
                             required: true
                         }
                     ]
