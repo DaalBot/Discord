@@ -1,5 +1,5 @@
 const client = require('../../client.js');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 const fs = require('fs');
 const daalbot = require('../../daalbot.js');
 const config = require('../../config.json');
@@ -28,20 +28,34 @@ client.on('messageDelete', async (message) => {
 
             const embed = new EmbedBuilder()
                 .setTitle('Message Deleted')
-                .setDescription(`<:icon_Person:1043647937487589446> <@${message.author.id}>\n<:discordReply:1043869882921533450> <#${message.channel.id}>\n\n<:Message:1117915334855360532> ${message.content}\n\n<:Trash:1118100123713540118> <@${message.author.id}> or a bot[*](https://pastebin.com/u0RjF7j8)`)
-                .setThumbnail('https://pinymedia.web.app/daalbot/embed/thumbnail/logs/Message.png')
+                .setDescription(`<:icon_Person:1043647937487589446> <@${message.author.id}>
+<:discordReply:1043869882921533450> <#${message.channel.id}>
+
+<:Message:1117915334855360532> ${message.content}
+
+<:Trash:1118100123713540118> <@${message.author.id}> or a bot[*](https://pastebin.com/u0RjF7j8)`)
+                .setThumbnail('https://media.piny.dev/daalbot/embed/thumbnail/logs/Message.png')
                 .setColor('#EF3D48')
                 .setTimestamp();
 
-            const latestAuditLog = await message.guild.fetchAuditLogs().then(audit => audit.entries.first());
+            const fetchedLogs = await message.guild.fetchAuditLogs({
+                limit: 1
+            })
+
+            const latestAuditLog = fetchedLogs.entries.first();
     
-            if (latestAuditLog.action == 'MESSAGE_DELETE') {
+            if (latestAuditLog.action == AuditLogEvent.MessageDelete) {
                 if (latestAuditLog.targetId == message.author.id) {
                     try {
                         // Message wasnt deleted by a bot or the author
                         const executor = latestAuditLog?.executorId;
             
-                        embed.setDescription(`<:icon_Person:1043647937487589446> <@${message.author.id}>\n<:discordReply:1043869882921533450> <#${message.channel.id}>\n\n<:Message:1117915334855360532> ${message.content}\n\n<:Trash:1118100123713540118> <@${executor}>[*](https://pastebin.com/u0RjF7j8)`)
+                        embed.setDescription(`<:icon_Person:1043647937487589446> <@${message.author.id}>
+<:discordReply:1043869882921533450> <#${message.channel.id}>
+
+<:Message:1117915334855360532> ${message.content}
+
+<:Trash:1118100123713540118> <@${executor}>[*](https://pastebin.com/u0RjF7j8)`)
                     } catch (error) {
                         console.error(error);
                     }

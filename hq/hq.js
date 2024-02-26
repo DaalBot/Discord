@@ -132,7 +132,7 @@ client.on('messageCreate', msg => {
             daalbot.getChannel(msg.guild.id, '1052304271221198898').send({ embeds: [commitEmbed] });
         } else if (msg.author.bot && msg.author.id == '1055877624230068315') {
             msg.channel.send('<@&1016344487867457597>')
-        } else if (msg.channel.id == '1003822202413662248') {
+        } else if (msg.channel.id == '1003822202413662248' || msg.channel.id == '1118225367572951131') {
             msg.crosspost(); // Publish the message when it is sent in announcements
         }
 

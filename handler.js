@@ -124,15 +124,12 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
     const command = commands.find(c => c.name === interaction.commandName);
 
-    // async function handleCallbackReturn(response) {
-    //     // All of the legacy response handling is done here
-    //     if (response) {
-    //         // Response will either be a string or an object that thank god happens to be the same a message object but with a custom property
-    //         interaction.reply(response);
-    //     }
-    // }
-
     if (command) {
+        if (command.guildOnly && (!(interaction?.guild ?? false))) return await interaction.reply({
+            content: 'This command can only be used in a server.',
+            ephemeral: true
+        })
+
         if (command.ownerOnly) {
             for (let i = 0; i < config.ownerIds.length; i++) {
                 if (interaction.user.id === config.WOKCommands.BotOwners[i]) {

@@ -10,104 +10,80 @@ module.exports = {
 
     type: 'SLASH',
     testOnly: true,
+    guildOnly: true,
 
-    options: [
-        {
-            name: 'start',
-            description: 'Starts the lockdown',
-            type: DJS.ApplicationCommandOptionType.Subcommand,
-            options: [
+    permissions: [
+        `${DJS.PermissionFlagsBits.ManageGuild}`
+    ],
+    
+    /**
+     * @param {{ interaction: import('discord.js').Interaction }} param0
+     */
+    callback: async ({ interaction }) => {
+        const embed = new DJS.EmbedBuilder();
+        const guild = interaction.guild;
+        const lockeddown = fs.existsSync(path.resolve(`./db/lockdown/${guild.id}/current.json`));
+
+        fs.mkdirSync(path.resolve(`./db/lockdown/${guild.id}`), { recursive: true }); // Create the directory if it doesn't exist
+
+        embed.setTitle('Lockdown Panel');
+        embed.setDescription(`Hello, ${interaction.user.displayName}! This is the current lockdown status of the server.`);
+
+        // Always visible
+        embed.addFields([
+            {
+                name: 'Lockdown Status',
+                value: lockeddown ? 'Locked' : 'Unlocked',
+                inline: false
+            }
+        ]);
+
+        if (lockeddown) {
+            const currentLockdown = JSON.parse(fs.readFileSync(path.resolve(`./db/lockdown/${guild.id}/current.json`), 'utf-8'));
+
+            embed.addFields([
                 {
-                    name: 'reason',
-                    description: 'The reason for the lockdown',
-                    type: DJS.ApplicationCommandOptionType.String,
-                    required: true
+                    name: 'Reason',
+                    value: currentLockdown.reason,
+                    inline: true
                 },
                 {
-                    name: 'role',
-                    description: 'The role to remove send perms from',
-                    type: DJS.ApplicationCommandOptionType.Role,
-                    required: true
+                    name: 'Locked By',
+                    value: `<@${currentLockdown.starter}>`,
+                    inline: true
+                },
+                {
+                    name: 'Locked At',
+                    value: `<t:${Math.floor(currentLockdown.timestamp / 1000)}:d> at <t:${Math.round(currentLockdown.timestamp / 1000)}:T>`,
+                    inline: true
+                },
+                {
+                    name: 'Isolation Channel',
+                    value: currentLockdown.isolation ? `<#${currentLockdown.isolation}>` : 'N/A',
+                    inline: true
+                },
+                {
+                    name: 'Isolated Role',
+                    value: currentLockdown.isolationRole ? `<@&${currentLockdown.isolationRole}>` : 'N/A',
+                    inline: true
                 }
-            ]
-        },
-        {
-            name: 'end',
-            description: 'Ends the lockdown',
-            type: DJS.ApplicationCommandOptionType.Subcommand
+            ]);
         }
-    ],
 
-    
-    callback: async ({ interaction }) => {
-        const subCommand = interaction.options.getSubcommand();
+        embed.setColor(lockeddown ? DJS.Colors.Red : DJS.Colors.Green);
 
-        const guild = daalbot.fetchServer(interaction.guild.id);
-        if (guild === 'Server not found.' || guild === undefined) return await interaction.reply({ content: 'Server not found.', ephemeral: true });
+        const row = new DJS.ActionRowBuilder()
 
-        if (subCommand === 'start') {
-            if (fs.existsSync(path.resolve(`./db/lockdown/${interaction.guild.id}/lockdown.json`))) {
-                return await interaction.reply({ content: 'The server is already in lockdown', ephemeral: true });
-            }
-
-            let data = {
-                channels: [],
-                role: '',
-                reason: ''
-            }
-
-            const Reason = interaction.options.getString('reason');
-            const role = interaction.options.getRole('role');
-
-            const roleId = `${role.id}`; // Turning the string into a string because it's a string and typeless javascript is stupid
-            const reason = `${Reason}`; // Again typeless javascript is stupid
-
-            data.role = roleId;
-            data.reason = reason;
-
-            const embed = new DJS.EmbedBuilder()
-                .setTitle('Lockdown started')
-                .setDescription(`The server has been locked down by ${interaction.user.tag} for the reason: ${reason}`)
-                .setColor('#EF3D48')
-                .setTimestamp();
-
-            await daalbot.logEvent(interaction.guild.id, 'lockdownstarted', embed); // Bugged
-
-            const channels = guild.channels.cache.filter(c => c.type === DJS.ChannelType.GuildText && c.permissionsFor(roleId).has('SEND_MESSAGES'));
-
-            channels.forEach(channel => {
-                channel.permissionOverwrites.edit(roleId, { SEND_MESSAGES: false }); // Potental bug here
-                data.channels.push(channel.id);
-            })
-
-            if (!fs.existsSync(path.resolve(`./db/lockdown/${interaction.guild.id}/`))) fs.mkdirSync(path.resolve(`./db/lockdown/${interaction.guild.id}/`));
-            daalbot.fs.write(`./db/lockdown/${interaction.guild.id}/lockdown.json`, JSON.stringify(data, null, 4));
-
-            await interaction.reply({ content: 'The server has been locked down', ephemeral: true });
-        } else if (subCommand === 'end') {
-            if (!fs.existsSync(path.resolve(`./db/lockdown/${interaction.guild.id}/lockdown.json`))) {
-                return await interaction.reply({ content: 'The server is not in lockdown', ephemeral: true });
-            }
-
-            const data = JSON.parse(fs.readFileSync(path.resolve(`./db/lockdown/${interaction.guild.id}/lockdown.json`)));
-
-            const role = interaction.guild.roles.cache.get(data.role);
-
-            const embed = new DJS.EmbedBuilder()
-                .setTitle('Lockdown ended')
-                .setDescription(`The server has been unlocked by ${interaction.user.tag}`)
-                .setColor('#57F28D')
-                .setTimestamp();
-
-            daalbot.logEvent(interaction.guild.id, 'lockdownstarted', embed);
-
-            data.channels.forEach(channel => {
-                interaction.guild.channels.cache.get(channel).permissionOverwrites.edit(role, { SEND_MESSAGES: true });
-            })
-
-            fs.rmSync(path.resolve(`./db/lockdown/${interaction.guild.id}/lockdown.json`));
-
-            await interaction.reply({ content: 'The server has been unlocked', ephemeral: true });
+        if (!lockeddown) {
+            row.addComponents([new DJS.ButtonBuilder().setCustomId('handler_lockdown-lock').setLabel('Lock').setStyle(DJS.ButtonStyle.Danger).setEmoji('🔒')]);
+        } else {
+            row.addComponents([new DJS.ButtonBuilder().setCustomId('handler_lockdown-unlock').setLabel('Unlock').setStyle(DJS.ButtonStyle.Success).setEmoji('🔓')]);
         }
+
+        row.addComponents([
+            new DJS.ButtonBuilder().setCustomId('handler_lockdown-config').setLabel('Config').setStyle(DJS.ButtonStyle.Secondary).setEmoji('⚙️'),
+        ])
+
+        interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
     }
 }

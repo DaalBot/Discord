@@ -22,7 +22,7 @@ require('./V14/index.js')
 
 // Social links
 require('./social/twitch.js');
-// require('./social/twitter.js'); // (unreliable due to having to scrape data from html)
+require('./social/twitter.js');
 // require('./social/youtube.js');
 
 // Monitoring

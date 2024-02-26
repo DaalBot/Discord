@@ -35,12 +35,14 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 
             if (oldMember.roles.cache.size !== newMember.roles.cache.size) {                
                 newMember.roles.cache.forEach(role => {
+                    if (role.name === 'DaalBot - Lockdown') throw new Error('CNCL'); // This literally happens to everyone, so we don't want to log it
                     if (!oldMember.roles.cache.has(role.id)) {
                         changes.push(`Added Role: ${role.name}`);
                     }
                 });
 
                 oldMember.roles.cache.forEach(role => {
+                    if (role.name === 'DaalBot - Lockdown') throw new Error('CNCL'); // This literally happens to everyone, so we don't want to log it
                     if (!newMember.roles.cache.has(role.id)) {
                         changes.push(`Removed Role: ${role.name}`);
                     }

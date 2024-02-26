@@ -75,6 +75,7 @@ module.exports = {
                             required: true,
                             channel_types: [
                                 ChannelType.GuildText,
+                                ChannelType.PublicThread,
                             ]
                         },
                         {

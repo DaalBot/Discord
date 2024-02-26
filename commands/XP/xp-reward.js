@@ -72,7 +72,7 @@ module.exports = {
         }
 
         // Check if the level is a positive number and not 0.
-        if (!(level > 1)) {
+        if (!(level >= 1)) {
             const embed = generateErrorEmbed('The level you specified is not a valid number.')
 
             return interaction.reply({ embeds: [embed], ephemeral: true });

@@ -43,7 +43,7 @@ client.on('messageCreate', async(message) => {
 })
 
 client.on('interactionCreate', async(interaction) => {
-    if (interaction.guild.id !== '1015322440152383539') return;
+    if (interaction?.guild?.id !== '1015322440152383539') return;
 
     if (interaction.isButton()) {
         if (interaction.customId.startsWith('oh-downtimepanel-')) {
