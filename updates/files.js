@@ -15,3 +15,15 @@ fs.watchFile(path.resolve('./PRIVACY.md'), () => {
     const announcementChannel = client.channels.cache.get('1003822202413662248');
     announcementChannel.send({ content: `<@&1011614505324793917> Privacy Policy has been updated`, embeds: [embed] });
 })
+
+fs.watchFile(path.resolve('./TERMS.md'), () => {
+    const embed = new EmbedBuilder()
+        .setDescription(fs.readFileSync(path.resolve(`./TERMS.md`), 'utf8').replace('<br/>', '\n').replace('###', '#').replace('#####', '###'))
+        .setTimestamp();
+    
+    /**
+     * @type {DJS.TextChannel}
+     */
+    const announcementChannel = client.channels.cache.get('1003822202413662248');
+    announcementChannel.send({ content: `<@&1011614505324793917> Terms of Service has been updated`, embeds: [embed] });
+})
