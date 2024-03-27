@@ -1,7 +1,6 @@
 const config = require('./config.json');
 require('./legacy/launch.js'); 
 require('./logs.js');
-// require('./localhost/launch');
 require('./XP/message.js');
 require('./XP/levelupmessagebutton.js');
 require('./custom/launch.js');
@@ -22,7 +21,7 @@ require('./V14/index.js')
 
 // Social links
 require('./social/twitch.js');
-require('./social/twitter.js');
+// require('./social/twitter.js');
 // require('./social/youtube.js');
 
 // Monitoring

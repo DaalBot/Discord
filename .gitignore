@@ -41,3 +41,6 @@ server.cert
 
 # Config
 config.json
+
+# Automations
+/automations/tools.js

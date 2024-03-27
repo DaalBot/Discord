@@ -8,6 +8,7 @@ module.exports = {
 
     slash: true,
     ownerOnly: true,
+    testOnly: true,
 
     options: [
         {

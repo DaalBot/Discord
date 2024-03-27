@@ -7,6 +7,14 @@ const modules = [
     {
         name: 'Social / Twitter',
         value: 'socialtwt'
+    },
+    {
+        name: 'Events / Creation',
+        value: 'cmdevents'
+    },
+    {
+        name: 'Moderation / Lockdown',
+        value: 'cmdlockdown'
     }
 ]
 
@@ -75,6 +83,7 @@ module.exports = {
             } else {
                 if (value) {
                     fs.appendFileSync(path.resolve(`./db/beta/${selectedModule}.txt`), `${interaction.guild.id}\n`);
+
                     return await interaction.reply({
                         content: `The server has been added to the beta involvement for the \`${moduleName}\` module`,
                         ephemeral: true

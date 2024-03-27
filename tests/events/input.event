@@ -1,2 +1,0 @@
-{"id": "input","name": "test","type": "root","children":[{"id": "input-ABCDEFGH", "name": "ABCDEFGH"},{"id": "input-IJKLMNOP", "name": "IJKLMNOP", "type": "input", "children": []},{"id": "input-QRSTUVWX", "name": "QRSTUVWX", "type": "input", "children": []}]}
-NULL|NULL

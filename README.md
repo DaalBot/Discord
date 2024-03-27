@@ -1,5 +1,5 @@
 # DaalBot
-
+![Server Count](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fbot.daalbot.xyz%3A8923%2Fapi%2Fstatus&query=%24.guilds&label=Servers&style=flat)
 ## Features
 
 DaalBot is a versatile Discord bot with a range of useful features to help manage and improve your server, including:

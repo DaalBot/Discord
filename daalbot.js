@@ -287,14 +287,7 @@ async function API_get_role(guild, id) {
 */
 async function createPermanentImgLink(url) {
     try {
-        const options = {
-            method: 'POST',
-            headers: {'content-type': 'multipart/form-data; boundary=---011000010111000001101001'},
-        };
-
-        const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_KEY}&image=${url}`, {
-            headers: {}
-        });
+        const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_KEY}&image=${url}`);
 
         return response.data.data.display_url;
     } catch (err) {
@@ -446,6 +439,20 @@ async function youtube_channelIdToName(channelId) {
     }
 }
 
+async function id_generatestring(length = 32) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+
+    // Default settings: 2.08592483976E93 possible combinations [length ^ 62 (< charset length)]
+    
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result.replace(/\B(?=(.{5})+(?!.))/g, '-');
+}
+
 const timestampEvents = new EventEmitter();
 
 setInterval(() => {
@@ -456,6 +463,10 @@ const youtube = {
     getChannelUploads: youtube_GetChannelUploads,
     isVideoValid: youtube_isVideoValid,
     channelIdToName: youtube_channelIdToName
+}
+
+const items = {
+    generateId: id_generatestring
 }
 
 const premium = {
@@ -512,6 +523,7 @@ module.exports = {
     premium,
     timestampEvents,
     youtube,
+    items,
     findServerVanity,
     fetchServer,
     fetchServerName,
