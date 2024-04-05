@@ -21,3 +21,6 @@ require('./events/messageUpdate.js');
 require('./events/roleCreate.js');
 require('./events/roleDelete.js');
 require('./events/roleUpdate.js');
+
+// Other
+require('./events/voice.js');

@@ -110,7 +110,6 @@ function db_mongo_warn_delete(id) {
 }
 
 function botLog(text) {
-    client.channels.cache.find(channel => channel.id === config.Logchannel).send(text);
     console.log(text);
 }
 
@@ -291,7 +290,7 @@ async function createPermanentImgLink(url) {
 
         return response.data.data.display_url;
     } catch (err) {
-        console.log(err.response.data.error)
+        console.error(err.response.data.error)
         return 'https://pinymedia.web.app/Error.png'
     }
 }
@@ -382,18 +381,28 @@ function premiumIsServerActivated(guild) {
 
 /**
  * @param {string} input
- * @param {Discord.TextChannel} channel
+ * @param {Discord.TextChannel | undefined} channel
 */
 async function getMessageFromString(input, channel) {
     let messageId = null;
+    let channelId = null;
+
+    let channelObj = channel?.id ? channel : null;
 
     if (input.includes('https')) {
-        messageId = input.split('/').slice(-1)[0];
+        let cleanLink = input.trim().replace(/https:\/\/(.*|)discord.com\/channels\//g, ''); // Remove the discord.com/channels/ part of the link (leaves 1017715574639431680/1017715576073895958/1222990713088643243)
+        const components = cleanLink.split('/');
+        channelId = components[1];
+        messageId = components[2];
+
+        channelObj = client.channels.cache.get(channelId);
     } else {
         messageId = input;
     }
 
-    const message = await channel.messages.fetch(messageId);
+    if (!channelObj) return null;
+
+    const message = await channelObj.messages.fetch(messageId);
 
     return message;
 }
@@ -459,6 +468,17 @@ setInterval(() => {
     timestampEvents.emit(Date.now())
 }, 1 * 1000);
 
+async function getFutureDiscordTimestamp(ms) {
+    // Get current time
+    const currentTime = Date.now();
+
+    // Add the time to the current time
+    const futureTime = currentTime + ms;
+
+    // Convert the future time to a Discord timestamp (epoch time)
+    return Math.floor(futureTime / 1000);
+}
+
 const youtube = {
     getChannelUploads: youtube_GetChannelUploads,
     isVideoValid: youtube_isVideoValid,
@@ -509,6 +529,10 @@ const colours = {
     daalbot_purple: '#502898'
 }
 
+const timestamps = {
+    getFutureDiscordTimestamp
+}
+
 module.exports = {
     client,
     serverAmount,
@@ -522,6 +546,7 @@ module.exports = {
     colours,
     premium,
     timestampEvents,
+    timestamps,
     youtube,
     items,
     findServerVanity,

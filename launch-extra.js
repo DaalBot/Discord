@@ -47,3 +47,6 @@ require('./dropdown/handler.js');
 
 // Context menus
 require('./context/handler.js');
+
+// Listings
+require('./listings/top.gg.js');

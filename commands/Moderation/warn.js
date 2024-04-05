@@ -93,10 +93,8 @@ module.exports = {
 
       user?.send(`You have been warned in ${guild?.name} for \`${reason}\``)
       .then(() => {
-        console.log(`Warned ${user?.tag} for ${reason}`)
       })
       .catch(() => {
-        console.log(`Failed to send DM to ${user?.tag}`)
         interaction.channel.send(`<@${user?.id}>, you have been warned for \`${reason}\``)
       });
 

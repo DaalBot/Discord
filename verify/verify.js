@@ -22,7 +22,6 @@ client.on('interactionCreate', async (interaction) => {
 
             member.roles.add(role)
             .then(() => {
-                console.log(`Added role to ${member.user.tag}`);
             })
             .catch((err) => {
                 console.log(`Failed to add role to ${member.user.tag}`);

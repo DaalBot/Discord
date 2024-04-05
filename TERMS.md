@@ -11,10 +11,14 @@ General conditions regarding DaalBot are under this topic.
 
 ### - Terms of Use
 ##### 1. Intentional spam data or attempts to cause the bot to spam outside resources should not be made.
+##### 2. The client is responsible for any content they use our services to create.
+
+### - Our rights
+##### 1. We have the right to update terms of service anytime with a notice in the [support server](https://lnk.daalbot.xyz/HQ).
 ##### 2. We reserve the right to block or prohibit the use of services to any user / server found to be abusing them.
-##### 3. The client is responsible for any content they use our services to create.
-##### 4. We have the rights to update terms of service anytime with a notice in the [support server](https://lnk.daalbot.xyz/HQ).
 
 ### - Our definition of "Abuse"
+Any content that violates Discords Terms of Service / Community Guidelines, or Any kind of scams or content designed to mislead users.
 
-Any content that violates Discords Terms of Service / Community Guidelines, or Any kind of scams or content designed to mislead users
+### - Questions and Concerns
+If you have any questions or concerns regarding our terms of service, please contact us by emailing [Terms@daalbot.xyz](mailto:Terms@daalbot.xyz)

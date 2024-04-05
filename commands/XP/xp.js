@@ -5,7 +5,7 @@ const { ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = {
     name: 'xp',
-    description: 'Modfies the XP of a user',
+    description: 'Modifies the XP of a user',
     category: 'XP',
 
     slash: true,

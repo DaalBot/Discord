@@ -1,13 +1,9 @@
 //const stuff
 const client = require('./client.js'); const config = require('./config.json'); const DJS = require('discord.js')
-  function botLog(text) {
-    client.channels.cache.find(channel => channel.id === config.Logchannel).send(text)
-    console.log(text)
-  }
 const fs = require('fs')
 
 client.on('rateLimit', () => {
-  console.log('Info > Client rate limited')
+  console.warn('Info > Client rate limited')
 });
 
 client.on('guildCreate', guild => {
@@ -43,7 +39,7 @@ client.on('guildDelete', guild => {
 })
 
 // Stuff i guess (i just copied this from the discord.js server)
-client.on('warn', console.log)
+client.on('warn', console.warn)
 
 if (config.debug) {
   client.on('debug', data => {

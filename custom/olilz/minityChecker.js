@@ -3,7 +3,6 @@ const client = require('../../client.js');
 client.on('guildMemberUpdate', async(oldMember, newMember) => {
     if (!newMember.guild.id === '1015322440152383539') return; // Check if the guild is the olilz server
     if (newMember.user.id === '1101980561138008095') {
-        console.log('Minity has been updated in olilz server')
     
         // Blacklist roles
         const rolesBlacklist = [

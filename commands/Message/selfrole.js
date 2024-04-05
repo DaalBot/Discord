@@ -30,8 +30,8 @@ module.exports = {
             required: true,
         },
         {
-            name: 'message_id',
-            description: 'The message id / link to add the menu to',
+            name: 'message_link',
+            description: 'The message link to add the menu to',
             type: DJS.ApplicationCommandOptionType.String,
             required: true,
         },
@@ -50,7 +50,7 @@ module.exports = {
          * @type {DJS.TextChannel}
          */
         const channel = daalbot.getChannel(interaction.guild.id, interaction.options.getChannel('channel').id)
-        const message_input = interaction.options.getString('message_id');
+        const message_input = interaction.options.getString('message_link');
         const placeholder = interaction.options.getString('placeholder') || 'Select a role';
 
         if (channel == undefined) return interaction.reply({ content: 'Channel not found', ephemeral: true });

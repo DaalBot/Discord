@@ -207,6 +207,8 @@ module.exports = {
                     id: eventId,
                     guild: interaction.guild.id,
                     on: type,
+                    name: name,
+                    description: description,
                     enabled: true
                 })
 
@@ -229,14 +231,14 @@ module.exports = {
     id: '${eventId}',
     
     execute: (async(${objectName}, util) => {
-        // To learn more visit https://lnk.daalbot.xyz/EventsGuide
+    // To learn more visit https://lnk.daalbot.xyz/EventsGuide
     })
 }`)
 
                 fs.writeFileSync(path.resolve(`./db/events/events.json`), JSON.stringify(eventsJSON, null, 4))
 
                 interaction.editReply({
-                    content: `Event created. To edit the code for the event click [here](https://daalbot.xyz/Dashboard/${interaction.guild.id}/events/editor?id=${eventId}).`,
+                    content: `Event created. To edit the code for the event click [here](https://daalbot.xyz/Dashboard/${interaction.guild.id}/events/edit?id=${eventId}).`,
                     embeds: [embed],
                     ephemeral: true
                 })

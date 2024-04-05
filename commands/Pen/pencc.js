@@ -25,8 +25,6 @@ module.exports = {
       }
 
       const { size } = await channel.bulkDelete(amount, true)
-      .then(() => { console.log('Successfully deleted the message(s)'); })
-      
   
       return `Deleted ${size} message(s).`
       

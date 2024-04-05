@@ -33,8 +33,8 @@ client.on('messageCreate', async (msg) => {
 
         const issueAuthorUser = daalbot.getUser(issueAuthorId);
 
-        if (issueAuthorUser == undefined) return console.log(`Couldn't find user with id ${issueAuthorId}!`);
-        if (issueAuthorUser == 'User not found.') return console.log(`Couldn't find user with id ${issueAuthorId}!`);
+        if (issueAuthorUser == undefined) return console.error(`Couldn't find user with id ${issueAuthorId}!`);
+        if (issueAuthorUser == 'User not found.') return console.error(`Couldn't find user with id ${issueAuthorId}!`);
 
         try {
             const embed = new Discord.EmbedBuilder()
@@ -66,7 +66,7 @@ ID: ${issueAuthorUser.id}`)
                 allowedMentions: []
             });
         } catch (e) {
-            console.log(`Something went wrong while sending a message to ${issueAuthorUser.tag}`)
+            console.error(`Something went wrong while sending a message to ${issueAuthorUser.tag}`)
         }
     }
 });

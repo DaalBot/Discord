@@ -8,7 +8,8 @@ const client = new Client({
         IntentsBitField.Flags.GuildModeration,
         IntentsBitField.Flags.GuildMembers,
         IntentsBitField.Flags.GuildWebhooks,
-        IntentsBitField.Flags.MessageContent
+        IntentsBitField.Flags.MessageContent,
+        IntentsBitField.Flags.GuildVoiceStates
     ]
 })
 

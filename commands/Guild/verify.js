@@ -1,7 +1,7 @@
 const config = require("../../config.json");
 const fs = require('fs');
 const daalbot = require('../../daalbot.js');
-const { PermissionFlagsBits, ApplicationCommandOptionType } = require('discord.js');
+const { PermissionFlagsBits, ApplicationCommandOptionType, ChatInputCommandInteraction, ChannelType } = require('discord.js');
 
 function save(GuildId, RoleId) {
     try {
@@ -38,56 +38,107 @@ module.exports = {
             type: ApplicationCommandOptionType.Role,
             required: true
         },
-        {
-            name: 'channel',
-            description: 'The channel to send the message in',
-            type: ApplicationCommandOptionType.Channel,
-            required: true
-        },
-        {
-            name: 'auto_update',
-            description: 'Automatically adds the recommended permissions to new channels (coming soon)',
-            type: ApplicationCommandOptionType.Boolean,
-            required: false
-        },
-        {
-            name: 'message-id',
-            description: 'If used, the bot will add a button to the message instead of sending a new one',
-            type: ApplicationCommandOptionType.String,
-            required: false
-        }
+        // {
+        //     name: 'channel',
+        //     description: 'The channel to send the message in',
+        //     type: ApplicationCommandOptionType.Channel,
+        //     required: true
+        // },
+        // {
+        //     name: 'auto_update',
+        //     description: 'Automatically adds the recommended permissions to new channels (coming soon)',
+        //     type: ApplicationCommandOptionType.Boolean,
+        //     required: false
+        // },
+        // {
+        //     name: 'message-id',
+        //     description: 'If used, the bot will add a button to the message instead of sending a new one',
+        //     type: ApplicationCommandOptionType.String,
+        //     required: false
+        // }
     ],
 
-    callback: ({ interaction, client }) => {
-        const channel = interaction.options.getChannel('channel')
-        const verified_role = interaction.options.getRole('verified_role')
-        const roleId = verified_role.id;
-        const messageId = interaction.options.getString('message-id');
-        const { guild } = interaction
+    /**
+     * @param {{ interaction: ChatInputCommandInteraction }} param0
+     */
+    callback: async({ interaction }) => {
+        interaction.reply({
+            content: `Please send a message link to a message you want to become the verification message. (Expires <t:${await daalbot.timestamps.getFutureDiscordTimestamp(60 * 1000)}:R>)`,
+            ephemeral: true,
+        })
 
-        save(interaction.guild.id, roleId);
-        // autoUpdateSave(interaction.guild.id, interaction.options.getBoolean('auto_update'));
+        const filter = m => (m.author.id === interaction.user.id);
 
-        const embed = new EmbedBuilder()
-            .setTitle('Verification')
-            .setDescription('Click the button below to verify yourself.')
-            .setColor(0x3cff00)
+        try {
+            const collector = await interaction.channel.awaitMessages({ filter, time: 60 * 1000, max: 1, errors: ['time'] });
+            
+            const message = collector.first();
+            message.delete();
 
-        const button = new ButtonBuilder()
-            .setStyle(ButtonStyle.Success)
-            .setLabel('Verify')
-            .setCustomId('verify')
+            const targetMessage = await daalbot.getMessageFromString(message.content, undefined);
 
-        const row = new ActionRowBuilder().addComponents(button)
+            const row = new ActionRowBuilder().addComponents([
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Success)
+                    .setLabel('Verify')
+                    .setCustomId('verify')
+            ]);
 
-        if (messageId == null) {
-            channel.send({ embeds: [embed], components: [row] })
-        } else {
-            daalbot.getMessageFromString(messageId, channel).then(message => {
-                message.edit({ components: [row] })
-            })
+            targetMessage.edit({ components: [row] });
+
+            interaction.editReply({
+                content: `The verification button has been added to the message! Would you like us to proactively update the permissions of all channels? ("yes" or "no" [Defaulting to "no" <t:${await daalbot.timestamps.getFutureDiscordTimestamp(60 * 1000)}:R>])`
+            });
+            try {
+                const AUCollector = await interaction.channel.awaitMessages({ filter, time: 60 * 1000, max: 1, errors: ['time'] });
+                const AUMessage = AUCollector.first();
+                AUMessage.delete();
+
+                autoUpdateSave(interaction.guild.id, AUMessage.content.toLowerCase() === 'yes');
+
+                interaction.editReply('Permissions will be updated proactively.');
+            } catch (err) {
+                console.error(err); // DEBUG
+                interaction.editReply('You took too long to send a response. We will not automatically update permissions of channels.');
+                autoUpdateSave(interaction.guild.id, false);
+            }
+        } catch (e) {
+            console.error(e); // DEBUG
+            return interaction.editReply('You took too long to send a response or something went wrong. Please try again.');
         }
 
-        return 'Verified button created!'
+
+
+
+        // const channel = interaction.options.getChannel('channel')
+        // const verified_role = interaction.options.getRole('verified_role')
+        // const roleId = verified_role.id;
+        // const messageId = interaction.options.getString('message-id');
+        // const { guild } = interaction
+
+        // save(interaction.guild.id, roleId);
+        // // autoUpdateSave(interaction.guild.id, interaction.options.getBoolean('auto_update'));
+
+        // const embed = new EmbedBuilder()
+        //     .setTitle('Verification')
+        //     .setDescription('Click the button below to verify yourself.')
+        //     .setColor(0x3cff00)
+
+        // const button = new ButtonBuilder()
+        //     .setStyle(ButtonStyle.Success)
+        //     .setLabel('Verify')
+        //     .setCustomId('verify')
+
+        // const row = new ActionRowBuilder().addComponents(button)
+
+        // if (messageId == null) {
+        //     channel.send({ embeds: [embed], components: [row] })
+        // } else {
+        //     daalbot.getMessageFromString(messageId, channel).then(message => {
+        //         message.edit({ components: [row] })
+        //     })
+        // }
+
+        // return 'Verified button created!'
     }
 }

@@ -21,6 +21,5 @@ module.exports = {
     slash: true,
 
     callback: () => {
-        console.log('Custom command command executed.');
     }
 }

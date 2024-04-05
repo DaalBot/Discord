@@ -22,7 +22,9 @@ const events = [
     'ticketCreate',
     'guildUpdate',
     'lockdownStart',
-    'lockdownEnd'
+    'lockdownEnd',
+    'voiceJoin',
+    'voiceLeave',
 ]
 
 module.exports = {

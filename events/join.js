@@ -60,19 +60,18 @@ client.on('guildMemberAdd', (member) => {
         roles.forEach(role => {
             const roleObj = daalbot.getRole(member.guild.id, role);
             if (roleObj == 'Server not found.') {
-                console.log(`Autorole > Server not found.`);
+                console.warn(`Autorole > Server not found.`);
             } else if (roleObj == 'Role not found.') {
-                console.log(`Autorole > Role not found.`);
+                console.warn(`Autorole > Role not found.`);
             } else if (roleObj == undefined) {
-                console.log(`Autorole > Role is undefined.`);
+                console.warn(`Autorole > Role is undefined.`);
             }
 
             member.roles.add(roleObj)
                 .then(() => {
-                    // console.log(`Autorole > Added ${roleObj.name} to ${member.user.tag}`);
                 })
                 .catch(err => {
-                    console.log(`Autorole > Failed to add ${roleObj.name} to ${member.user.tag}`);
+                    console.error(`Autorole > Failed to add ${roleObj.name} to ${member.user.tag} (${err}, Server owned by ${member.guild.ownerId})`);
                 })
         });
     }

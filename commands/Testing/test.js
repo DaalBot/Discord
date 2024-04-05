@@ -57,10 +57,37 @@ module.exports = {
         }
     ],
 
+    /**
+     * @param {{ interaction: DJS.ChatInputCommandInteraction }} param0
+     */
     callback: async({interaction}) => {
-        interaction.reply({
-            content: process.env.BEARER_TOKEN,
-            ephemeral: true
-        })
+        try {
+            const string = interaction.options.getString('string');
+            const client = daalbot.client;
+
+            const user = client.users.cache.get(string);
+
+            if (user) {
+                user.send({
+                    content: `Hey it seems DaalBot is lacking permissions in your server and cannot automatically add roles to users. [Learn more](https://docs.daalbot.xyz/guides/setup/permissions) or join the [Support Server](https://lnk.daalbot.xyz).\n\nThis message is automated and cannot be replied to. If you have any questions, please join the [Support Server](https://lnk.daalbot.xyz)`
+                })
+
+                interaction.reply({
+                    content: 'User found. Message sent.',
+                    ephemeral: true
+                })
+            } else {
+                interaction.reply({ 
+                    content: 'User not found.',
+                    ephemeral: true
+                });
+            }
+        } catch (err) {
+            console.error(err)
+            interaction.reply({
+                content: `Error: ${err}`,
+                ephemeral: true
+            })
+        }
     },
 }

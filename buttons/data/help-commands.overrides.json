@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Guild",
+        "overrideName": "Server",
+        "emoji": "🏰"
+    },
+    {
+        "name": "NonWOK",
+        "overrideName": "Unknown",
+        "emoji": "❓"
+    }
+]

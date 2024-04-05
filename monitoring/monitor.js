@@ -37,21 +37,5 @@ setInterval(() => {
     // Execute every 5 minutes
     const olilzHelper = daalbot.getMember(monitoringGuild?.id, '951587858962079778');
 
-    if (olilzHelper == 'Member not found.') return console.error('Olilz helper not found.');
-    if (olilzHelper == 'Server not found.') return;
-    if (olilzHelper == undefined) return console.error('Olilz helper is undefined.');
-
-    if (olilzHelper.presence.status === 'offline') {
-        // Olilz helper is offline
-        const embed = new DJS.EmbedBuilder()
-            .setTitle('Olilz helper is offline')
-            .setDescription('Olilz is a bot and his bot is offline. This is not good.')
-            .setColor('Red')
-            .setTimestamp();
-
-        logChannel.send({
-            content: `<@&${alertRoles.ohdownalert}> Olilz helper is offline!`,
-            embeds: [embed]
-        });
-    }
+    // TODO
 }, 5 * 60 * 1000)

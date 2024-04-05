@@ -51,6 +51,9 @@ module.exports = {
         }
     ],
 
+    /**
+     * @param {{ interaction: Discord.ChatInputCommandInteraction }} param0
+     */
     callback: ({ interaction }) => {
         const subcommand = interaction.options.getSubcommand();
         const role = interaction.options.getRole('role');
@@ -59,31 +62,63 @@ module.exports = {
         if (subcommand === 'add') {
             // Add role to autorole list
             const roleID = role.id;
+
+            async function checkRolePos() {
+                const guildRoles = interaction.guild.roles.cache;
+
+                // Get bot position
+                const botRole = interaction.guild.members.me.roles.highest;
+
+                // Get role position
+                const roleObj = guildRoles.get(roleID);
+
+                if (roleObj.position >= botRole.position) {
+                    if (interaction.replied) {
+                        interaction.editReply({
+                            content: `Added <@&${roleID}> to the autorole list.\n\nPlease note: The role <@&${roleID}> is higher than my role, I will not be able to assign it to new members. Please move my role above <@&${roleID}> in the role list.\n[Learn more](https://docs.daalbot.xyz/guides/setup/permissions)`,
+                            ephemeral: true,
+                            allowedMentions: {
+                                roles: []
+                            }
+                        })
+                    } else {
+                        interaction.channel.send({
+                            content: `<@${interaction.user.id}>Please note: The role <@&${roleID}> is higher than my role, I will not be able to assign it to new members. Please move my role above <@&${roleID}> in the role list.\n[Learn more](https://docs.daalbot.xyz/guides/setup/permissions)`,
+                            ephemeral: true,
+                            allowedMentions: {
+                                roles: []
+                            }
+                        })
+                    }
+                }
+            }
             if (fs.existsSync(`${dbFolder}`)) {
                 if (fs.existsSync(`${dbFolder}/${roleID}.id`)) {
                     return 'That role is already in the autorole list.';
                 } else {
                     fs.appendFileSync(`${dbFolder}/${roleID}.id`, roleID);
-                    return {
-                        custom: true,
+                    interaction.reply({
                         content: `Added <@&${roleID}> to the autorole list.`,
                         ephemeral: true,
                         allowedMentions: {
                             roles: []
                         }
-                    }
+                    })
+
+                    checkRolePos()
                 }
             } else {
                 fs.mkdirSync(`${dbFolder}`);
                 fs.appendFileSync(`${dbFolder}/${roleID}.id`, roleID);
-                return {
-                    custom: true,
+                interaction.reply({
                     content: `Added <@&${roleID}> to the autorole list.`,
                     ephemeral: true,
                     allowedMentions: {
                         roles: []
                     }
-                }
+                })
+
+                checkRolePos()
             }
         } else if (subcommand === 'remove') {
             // Remove role from autorole list
