@@ -72,19 +72,25 @@ client.on('interactionCreate', async interaction => {
 
     if (interaction.isStringSelectMenu()) {
         if (interaction.customId === 'vortex-ticket-dropdown') {
-            const ticketChannel = await interaction.guild.channels.create(`ticket-${interaction.user.username}`, {
-                type: 'GUILD_TEXT',
+            const ticketChannel = await interaction.guild.channels.create({
+                name: `ticket-${Math.random().toString(36).substring(7)}`,
+                type: Discord.ChannelType.GuildText,
                 permissionOverwrites: [
                     {
                         id: interaction.guild.roles.everyone,
-                        deny: ['VIEW_CHANNEL']
+                        deny: [
+                            Discord.PermissionFlagsBits.ViewChannel
+                        ]
                     },
                     {
                         id: interaction.user.id,
-                        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                        allow: [
+                            Discord.PermissionFlagsBits.ViewChannel,
+                            Discord.PermissionFlagsBits.SendMessages
+                        ]
                     }
                 ],
-                parent: daalbot.getChannel(interaction.guild.id, '974284633086771240')
+                parent: daalbot.getChannel(interaction.guild.id, '1085829640431607819')
             })
     
             interaction.reply({
@@ -102,8 +108,8 @@ client.on('interactionCreate', async interaction => {
             }
     
             await ticketChannel.permissionOverwrites.edit(supportRole, {
-                VIEW_CHANNEL: true,
-                SEND_MESSAGES: true
+                ViewChannel: true,
+                SendMessages: true
             })
     
             const embed = new Discord.EmbedBuilder()
@@ -115,7 +121,7 @@ client.on('interactionCreate', async interaction => {
                 .setColor('#00aae3')
                 .setFooter({
                     text: 'Vortex | Ticket',
-                    iconURL: 'https://pinymedia.web.app/VortexIcon.png'
+                    iconURL: 'https://media.piny.dev/VortexIcon.png'
                 })
                 .setTimestamp()
     

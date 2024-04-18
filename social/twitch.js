@@ -118,7 +118,7 @@ async function main() {
 
                     pingRoleId = channelRole
 
-                    if (channelObj.type != ChannelType.GuildText) return console.log(`Twitch link > Channel ${channel} is not a text channel`);
+                    if (channelObj?.type != ChannelType.GuildText) return console.log(`Twitch link > Channel ${channel} is not a text channel`);
                     if (channelObj == undefined) return console.log(`Twitch link > Channel ${channel} not found`)
 
                     if (channelObj) {

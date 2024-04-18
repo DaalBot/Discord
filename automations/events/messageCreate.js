@@ -8,11 +8,10 @@ const filenameWithoutExtension = path.basename(__filename, '.js');
 const consoleOverrides = toolsClass.getConsoleOverrides();
 const utils = toolsClass.getUtils();
 const checkSecurityRules = toolsClass.getSecurityRules();
+const overridenProcessEnv = toolsClass.getOverridenProcessEnv();
 
 // Event handler
 client.on(`${filenameWithoutExtension}`, async eventObject => {
-    const originalConsoleLog = console.log;
-
     async function executeEvent(inputFile) {
         // Unload input incase its already loaded
         delete require.cache[require.resolve(inputFile)];
@@ -24,13 +23,15 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
 
         toolsClass.setId(input.id);
 
-        // Override console functions
+        // Override data
         console.log = consoleOverrides.log;
         console.error = consoleOverrides.error;
         console.warn = consoleOverrides.warn;
         console.info = consoleOverrides.info;
         console.debug = consoleOverrides.debug;
         console.trace = consoleOverrides.trace;
+
+        process.env = overridenProcessEnv;
         
         if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     
@@ -38,7 +39,7 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
         input.execute(inputData, utils, input.id);
 
         // Reset everything to normal
-        console.log = originalConsoleLog;
+        toolsClass.reset();
 
         // Unload input file again
         delete require.cache[require.resolve(inputFile)];

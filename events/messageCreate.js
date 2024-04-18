@@ -69,4 +69,67 @@ ID: ${issueAuthorUser.id}`)
             console.error(`Something went wrong while sending a message to ${issueAuthorUser.tag}`)
         }
     }
+
+    if (fs.existsSync(path.resolve(`./db/scamprot/${guild.id}.json`))) {
+        const scamprotData = JSON.parse(fs.readFileSync(path.resolve(`./db/scamprot/${guild.id}.json`), 'utf8'));
+        if (!scamprotData.enabled) return;
+
+        // Scam protection is enabled
+        let score = 0;
+
+        const knownBadLinks = fs.readFileSync(path.resolve(`./db/scamprot/badLinks.list`), 'utf8').split('\n').map(link => {
+            return {
+                value: `${link.replace('.'), '\\.'}`,
+                weight: 100,
+                reason: 'Known bad link'
+            }
+        });
+
+        const values = [
+            ...knownBadLinks,
+            {
+                value: '\[.*\]\(.*\)', // Markdown link
+                weight: 5,
+                reason: 'Markdown link'
+            },
+            {
+                value: 'http(s|)://.*', // HTTP(s) Link
+                weight: 2.5,
+                reason: 'HTTP(s) link'
+            },
+            {
+                value: '\$[0-9]{1,}', // Money usually used in messages as "$50 Steam gift card giveaway!" or similar
+                weight: 1,
+                reason: 'Money'
+            }
+        ]
+
+        /**
+         * @type {Array<String>}
+        */
+        let reasons = [];
+
+        for (let i = 0; i < values.length; i++) {
+            if (content.match(new RegExp(values[i].value, 'g'))) {
+                score += values[i].weight;
+
+                reasons.push(values[i].reason)
+            }
+        }
+
+        // console.log(`Score: ${score}`);
+        // console.table(reasons);
+
+        // const actions = scamprotData.actions;
+
+        // for (let i = 0; i < actions.length; i++) {
+        //     if (score >= actions[i].score) {
+        //         const actionArr = actions[i].action.split('+');
+
+        //         for (let j = 0; j < actionArr.length; j++) {
+
+        //         }
+        //     }
+        // }
+    }
 });

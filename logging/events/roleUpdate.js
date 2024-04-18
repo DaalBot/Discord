@@ -5,7 +5,7 @@ const path = require('path');
 const { EmbedBuilder, ChannelType } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 
-client.on('roleUpdate', (oldRole, newRole) => {
+client.on('roleUpdate', async(oldRole, newRole) => {
     try {
         if (fs.existsSync(path.resolve(`./db/logging/${oldRole.guild.id}/roleUpdate.cooldown`))) {
             const text = fs.readFileSync(path.resolve(`./db/logging/${oldRole.guild.id}/roleUpdate.cooldown`), 'utf8');
@@ -61,6 +61,14 @@ client.on('roleUpdate', (oldRole, newRole) => {
                 .setColor('#FFE467')
                 .setTimestamp()
 
+            const pasteUrl = await daalbot.api.pastebin.createPaste(`--- OLD ---
+${JSON.stringify(oldRole, null, 4)}
+
+--- NEW ---
+${JSON.stringify(newRole, null, 4)}`, 'Role Update - JSON');
+
+            embed.setDescription(embed.data.description + `\n[Raw Data](${pasteUrl})`)
+            
             logChannel.send({
                 content: `Role Updated`,
                 embeds: [embed]

@@ -40,8 +40,16 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
                 .setTimestamp()
 
             if (description.length >= 4000) {
-                embed.setDescription('Data too long to display.');
+                embed.setDescription('Data too long to display. Check the raw data below.');
             }
+
+            const pasteUrl = await daalbot.api.pastebin.createPaste(`--- OLD ---
+${JSON.stringify(oldMessage, null, 4)}
+
+--- NEW ---
+${JSON.stringify(newMessage, null, 4)}`, 'Message Update - JSON');
+
+            embed.setDescription(embed.data.description + `\n\n[Raw Data](${pasteUrl})`)
 
             logChannel.send({
                 content: `Message Edited`,

@@ -5,7 +5,7 @@ const path = require('path');
 const { EmbedBuilder } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 
-client.on('guildMemberUpdate', (oldMember, newMember) => {
+client.on('guildMemberUpdate', async(oldMember, newMember) => {
     try {
         if (fs.existsSync(path.resolve(`./db/logging/${oldMember.guild.id}/roleUpdate.cooldown`))) {
             const text = fs.readFileSync(path.resolve(`./db/logging/${oldMember.guild.id}/roleUpdate.cooldown`), 'utf8');
@@ -77,13 +77,21 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
                 description += `${change}\n`;
             });
 
+            try {
+                description += `\n[Raw Data](${await daalbot.api.pastebin.createPaste(`--- OLD ---
+${JSON.stringify(oldMember, null, 4)}
+
+--- NEW ---
+${JSON.stringify(newMember, null, 4)}`, 'User Update - JSON')})`;
+            } catch (err) {
+                description += '\nError: Failed to upload raw data to Pastebin.';
+            }
+
             embed.setDescription(description);
             embed.setAuthor({
                 name: `${oldMember.user.username} (${oldMember.user.id})`,
                 iconURL: oldMember.user.displayAvatarURL()
             })
-
-            if (description.length == 0) return;
 
             if (description.length >= 4000) {
                 embed.setDescription('Error: Too many changes to display.');

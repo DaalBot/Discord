@@ -62,16 +62,6 @@ client.on("messageCreate", msg => {
             AutomodLog(word, msg); // Sends a message to the automod log channel
             }
         })
-        if (msg.channel.id === '1005373380075192360') { // Checks if message was sent in the hi channel
-            if (msg.content.toLowerCase().startsWith('hi')) { // Checks if message begins with "hi"
-                if (msg.author.id === client.user.id) return; // Checks if the author is the bot
-
-                msg.channel.send('hi')
-                msg.react('984578637682601994')
-            } else {
-                msg.delete(); // Deletes the message if it doesn't start with "hi"
-            }
-        }
     } else {
         return // Returns if guild id does not match
     }

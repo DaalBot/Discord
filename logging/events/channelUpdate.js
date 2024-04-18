@@ -3,44 +3,73 @@ const config = require('../../config.json');
 const fs = require('fs');
 const Discord = require('discord.js');
 const path = require('path');
+const daalbot = require('../../daalbot.js');
 
-client.on('channelUpdate', async(oldChannel, newChannel) => {
-    if (oldChannel.type === Discord.ChannelType.DM) return;
-    if (newChannel.type === Discord.ChannelType.DM) return;
-    try {
-        const oldRole = oldChannel;
-        if (fs.existsSync(path.resolve(`./db/logging/${oldRole.guild.id}/channelUpdate.cooldown`))) {
-            const text = fs.readFileSync(path.resolve(`./db/logging/${oldRole.guild.id}/channelUpdate.cooldown`), 'utf8');
-            if (text == 'true') {
-                return;
-            } else {
-                fs.writeFileSync(path.resolve(`./db/logging/${oldRole.guild.id}/channelUpdate.cooldown`), 'true');
-                setTimeout(() => {
-                    fs.writeFileSync(path.resolve(`./db/logging/${oldRole.guild.id}/channelUpdate.cooldown`), 'false');
-                }, 1000);
-            }
-        } else {
-            fs.appendFileSync(path.resolve(`./db/logging/${oldRole.guild.id}/channelUpdate.cooldown`), 'true');
-            setTimeout(() => {
-                fs.writeFileSync(path.resolve(`./db/logging/${oldRole.guild.id}/channelUpdate.cooldown`), 'false');
-            }, 1000);
+client.on('channelUpdate', async (oldChannel, newChannel) => {
+    if (oldChannel.type === Discord.ChannelType.DM || newChannel.type === Discord.ChannelType.DM) return;
+
+    // Check if that all that has changed is position
+    let changed = false;
+
+    const channelProps = [
+        'name',
+        'type',
+        'topic',
+        'rateLimitPerUser',
+        'nsfw',
+        'permissionOverwrites',
+    ]
+
+    for (let i = 0; i < channelProps.length; i++) {
+        if (oldChannel[channelProps[i]] !== newChannel[channelProps[i]]) {
+            changed = true;
+            break;
         }
-    const enabled = fs.readFileSync(path.resolve(`./db/logging/${oldChannel.guild.id}/CHANNELUPDATE.enabled`), 'utf8');
-    if (enabled == 'true') {
-        if (fs.existsSync(path.resolve(`./db/logging/${oldChannel.guild.id}/CHANNELUPDATE.exclude`))) {
-            const excluded = fs.readFileSync(path.resolve(`./db/logging/${oldChannel.guild.id}/CHANNELUPDATE.exclude`), 'utf8').split('\n');
+    }
 
-            if (excluded.includes(oldChannel.id)) return;
-        }
+    if (!changed) return;
 
-        if (!fs.existsSync(`./db/logging/${oldChannel.guild.id}/channel.id`)) return;
+    const guildId = oldChannel.guild.id;
+    const cooldownPath = `./db/logging/${guildId}/channelUpdate.cooldown`;
+    const enabledPath = `./db/logging/${oldChannel.guild.id}/CHANNELUPDATE.enabled`;
+    const excludePath = `./db/logging/${oldChannel.guild.id}/CHANNELUPDATE.exclude`;
+    const channelIdPath = `./db/logging/${oldChannel.guild.id}/channel.id`;
 
-        const channelID = fs.readFileSync(path.resolve(`./db/logging/${oldChannel.guild.id}/channel.id`), 'utf8');
-        const logChannel = client.channels.cache.get(channelID);
+    if (fs.existsSync(path.resolve(cooldownPath))) {
+        const text = fs.readFileSync(path.resolve(cooldownPath), 'utf8');
+        if (text === 'true') return;
+        fs.writeFileSync(path.resolve(cooldownPath), 'true');
+        setTimeout(() => fs.writeFileSync(path.resolve(cooldownPath), 'false'), 1000);
+    } else {
+        fs.appendFileSync(path.resolve(cooldownPath), 'true');
+        setTimeout(() => fs.writeFileSync(path.resolve(cooldownPath), 'false'), 1000);
+    }
 
-        const embed = new Discord.EmbedBuilder()
-            .setTitle('Channel Updated')
-            .setDescription(`
+    const enabled = fs.readFileSync(path.resolve(enabledPath), 'utf8');
+    if (enabled !== 'true') return;
+
+    if (fs.existsSync(path.resolve(excludePath))) {
+        const excluded = fs.readFileSync(path.resolve(excludePath), 'utf8').split('\n');
+        if (excluded.includes(oldChannel.id)) return;
+    }
+
+    if (!fs.existsSync(path.resolve(channelIdPath))) return;
+
+    const channelID = fs.readFileSync(path.resolve(channelIdPath), 'utf8');
+    const logChannel = client.channels.cache.get(channelID);
+
+    const oldRawData = JSON.stringify(oldChannel, null, 4);
+    const newRawData = JSON.stringify(newChannel, null, 4);
+
+    const rawPaste = await daalbot.api.pastebin.createPaste(`--- OLD ---
+${oldRawData}
+
+--- NEW ---
+${newRawData}`, 'Channel Update - JSON');
+
+    const embed = new Discord.EmbedBuilder()
+        .setTitle('Channel Updated')
+        .setDescription(`
             **Before**
             Name: ${oldChannel.name}
             Type: ${oldChannel.type}
@@ -54,17 +83,15 @@ client.on('channelUpdate', async(oldChannel, newChannel) => {
             Topic: ${newChannel.topic}
             Position: ${newChannel.rawPosition}
             Category: ${newChannel.parent.name ? newChannel.parent.name : 'None'} / ${newChannel.parent.id ? newChannel.parent.id : 'None'}
-            `)
-            .setThumbnail('https://pinymedia.web.app/daalbot/embed/thumbnail/logs/Channel.png')
-            .setColor('#FFE467')
-            .setTimestamp()
 
-        logChannel.send({
-            content: `Channel Updated`,
-            embeds: [embed]
-        })
-    }
-} catch (err) {
-    return;
-}
+            [Raw Data](${rawPaste})
+        `)
+        .setThumbnail('https://pinymedia.web.app/daalbot/embed/thumbnail/logs/Channel.png')
+        .setColor('#FFE467')
+        .setTimestamp();
+
+    logChannel.send({
+        content: `Channel Updated`,
+        embeds: [embed],
+    });
 });

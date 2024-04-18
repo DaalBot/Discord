@@ -65,11 +65,21 @@ client.on('guildUpdate', async (oldGuild, newGuild) => {
                 changes.push(`Explicit Content Filter: ${oldGuild.explicitContentFilter} -> ${newGuild.explicitContentFilter}`);
             }
 
+            const rawChanges = `--- OLD ---
+${JSON.stringify(oldGuild, null, 4)}
+
+--- NEW ---
+${JSON.stringify(newGuild, null, 4)}`;
+
+            const pasteUrl = await daalbot.api.pastebin.createPaste(rawChanges, 'Guild Update - JSON');
+
             let description = changes.join('\n');
+
+            description += `\n[Raw Data](${pasteUrl})`;
             
             // Make sure the description is not too long (max: 4096 characters)
             if (description.length > 4096) {
-                description = description.slice(0, 4093) + '...';
+                description = `Changes are too long to display. [Raw Data](${pasteUrl})`;
             }
 
             logChannel.send({

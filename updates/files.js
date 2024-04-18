@@ -18,7 +18,7 @@ fs.watchFile(path.resolve('./PRIVACY.md'), () => {
 
 fs.watchFile(path.resolve('./TERMS.md'), () => {
     const embed = new EmbedBuilder()
-        .setDescription(fs.readFileSync(path.resolve(`./TERMS.md`), 'utf8').replace('<br/>', '\n').replace('###', '#').replace('#####', '###'))
+        .setDescription(fs.readFileSync(path.resolve(`./TERMS.md`), 'utf8').replace('<br/>', '\n').replace(/###/g, '#'))
         .setTimestamp();
     
     /**

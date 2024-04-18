@@ -2,11 +2,11 @@ const client = require('../../client.js');
 
 client.on('guildMemberUpdate', async(oldMember, newMember) => {
     if (!newMember.guild.id === '1015322440152383539') return; // Check if the guild is the olilz server
-    if (newMember.user.id === '1101980561138008095') {
-    
+    if (newMember.user.id === '1101980561138008095' && false) {
         // Blacklist roles
         const rolesBlacklist = [
             // '1023561501933572116', // Head moderator
+            // '1015608653132349480', // Moderator
             '1015703997736308776', // Super Admin
             '1015609359956463626', // Management
             '1015592213633318953', // Owner

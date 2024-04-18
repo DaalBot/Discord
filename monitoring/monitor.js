@@ -1,6 +1,7 @@
 const client = require('../client.js');
 const DJS = require('discord.js');
 const daalbot = require('../daalbot.js');
+const axios = require('axios');
 
 const alertRoles = {
     'botpomelo': '1145055821839999017',
@@ -12,7 +13,7 @@ const logChannel = daalbot.getChannel(monitoringGuild.id, '1119698501815783434')
 
 client.on('guildMemberUpdate', (oldMember, newMember) => {
     // Check if its in the monitoring guild
-    if (newMember.guild.id !== 'id') return;
+    if (newMember.guild.id !== '1119698500440035439') return;
 
     // Bot pomelo check
     if (newMember.id === '159985870458322944') {
@@ -32,10 +33,3 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         }
     }
 })
-
-setInterval(() => {
-    // Execute every 5 minutes
-    const olilzHelper = daalbot.getMember(monitoringGuild?.id, '951587858962079778');
-
-    // TODO
-}, 5 * 60 * 1000)

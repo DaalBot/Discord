@@ -8,10 +8,10 @@ const filenameWithoutExtension = path.basename(__filename, '.js');
 const consoleOverrides = toolsClass.getConsoleOverrides();
 const utils = toolsClass.getUtils();
 const checkSecurityRules = toolsClass.getSecurityRules();
+const overridenProcessEnv = toolsClass.getOverridenProcessEnv();
 
 // Event handler
 client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) => {
-    const originalConsoleLog = console.log;
 
     async function executeEvent(inputFile) {
         // Unload input incase its already loaded
@@ -31,6 +31,9 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
         console.info = consoleOverrides.info;
         console.debug = consoleOverrides.debug;
         console.trace = consoleOverrides.trace;
+
+        // Override process.env
+        process.env = overridenProcessEnv;
         
         if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     
@@ -38,7 +41,7 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
         input.execute(inputData, utils, input.id);
 
         // Reset everything to normal
-        console.log = originalConsoleLog;
+        toolsClass.reset();
 
         // Unload input file again
         delete require.cache[require.resolve(inputFile)];
@@ -46,7 +49,7 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
 
     const eventsJSON = JSON.parse(fs.readFileSync(path.resolve('./db/events/events.json'), 'utf8'));
 
-    const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObject.guild.id);
+    const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObjectNew.guild.id);
 
     for (let i = 0; i < validEvents.length; i++) {
         const event = validEvents[i];

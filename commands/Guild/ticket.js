@@ -3,19 +3,6 @@ const Discord = require('discord.js');
 const config = require('../../config.json');
 const fs = require('fs');
 const path = require('path');
-const embedColours = [
-    'Red',
-    'Orange',
-    'Yellow',
-    'Green',
-    'Blue',
-    'Purple',
-    'Luminous_Vivid_Pink',
-    'Dark_But_Not_Black',
-    'White',
-    'Grey',
-    'Aqua',
-]
 
 module.exports = {
     name: 'ticket',
@@ -37,9 +24,10 @@ module.exports = {
             type: Discord.ApplicationCommandOptionType.Subcommand,
             options: [
                 {
-                    name: Discord.ApplicationCommandOptionType.Channel,
+                    name: 'channel',
                     description: 'The channel to send the ticket panel to.',
                     type: Discord.ApplicationCommandOptionType.Channel,
+                    channel_types: [Discord.ChannelType.GuildText],
                     required: true
                 },
                 {
@@ -50,13 +38,9 @@ module.exports = {
                 },
                 {
                     name: 'colour',
-                    description: 'The colour of the ticket panel.',
+                    description: 'The colour of the ticket panel. (Hex)',
                     type: Discord.ApplicationCommandOptionType.String,
-                    required: true,
-                    choices: embedColours.map((colour) => ({
-                        name: colour,
-                        value: colour.toUpperCase(),
-                    })),
+                    required: true
                 },
                 {
                     name: 'message-id',
@@ -166,7 +150,7 @@ module.exports = {
         const subCommand = interaction.options.getSubcommand();
 
         if (subCommand === 'send') {
-            const channel = interaction.options.getChannel(Discord.ApplicationCommandOptionType.Channel);
+            const channel = interaction.options.getChannel('channel');
             const title = interaction.options.getString('title');
             const colour = interaction.options.getString('colour');
             const messageId = interaction.options.getString('message-id');
@@ -185,10 +169,10 @@ module.exports = {
                 );
 
             if (messageId == null) {
-                channel.send({ embeds: [embed], components: [row] });
+                channel?.send({ embeds: [embed], components: [row] });
             } else {
                 daalbot.getMessageFromString(messageId, channel).then((message) => {
-                    message.edit({ embeds: [embed], components: [row] });
+                    message.edit({ components: [row] });
                 });
             }
 

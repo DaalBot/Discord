@@ -1,3 +1,4 @@
+const { send } = require('process');
 const client = require('../client.js');
 const config = require('../config.json');
 const daalbot = require('../daalbot.js');
@@ -71,17 +72,23 @@ client.on('interactionCreate', async (interaction) => {
             ticketAmount++;
             fs.appendFileSync(`${config.botPath}/db/tickets/${interaction.guild.id}/${ticketAmount}.ticket`, `${interaction.user.id}`);
 
-            const ticketChannel = await interaction.guild.channels.create(`ticket-${ticketAmount}`, {
-                type: 'GUILD_TEXT',
+            const ticketChannel = await interaction.guild.channels.create({
+                name: `ticket-${ticketAmount}`,
+                type: Discord.ChannelType.GuildText,
                 parent: ticketCategory,
                 permissionOverwrites: [
                     {
                         id: interaction.guild.roles.everyone,
-                        deny: ['VIEW_CHANNEL']
+                        deny: [
+                            Discord.PermissionFlagsBits.ViewChannel
+                        ]
                     },
                     {
                         id: interaction.user.id,
-                        allow: ['VIEW_CHANNEL']
+                        allow: [
+                            Discord.PermissionFlagsBits.ViewChannel,
+                            Discord.PermissionFlagsBits.SendMessages
+                        ]
                     }
                 ]
             })
@@ -99,7 +106,7 @@ client.on('interactionCreate', async (interaction) => {
                     if (role == undefined) continue;
                     if (data[1] == 'allow') {
                         ticketChannel.permissionOverwrites.edit(role, {
-                            VIEW_CHANNEL: true
+                            ViewChannel: true,
                         })
                     } else { continue }
                 }
@@ -168,15 +175,6 @@ client.on('interactionCreate', async (interaction) => {
             if (ticketChannel.type != Discord.ChannelType.GuildText) return interaction.reply({ content: 'Something went wrong and we were unable to find the ticket channel.', ephemeral: true });
 
             const { Permissions } = require('discord.js');
-
-            client.channels.cache.get(ticketChannel.id).permissionOverwrites.edit(interaction.user, {
-                SEND_MESSAGES: false,
-            })
-
-            client.channels.cache.get(ticketChannel.id).permissionOverwrites.edit(interaction.guild.roles.everyone, {
-                VIEW_CHANNEL: false,
-                SEND_MESSAGES: false,
-            })
 
             interaction.reply({ content: 'Your ticket has been closed.', ephemeral: true });
         }
@@ -329,7 +327,8 @@ client.on('interactionCreate', async (interaction) => {
                 }
               })
             }   
-        } catch {
+        } catch(e) {
+            console.error(e)
             interaction.reply({ content: 'Something went wrong and we were unable to process your request.', ephemeral: true });
         }
     }

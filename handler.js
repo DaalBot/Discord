@@ -136,8 +136,8 @@ client.on('interactionCreate', async interaction => {
             })
     
             if (command.ownerOnly) {
-                for (let i = 0; i < config.ownerIds.length; i++) {
-                    if (interaction.user.id === config.WOKCommands.BotOwners[i]) {
+                for (let i = 0; i < config.WOKCommands.ownerIds.length; i++) {
+                    if (interaction.user.id === config.WOKCommands.ownerIds[i]) {
                         command.callback({ interaction });
                         return;
                     }
@@ -197,22 +197,16 @@ client.on('interactionCreate', async interaction => {
         }
     } catch (error) {
         const errorId = await daalbot.items.generateId(5);
-        console.error(`${error}\n[ID: ${errorId}]`)
-
 
         try {
-            // if (interaction.replied) {
-            //     interaction.editReply({
-            //         content: `Something went wrong, We have no clue what you somehow messed up so bad you discovered a new bug. Though do report it in the [support server](https://lnk.daalbot.xyz/HQ) (Error ID: ${errorId})`,
-            //     })
-            // } else {
-                interaction.reply({
-                    content: `Something went wrong, We have no clue what you somehow messed up so bad you discovered a new bug. Though do report it in the [support server](https://lnk.daalbot.xyz/HQ) (Error ID: ${errorId})`,
-                    ephemeral: true
-                })
-            // }
+            console.error(error)
+            console.error(`[ID: ${errorId}]`)
+
+            interaction.reply({
+                content: `Something went wrong, We have no clue what you somehow messed up so bad you discovered a new bug. Though do report it in the [support server](https://lnk.daalbot.xyz/HQ) (Error ID: ${errorId})`,
+                ephemeral: true
+            })
         } catch (e) {
-            console.error(e) // Just give up on returning a message
         }
     }
 })

@@ -462,6 +462,32 @@ async function id_generatestring(length = 32) {
     return result.replace(/\B(?=(.{5})+(?!.))/g, '-');
 }
 
+/**
+ * @param {string} string
+ * @param {string?} title
+ * @param {string?} format
+ * @param {number?} visibility
+ * @returns {Promise<string>}
+*/
+async function pasteapi_create_paste(string, title, visibility = 1) {
+    // TODO: Turn
+    // curl -X POST -d api_dev_key=[API KEY] -d api_paste_code=test -d api_option=paste -d api_paste_private=1 https://pastebin.com/api/api_post.php
+    // into an axios request
+
+    const { PasteClient } = require('pastebin-api')
+
+    const pasteClient = new PasteClient(process.env.PASTEBIN_KEY);
+
+    const url = await pasteClient.createPaste({
+        code: string,
+        name: title,
+        publicity: visibility
+    })
+
+    // Res (hopefully): https://pastebin.com/abc123
+    return url;
+}
+
 const timestampEvents = new EventEmitter();
 
 setInterval(() => {
@@ -522,6 +548,10 @@ const api = {
         getUser: API_get_user,
         getGuild: API_get_guild,
         getRole: API_get_role
+    },
+
+    pastebin: {
+        createPaste: pasteapi_create_paste
     }
 }
 
