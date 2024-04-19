@@ -61,7 +61,7 @@ client.on('channelUpdate', async (oldChannel, newChannel) => {
     const oldRawData = JSON.stringify(oldChannel, null, 4);
     const newRawData = JSON.stringify(newChannel, null, 4);
 
-    const rawPaste = await daalbot.api.pastebin.createPaste(`--- OLD ---
+    const rawPaste = await daalbot.api.pasteapi.createPaste(`--- OLD ---
 ${oldRawData}
 
 --- NEW ---

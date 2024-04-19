@@ -78,13 +78,13 @@ client.on('guildMemberUpdate', async(oldMember, newMember) => {
             });
 
             try {
-                description += `\n[Raw Data](${await daalbot.api.pastebin.createPaste(`--- OLD ---
+                description += `\n[Raw Data](${await daalbot.api.pasteapi.createPaste(`--- OLD ---
 ${JSON.stringify(oldMember, null, 4)}
 
 --- NEW ---
 ${JSON.stringify(newMember, null, 4)}`, 'User Update - JSON')})`;
             } catch (err) {
-                description += '\nError: Failed to upload raw data to Pastebin.';
+                description += '\nError: Failed to upload raw data to pasteapi.';
             }
 
             embed.setDescription(description);

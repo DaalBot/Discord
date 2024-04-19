@@ -71,7 +71,7 @@ ${JSON.stringify(oldGuild, null, 4)}
 --- NEW ---
 ${JSON.stringify(newGuild, null, 4)}`;
 
-            const pasteUrl = await daalbot.api.pastebin.createPaste(rawChanges, 'Guild Update - JSON');
+            const pasteUrl = await daalbot.api.pasteapi.createPaste(rawChanges, 'Guild Update - JSON');
 
             let description = changes.join('\n');
 

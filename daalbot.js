@@ -7,6 +7,7 @@ const cleanText = require('./util/homoglyphs.js');
 require('dotenv').config();
 const axios = require('axios');
 const { EventEmitter } = require('events');
+const net = require('net');
 
 const serverAmount = client.guilds.cache.size
 
@@ -240,7 +241,7 @@ async function sendAlert(guild, embed, message) {
  */
 async function API_get_user(id) {
     try {
-        const response = await axios.get(`https://discord.com/api/v9/users/${id}`, {
+        const response = await axios.get(`Add typings to this function using jsdochttps://discord.com/api/v9/users/${id}`, {
             headers: {
                 'Authorization': `Bot ${process.env.TOKEN}`
             }
@@ -463,29 +464,57 @@ async function id_generatestring(length = 32) {
 }
 
 /**
- * @param {string} string
- * @param {string?} title
- * @param {string?} format
- * @param {number?} visibility
+ * @param {string} host
+ * @param {number} port
+ * @param {string} data
  * @returns {Promise<string>}
 */
-async function pasteapi_create_paste(string, title, visibility = 1) {
-    // TODO: Turn
-    // curl -X POST -d api_dev_key=[API KEY] -d api_paste_code=test -d api_option=paste -d api_paste_private=1 https://pastebin.com/api/api_post.php
-    // into an axios request
+async function netcat(host, port, data) {
+    return new Promise((resolve, reject) => {
+        const client = new net.Socket();
+        let responseData = '';
 
-    const { PasteClient } = require('pastebin-api')
+        client.connect(port, host, () => {
+            client.write(data);
+        });
 
-    const pasteClient = new PasteClient(process.env.PASTEBIN_KEY);
+        client.on('data', (data) => {
+            responseData += data;
+        });
 
-    const url = await pasteClient.createPaste({
-        code: string,
-        name: title,
-        publicity: visibility
-    })
+        client.on('end', () => {
+            client.destroy(); // Clean up the client socket
+            resolve(responseData);
+        });
 
-    // Res (hopefully): https://pastebin.com/abc123
-    return url;
+        client.on('error', (err) => {
+            client.destroy(); // Clean up the client socket
+            reject(err);
+        });
+    });
+}
+
+/**
+ * @param {string} string
+ * @returns {Promise<string>}
+*/
+async function pasteapi_create_paste(string) {
+    try {
+        // Termbin URL
+        const response = await netcat('termbin.com', 9999, string);
+
+        const data = {
+            termbin: response,
+            ts: Date.now()
+        }
+
+        const base64 = Buffer.from(JSON.stringify(data)).toString('base64');
+
+        return `https://daalbot.xyz/api/paste?data=${encodeURIComponent(base64)}`
+    } catch (err) {
+        console.error(err);
+        return 'https://daalbot.xyz/api/paste?data=error'
+    }
 }
 
 const timestampEvents = new EventEmitter();
@@ -550,7 +579,7 @@ const api = {
         getRole: API_get_role
     },
 
-    pastebin: {
+    pasteapi: {
         createPaste: pasteapi_create_paste
     }
 }

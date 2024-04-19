@@ -62,15 +62,25 @@ module.exports = {
      */
     callback: async({interaction}) => {
         try {
-            const string = interaction.options.getString('string');
-            const url = await daalbot.api.pastebin.createPaste(string);
-
-            interaction.reply({
-                content: url,
+            interaction.deferReply({
                 ephemeral: true
             })
+            const string = interaction.options.getString('string');
+            const res = JSON.stringify(daalbot.client.guilds.cache.get(string), null, 4);
 
-            const client = daalbot.client;
+            const pasteapiLink = await daalbot.api.pasteapi.createPaste(res);
+            interaction.editReply({
+                content: `${pasteapiLink}`,
+                ephemeral: true
+            })
+            // const url = await daalbot.api.pasteapi.createPaste(string);
+
+            // interaction.reply({
+            //     content: url,
+            //     ephemeral: true
+            // })
+
+            // const client = daalbot.client;
 
             // // Guild mode
             // const guilds = client.guilds.cache.filter(g => g.ownerId === string);

@@ -43,7 +43,7 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
                 embed.setDescription('Data too long to display. Check the raw data below.');
             }
 
-            const pasteUrl = await daalbot.api.pastebin.createPaste(`--- OLD ---
+            const pasteUrl = await daalbot.api.pasteapi.createPaste(`--- OLD ---
 ${JSON.stringify(oldMessage, null, 4)}
 
 --- NEW ---

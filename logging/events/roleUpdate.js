@@ -61,7 +61,7 @@ client.on('roleUpdate', async(oldRole, newRole) => {
                 .setColor('#FFE467')
                 .setTimestamp()
 
-            const pasteUrl = await daalbot.api.pastebin.createPaste(`--- OLD ---
+            const pasteUrl = await daalbot.api.pasteapi.createPaste(`--- OLD ---
 ${JSON.stringify(oldRole, null, 4)}
 
 --- NEW ---

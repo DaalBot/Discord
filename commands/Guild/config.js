@@ -65,11 +65,11 @@ module.exports = {
                 value: 'channels',
                 emoji: '#️⃣'
             },
-            {
-                label: 'Permissions',
-                value: 'permissions',
-                emoji: '🔒'
-            }
+            // { // No clue what i meant by this so disable for now
+            //     label: 'Permissions',
+            //     value: 'permissions',
+            //     emoji: '🔒'
+            // }
         ]
 
         const row = new ActionRowBuilder()
