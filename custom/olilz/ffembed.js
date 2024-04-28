@@ -38,6 +38,23 @@ client.on('messageCreate', async message => {
         data = data.map(row => row.split('    '));
 
         data.forEach(map => {
+            if (map[0].match(/[0-9]\./g)) {
+                // This is a bit of a hacky way to check how many elements to remove
+                if (map[1].includes('.')) {
+                    // Chances are this is useless
+                    map.shift();
+                    map.shift();
+                } else {
+                    map.shift();
+                }
+            }
+
+            let creatorPing = null;
+            if (map[0].includes('<@')) {
+                creatorPing = map[0].trim();
+                map.shift();
+            }
+
             const mapCreator = map[0];
             const mapName = map[1];
             const mapCode = map[2];
@@ -45,7 +62,7 @@ client.on('messageCreate', async message => {
             const testedBefore = map[4] === 'TRUE' ? 'Yes' : 'No';
 
             desc += `## ${mapName} - ${mapCreator}\n`
-            desc += `Code: ${mapCode}\n`
+            desc += `Code: [${mapCode}](https://fchq.io/map/${mapCode})\n`
             desc += `Players: ${playerCount}\n`
             desc += `Tested Before: ${testedBefore}\n\n`
         })

@@ -16,6 +16,7 @@ client.on('guildCreate', async (guild) => {
             console.log(`[LISTINGS] Posted server count to top.gg. Status: ${res.status}`);
         })
         .catch((err) => {
+            // TODO: This keeps logging out a invalid key error. Not too important but should be fixed.
             console.error(`[LISTINGS] Error posting server count to top.gg: ${err}`);
         })
 })

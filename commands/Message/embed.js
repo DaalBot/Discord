@@ -118,6 +118,9 @@ module.exports = {
             }
         ],
       
+        /**
+         * @param {{ interaction: DJS.ChatInputCommandInteraction }} param0
+         */
         callback: async ({ interaction }) => {
         if (interaction.options.getSubcommand() === 'builder') {
             // return 'Command has been disabled'
@@ -155,6 +158,8 @@ module.exports = {
             const getPermanentLink = async(attachment) => {
                 if (attachment) {
                     const tempLink = getAttachmentLink(attachment);
+
+                    console.log(tempLink);
     
                     const url = await daalbot.images.createPermLink(tempLink);
 

@@ -14,6 +14,7 @@ DaalBot sometimes reaches out to 3rd party services to store / retrieve data. Yo
 
 * [ImgBB](https://imgbb.com/) - Used to store images
 * [Twitch](https://www.twitch.tv/) - Used to provide twitch integration
+* [Termbin](https://termbin.com) - Used to store raw data for logging (Deleted automatically after 1 week)
 
 ## Questions and removal
 If you have any questions about the privacy policy please or want your data removed please create a ticket in the [support server](https://lnk.daalbot.xyz/HQ) or contact the bot owner directly.

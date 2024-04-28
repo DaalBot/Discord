@@ -19,7 +19,7 @@ client.on('interactionCreate', async (interaction) => {
             }
 
             // Check if the server has any tickets free
-            if (fs.readdirSync(path.resolve(`./db/tickets/${interaction.guild.id}/`)).length / 2 >= 25) {
+            if (fs.existsSync(path.resolve(`./db/tickets/${interaction.guild.id}`)) && fs.readdirSync(path.resolve(`./db/tickets/${interaction.guild.id}/`)).length / 2 >= 25) {
                 // if (interaction.user.id === interaction.guild.ownerId) {
                 //     return await interaction.reply({
                 //         content: `This server has reached the maximum amount of tickets. You can upgrade to DaalBot Premium to increase the limit.`,

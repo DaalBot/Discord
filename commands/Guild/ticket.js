@@ -88,9 +88,9 @@ module.exports = {
             type: Discord.ApplicationCommandOptionType.Subcommand,
             options: [
                 {
-                    name: Discord.ApplicationCommandOptionType.Boolean,
+                    name: 'role',
                     description: 'The role to modify the permissions for.',
-                    type: Discord.ApplicationCommandOptionType.Boolean,
+                    type: Discord.ApplicationCommandOptionType.Role,
                     required: true
                 },
                 {
