@@ -47,7 +47,17 @@ module.exports = {
                     name: 'Ping',
                     value: `DaalBots current ping is ${ping}ms`,
                     inline: true
-                }
+                },
+                // {
+                //     name: 'Shards',
+                //     value: `DaalBot is running on ${client?.shard?.count ?? '0'} shards`,
+                //     inline: true
+                // },
+                // {
+                //     name: 'Shard ID',
+                //     value: `This shard is shard ${client?.shard?.ids[0] ?? '0'}`,
+                //     inline: true
+                // }
             )
             .setTimestamp()
 

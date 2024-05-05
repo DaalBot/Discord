@@ -99,15 +99,18 @@ setInterval(async() => {
             .setTitle(`Service${downServices.length > 1 ? 's' : ''} down`)
             .setDescription(`The following services are down: ${downServices.join(', ')}`)
             .setColor(Colors.Red)
+            .setFooter({
+                text: 'Noticed by: BOT'
+            })
             .setTimestamp()
 
         const downtimeWebhook = process.env.DOWNTIME_WEBHOOK;
 
         if (downtimeWebhook) {
-            // await axios.post(downtimeWebhook, {
-            //     content: '<@&> Shit happened lmao',
-            //     embeds: [embed]
-            // })
+            await axios.post(downtimeWebhook, {
+                content: '<@&1173214195605590097> Shit happened lmao',
+                embeds: [embed]
+            })
         }
     }
 }, 5 * 60 * 1000)
