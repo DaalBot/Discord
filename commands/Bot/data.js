@@ -98,28 +98,28 @@ module.exports = {
                 const type = interaction.options.getString('type');
 
                 if (type === 'guild') {
-                    if (fs.existsSync(path.resolve(`./temp/${interaction.guild.id}.del`))) {
-                        return interaction.reply({ content: 'Deletion already scheduled.', ephemeral: true });
-                    }
+                    // if (fs.existsSync(path.resolve(`./temp/${interaction.guild.id}.del`))) {
+                    //     return interaction.reply({ content: 'Deletion already scheduled.', ephemeral: true });
+                    // }
 
-                    const embed = new EmbedBuilder()
-                        .setTitle('Deletion scheduled (TEST)')
-                        .setDescription(`Guild data for ${interaction.guild.name} will be deleted <t:${(Math.floor(Date.now() / 1000)) + 24 * 60 * 60}:R> unless you cancel it with \`/data actions cancel\``)
-                        .setFooter({
-                            text: 'All current data will be deleted, this will not affect any data that is added after the deletion is complete'
-                        })
-                        .setColor('Red');
+                    // const embed = new EmbedBuilder()
+                    //     .setTitle('Deletion scheduled (TEST)')
+                    //     .setDescription(`Guild data for ${interaction.guild.name} will be deleted <t:${(Math.floor(Date.now() / 1000)) + 24 * 60 * 60}:R> unless you cancel it with \`/data actions cancel\``)
+                    //     .setFooter({
+                    //         text: 'All current data will be deleted, this will not affect any data that is added after the deletion is complete'
+                    //     })
+                    //     .setColor('Red');
 
-                    interaction.reply({ embeds: [embed] });
+                    // interaction.reply({ embeds: [embed] });
 
-                    fs.appendFileSync(path.resolve(`./temp/${interaction.guild.id}.del`), Math.floor(Date.now()) + 24 * 60 * 60 * 1000);
+                    // fs.appendFileSync(path.resolve(`./temp/${interaction.guild.id}.del`), Math.floor(Date.now()) + 24 * 60 * 60 * 1000);
 
-                    daalbot.timestampEvents.once(`${Math.floor(Date.now()) + 24 * 60 * 60 * 1000}`, () => {
-                        // Executes once the countdown is over
-                        if (fs.readFileSync(path.resolve(`./temp/${interaction.guild.id}.del`), 'utf8') === 'ABORTED') return; // If the deletion was aborted, don't delete the data
+                    // daalbot.timestampEvents.once(`${Math.floor(Date.now()) + 24 * 60 * 60 * 1000}`, () => {
+                    //     // Executes once the countdown is over
+                    //     if (fs.readFileSync(path.resolve(`./temp/${interaction.guild.id}.del`), 'utf8') === 'ABORTED') return; // If the deletion was aborted, don't delete the data
 
-                        // TODO
-                    })
+                    //     // TODO
+                    // })
                 }
             }
         }

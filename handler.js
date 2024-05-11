@@ -207,6 +207,7 @@ client.on('interactionCreate', async interaction => {
                 ephemeral: true
             })
         } catch (e) {
+            // Give up
         }
     }
 })

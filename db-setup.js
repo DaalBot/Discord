@@ -1,5 +1,4 @@
-// This file is designed to create the database when the bot is launched if it does nto already exist
-
+// This file is designed to create the database when the bot is launched if it doesn't already exist
 const fs = require('fs');
 
 if (!fs.existsSync('./db')) {
@@ -7,32 +6,31 @@ if (!fs.existsSync('./db')) {
     console.log('✅ Created database folder');
 }
 
-if (!fs.existsSync('./db/welcome')) {
-    fs.mkdirSync('./db/welcome');
-    console.log('✅ Created welcome folder');
+async function createFolderIfNonExistant(folder) {
+    if (!fs.existsSync(folder)) {
+        fs.mkdirSync(folder);
+        console.log(`✅ Created ${folder} folder`);
+    }
 }
 
-if (!fs.existsSync('./db/logging')) {
-    fs.mkdirSync('./db/logging');
-    console.log('✅ Created logging folder');
-}
+const subFolders = [
+    'antiraid',
+    'automod',
+    'autorole',
+    'beta',
+    'config',
+    'events',
+    'lockdown',
+    'logging',
+    'scamprot',
+    'socialalert',
+    'test',
+    'tickets',
+    'verify',
+    'welcome',
+    'xp'
+]
 
-if (!fs.existsSync('./db/xp')) {
-    fs.mkdirSync('./db/xp');
-    console.log('✅ Created xp folder');
-}
-
-if (!fs.existsSync('./db/verify')) {
-    fs.mkdirSync('./db/verify');
-    console.log('✅ Created verify folder');
-}
-
-if (!fs.existsSync('./db/tickets')) {
-    fs.mkdirSync('./db/tickets');
-    console.log('✅ Created tickets folder');
-}
-
-if (!fs.existsSync('./db/autorole')) {
-    fs.mkdirSync('./db/autorole');
-    console.log('✅ Created autorole folder');
+for (let i = 0; i < subFolders.length; i++) {
+    createFolderIfNonExistant(`./db/${subFolders[i]}`);
 }

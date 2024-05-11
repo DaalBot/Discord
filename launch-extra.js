@@ -13,7 +13,7 @@ require('./events/join.js');
 require('./events/messageCreate.js');
 require('./interactions/load.js');
 require('./events/channelCreate.js');
-require('./V14/index.js')
+// require('./V14/index.js') // DEPRICATED
 
 // Premium
 // require('./premium/boostdetection.js');

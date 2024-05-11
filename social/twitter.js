@@ -3,7 +3,7 @@ const path = require('path');
 const Discord = require('discord.js');
 const client = require('../client.js');
 const { parse } = require('rss-to-json');
-const nitterLink = 'nitter.esmailelbob.xyz';
+const nitterLink = 'nitter.poast.org';
 const crypto = require('crypto');
 
 /**
