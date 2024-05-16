@@ -14,7 +14,7 @@ if (!fs.existsSync(`./db/`)) {
   require('./db-setup.js') // If the database doesn't exist, run the setup
 }
 
-fs.writeFileSync('/home/piny/.pm2/logs/Discord-out.log', `[Logs wiped]\n`) // Clean the out log on startup
-fs.writeFileSync('./pm2.log', `[Logs wiped]\n`) // Clean the general logs on startup
+fs.existsSync('/home/piny/.pm2/logs/Discord-out.log') ? fs.writeFileSync('/home/piny/.pm2/logs/Discord-out.log', `[Logs wiped]\n`) : null // Clean the out log on startup
+fs.existsSync('./pm2.log') ? fs.writeFileSync('./pm2.log', `[Logs wiped]\n`) : null // Clean the general logs on startup
 
 client.login(process.env.TOKEN);

@@ -22,45 +22,52 @@ async function updateBearer() {
             }
         })
     } catch {
-        // If the request fails, it means the bearer is invalid
-        const GetNewBearerReq = await axios.post(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENTID}&client_secret=${process.env.TWITCH_CLIENTSECRET}&grant_type=client_credentials`)
-        Bearer = GetNewBearerReq.data.access_token
-
-        // Update the .env file
-        const dotenvpath = path.resolve('./.env')
-
-        const currentEnv = fs.readFileSync(dotenvpath, 'utf8')
-        const newEnv = currentEnv.replace(startingBearer, Bearer)
-
-        fs.writeFileSync(dotenvpath, newEnv)
-
-        // Logs
-        console.log('Twitch link > Bearer updated')
-
-        // Test the new bearer
-        await updateBearer()
+        if (process.env.TWITCH_CLIENTID && process.env.TWITCH_CLIENTSECRET) {
+            // If the request fails, it means the bearer is invalid
+            const GetNewBearerReq = await axios.post(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENTID}&client_secret=${process.env.TWITCH_CLIENTSECRET}&grant_type=client_credentials`)
+            Bearer = GetNewBearerReq.data.access_token
+    
+            // Update the .env file
+            const dotenvpath = path.resolve('./.env')
+    
+            const currentEnv = fs.readFileSync(dotenvpath, 'utf8')
+            const newEnv = currentEnv.replace(startingBearer, Bearer)
+    
+            fs.writeFileSync(dotenvpath, newEnv)
+    
+            // Logs
+            console.log('Twitch link > Bearer updated')
+    
+            // Test the new bearer
+            await updateBearer()
+        }
     }
 }
 
 async function checkIfLive(users) {
-    let url = `https://api.twitch.tv/helix/streams?user_id=798413363`
+    try {
+        let url = `https://api.twitch.tv/helix/streams?user_id=798413363`
 
-    for (i = 0; i < users.length; i++) {
-        const user = users[i]
+        for (i = 0; i < users.length; i++) {
+            const user = users[i]
 
-        url += `&user_id=${user}`
-    }
-
-    const request = await axios.get(url, {
-        headers: {
-            'Authorization': `Bearer ${Bearer}`,
-            'Client-Id': process.env.TWITCH_CLIENTID
+            url += `&user_id=${user}`
         }
-    })
 
-    const liveUsers = request.data.data
+        const request = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Bearer}`,
+                'Client-Id': process.env.TWITCH_CLIENTID
+            }
+        })
 
-    return liveUsers;
+        const liveUsers = request.data.data
+
+        return liveUsers;
+    } catch (e) {
+        console.log(e)
+        return [];
+    }
 }
 
 async function main() {

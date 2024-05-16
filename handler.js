@@ -86,9 +86,9 @@ let commands = [];
             // If the command is already registered, update it
             if (existingCommand) {
                 // Do nothing is already in all guilds
-            } else if (!(client.guilds.cache.get(testGuild).commands.cache.get(c => c.name === command.name)) && command.testOnly) {
+            } else if (!(client?.guilds?.cache?.get(testGuild)?.commands?.cache?.get(c => c?.name === command?.name)) && command.testOnly) {
                 // Update the command to the test guild one if it exists
-                existingCommand = client.guilds.cache.get(testGuild).commands.cache.get(c => c.name === command.name);
+                existingCommand = client?.guilds?.cache?.get(testGuild)?.commands?.cache?.get(c => c?.name === command?.name);
             } else {
                 exists = false;
             }
@@ -100,18 +100,22 @@ let commands = [];
                     options: command.options
                 });
             } else {
-                if (command.testOnly) {
-                    await client.guilds.cache.get(testGuild).commands.create({
-                        name: command.name,
-                        description: command.description,
-                        options: command.options
-                    });
-                } else {
-                    await client.application.commands.create({
-                        name: command.name,
-                        description: command.description,
-                        options: command.options
-                    });
+                try {
+                    if (command.testOnly) {
+                        await client.guilds.cache.get(testGuild).commands.create({
+                            name: command.name,
+                            description: command.description,
+                            options: command.options
+                        });
+                    } else {
+                        await client.application.commands.create({
+                            name: command.name,
+                            description: command.description,
+                            options: command.options
+                        });
+                    }
+                } catch (error) {
+                    console.error(error)
                 }
             }
         }

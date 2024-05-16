@@ -48,6 +48,11 @@
         ]
     },
 
+    "handler": {
+        // Test servers for "testOnly" commands
+        "testServer": "1234"
+    },
+
     // List of statuses to randomly pick from
     /*
         {GUILDS} - Number of guilds the bot is in
