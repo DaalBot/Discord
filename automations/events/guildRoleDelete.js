@@ -32,6 +32,9 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
         console.trace = consoleOverrides.trace;
 
         process.env = overridenProcessEnv;
+
+        // Hide client data
+        eventObject.client = {};
         
         if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     

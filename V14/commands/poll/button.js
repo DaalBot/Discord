@@ -48,7 +48,7 @@ client.on('interactionCreate', async interaction => {
             const embed = new DJS.EmbedBuilder()
                 .setAuthor({
                     name: 'Poll',
-                    iconURL: 'https://pinymedia.web.app/daalbot/Poll.png'
+                    iconURL: 'https://media.piny.dev/daalbot/Poll.png'
                 })
                 .setTitle(message.embeds[0].title.replace('(ends', '(ended'))
                 .setDescription('This poll has ended!')
@@ -67,7 +67,7 @@ client.on('interactionCreate', async interaction => {
                 const message = interaction.message;
 
                 const embed = new DJS.EmbedBuilder()
-                    .setThumbnail('https://pinymedia.web.app/daalbot/Poll.png')
+                    .setThumbnail('https://media.piny.dev/daalbot/Poll.png')
                     .setAuthor({
                         name: 'Poll'
                     })

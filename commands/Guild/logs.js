@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType, ChannelType, ChatInputCommandInteraction } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 const config = require('../../config.json');
 const events = [
@@ -87,7 +87,10 @@ module.exports = {
                     name: 'channel',
                     description: 'The channel to exclude from logging.',
                     type: ApplicationCommandOptionType.Channel,
-                    required: true
+                    required: true,
+                    channel_types: [
+                        ChannelType.GuildText
+                    ]
                 },
                 {
                     name: 'enabled',
@@ -110,33 +113,44 @@ module.exports = {
         }
     ],
 
+    /**
+     * @param {{ interaction: ChatInputCommandInteraction }} param0
+     */
     callback: async ({ interaction }) => {
         const subCommand = interaction.options.getSubcommand();
         const guildID = interaction.guild.id;
         const dbFolder = `${config.botPath}/db/logging/${guildID}`;
         
         if (subCommand === 'channel') {
-            const channel = interaction.options.getChannel('channel');
+            const channel = interaction.options.getChannel('channel', true, [ ChannelType.GuildText ]);
             const channelID = channel.id;
             const guild = interaction.guild;
 
             if (!fs.existsSync(dbFolder)) {
                 try {
                     fs.mkdirSync(dbFolder);
-                    fs.appendFileSync(`${dbFolder}/channel.id`, channelID);
-                    return `Successfully set the logging channel to <#${channelID}>.`;
                 } catch {
                     return 'There was an error creating the database folder.';
                 }
-            } else {
-                if (fs.existsSync(`${dbFolder}/channel.id`)) {
-                    fs.writeFileSync(`${dbFolder}/channel.id`, channelID);
-                    return `Successfully set the logging channel to <#${channelID}>.`;
-                } else {
-                    fs.appendFileSync(`${dbFolder}/channel.id`, channelID);
-                    return `Successfully set the logging channel to <#${channelID}>.`;
-                }
             }
+
+            daalbot.fs.write(`${dbFolder}/channel.id`, channelID);
+
+            const webhook = await channel.createWebhook({
+                name: 'DaalBot Logging',
+                avatar: 'https://media.piny.dev/DaalBotSquare.png',
+                reason: 'Triggered by logs command.'
+            })
+
+            const output = {
+                id: webhook.id,
+                token: webhook.token,
+                url: webhook.url
+            }
+
+            daalbot.db.managed.set(guildID, 'logging/webhook', JSON.stringify(output));
+
+            return `Successfully set the logging channel to <#${channelID}>.`;
         } else if (subCommand === 'toggle') {
             const event = interaction.options.getString('event');
             const enabled = `${interaction.options.getBoolean('enabled')}`;

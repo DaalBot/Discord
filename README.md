@@ -1,5 +1,5 @@
 # DaalBot
-![Server Count](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fbot.daalbot.xyz%3A8923%2Fapi%2Fstatus&query=%24.guilds&label=Servers&style=flat)
+[![Current Status](https://top.gg/api/widget/status/1016086353085222993.svg)](https://bot.daalbot.xyz)  ![Server Count](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fbot.daalbot.xyz%3A8923%2Fapi%2Fstatus&query=%24.guilds&label=Servers&style=flat)
 ## Features
 
 DaalBot is a versatile Discord bot with a range of useful features to help manage and improve your server, including:
@@ -19,4 +19,4 @@ You can invite DaalBot to your server [here](https://daalbot.xyz/Invite).
 
 If you have any questions or issues with DaalBot, you can join the official [Discord server](https://lnk.daalbot.xyz/HQ).
 
-![DaalBot](https://pinymedia.web.app/Daalbot.png)
+![DaalBot](https://media.piny.dev/Daalbot.png)

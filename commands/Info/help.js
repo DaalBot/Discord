@@ -3,7 +3,7 @@ const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('
 module.exports = {
     name: 'help',
     description: 'Bring up the help panel',
-    category: 'Help',
+    category: 'Info',
     testOnly: false,
     ownerOnly: false,
     type: 'SLASH',

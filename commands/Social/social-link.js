@@ -53,42 +53,6 @@ module.exports = {
             ]
         },
         {
-            name: 'twitter',
-            description: 'Modifies the Twitter feeds for the server.',
-            type: ApplicationCommandOptionType.SubcommandGroup,
-            options: [
-                {
-                    name: 'add',
-                    description: 'Adds a Twitter feed to a channel.',
-                    type: ApplicationCommandOptionType.Subcommand,
-                    options: [
-                        {
-                            name: 'account',
-                            description: 'The name of the twitter account to add.',
-                            type: ApplicationCommandOptionType.String,
-                            required: true
-                        },
-                        {
-                            name: 'channel',
-                            description: 'The channel to send the feed to.',
-                            type: ApplicationCommandOptionType.Channel,
-                            required: true,
-                            channel_types: [
-                                ChannelType.GuildText,
-                                ChannelType.PublicThread,
-                            ]
-                        },
-                        {
-                            name: 'role',
-                            description: 'The role to ping when a new tweet is made.',
-                            type: ApplicationCommandOptionType.Role,
-                            required: false
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             name: 'youtube',
             description: 'Modifies the YouTube feeds for the server.',
             type: ApplicationCommandOptionType.SubcommandGroup,

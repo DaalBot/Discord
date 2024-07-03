@@ -8,6 +8,7 @@ require('dotenv').config();
 const axios = require('axios');
 const { EventEmitter } = require('events');
 const net = require('net');
+const crypto = require('crypto');
 
 const serverAmount = client.guilds.cache.size
 
@@ -124,6 +125,14 @@ const warnings = {
 }
 
 function betterFS_write(path, data) {
+    // Get file directory
+    const fileDirectory = path.split('/').slice(0, -1).join('/');
+
+    // Check if the directory exists
+    if (!fs.existsSync(fileDirectory)) {
+        fs.mkdirSync(fileDirectory, { recursive: true });
+    }
+
     if (fs.existsSync(path)) {
         fs.writeFileSync(path, data);
         return "Success";
@@ -225,6 +234,53 @@ async function DatabaseGetChannel(guild, type) {
     }
 }
 
+/**
+ * @param {string} guild
+ * @param {string} pathName
+ * @param {string} data
+ * @param {'w' | 'a'} flags
+*/
+async function managedDBSet(guild, pathName, data, flags = 'w') {
+    switch (flags) {
+        case 'w':
+            betterFS_write(path.resolve(`./db/managed/${guild}/${pathName}`), `${data}`);
+            break;
+        case 'a':
+            if (!fs.existsSync(path.resolve(`./db/managed/${guild}/${pathName}`.split('/').slice(0, -1).join('/')))) {
+                fs.mkdirSync(path.resolve(`./db/managed/${guild}/${pathName}`.split('/').slice(0, -1).join('/')), { recursive: true });
+            }
+
+            fs.appendFileSync(path.resolve(`./db/managed/${guild}/${pathName}`), `${data}`);
+            break;
+    }
+}
+
+/**
+ * @param {string} guild 
+ * @param {string} pathName 
+ * @returns {Promise<string | "File not found.">}
+ */
+async function managedDBGet(guild, pathName) {
+    return betterFS_read(path.resolve(`./db/managed/${guild}/${pathName}`));
+}
+
+/**
+ * @param {string} guild 
+ * @param {string} pathName
+*/
+async function managedDBExists(guild, pathName) {
+    // Why tf is this not working
+    return fs.existsSync(path.resolve(`./db/managed/${guild}/${pathName}`)) ?? false;
+}
+
+/**
+ * @param {string} guild
+ * @param {string} pathName
+*/
+async function managedDBDelete(guild, pathName) {
+    fs.unlinkSync(path.resolve(`./db/managed/${guild}/${pathName}`));
+}
+
 async function sendAlert(guild, embed, message) {
     const alertChannel = await DatabaseGetChannel(guild, 'alerts');
 
@@ -241,7 +297,7 @@ async function sendAlert(guild, embed, message) {
  */
 async function API_get_user(id) {
     try {
-        const response = await axios.get(`Add typings to this function using jsdochttps://discord.com/api/v9/users/${id}`, {
+        const response = await axios.get(`https://discord.com/api/v9/users/${id}`, {
             headers: {
                 'Authorization': `Bot ${process.env.TOKEN}`
             }
@@ -282,17 +338,39 @@ async function API_get_role(guild, id) {
 }
 
 /**
- * @param {string} url 
+ * @param {string} url
  * @returns {Promise<string>}
 */
-async function createPermanentImgLink(url) {
+async function createPermanentImgLink(url, checkHash = false) {
     try {
-        const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_KEY}&image=${url}`);
+        if (!url) return 'https://media.piny.dev/Error.png';
 
-        return response.data.data.display_url;
+        if (checkHash) {
+            const imageReq = await axios.get(url);
+            const imageData = imageReq.data;
+
+            const hash = crypto.createHash('sha256').update(imageData).digest('hex');
+
+            const hashFile = await managedDBGet('global', 'imgbb.hash');
+
+            if (hashFile.includes(hash)) {
+                // We know this image has been uploaded before now we just need to get the URL
+                const combos = hashFile.split('\n');
+                const combo = combos.find(c => c.includes(hash));
+
+                return combo.split(':')[1];
+            }
+        }
+
+        const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_KEY}&image=${url}`);
+        const imageUrl = response.data.data.display_url;
+
+        if (checkHash) managedDBSet('global', 'imgbb.hash', `\n${hash}:${imageUrl}`, 'a');
+
+        return imageUrl;
     } catch (err) {
         console.error(err.response.data.error)
-        return 'https://pinymedia.web.app/Error.png'
+        return 'https://media.piny.dev/Error.png'
     }
 }
 
@@ -517,6 +595,81 @@ async function pasteapi_create_paste(string) {
     }
 }
 
+async function addXP(guild, user, amount) {
+    const DJS = Discord;
+    const XPamount = parseInt(amount);
+    const GuildXpFolder = path.resolve(`./db/xp/${guild}`);
+    const MemberXpFile = path.resolve(`./db/xp/${guild}/${user}.xp`);
+
+    if (!fs.existsSync(GuildXpFolder)) {
+        fs.mkdirSync(GuildXpFolder);
+    }
+
+    const newXp = fs.existsSync(MemberXpFile) ? `${parseInt(fs.readFileSync(MemberXpFile)) + XPamount}` : `${XPamount}`;
+
+    betterFS_write(MemberXpFile, `${newXp}`);
+
+    const level = parseInt(newXp.slice(0, -3)) || 0;
+
+    if (level == 0) return;
+
+    const levelFile = path.resolve(`./db/xp/${guild}/rewards/${level}.reward`);
+
+    if (!fs.existsSync(levelFile)) return;
+
+    const rewardRole = fs.readFileSync(levelFile, 'utf8')
+
+    if (rewardRole == undefined) return;
+
+    const role = getRole(guild, rewardRole);
+
+    if (role == undefined || role == 'Role not found.' || role == 'Server not found.') return;
+
+    const member = getMember(guild, user)
+
+    if (member.roles.cache.has(role.id)) return;
+
+    member.roles.add(role.id)
+        .then(async() => {
+            const silentUsers = fs.readFileSync(path.resolve(`./db/xp/silent.users`), 'utf8').split('\n');
+
+            const levelUpChannel = getChannel(guild, await DatabaseGetChannel(guild, 'levels'));
+
+            if (levelUpChannel == null) return;
+
+            const levelUpEmbed = new DJS.EmbedBuilder()
+                .setTitle('Level Up!')
+                .setDescription(`Congratulations on leveling up <@${user}>! You are now level ${level} and have unlocked the ${role.name} role`)
+                .setTimestamp();
+
+            const row = new DJS.ActionRowBuilder()
+
+            const menuButton = new DJS.ButtonBuilder()
+                .setLabel('Menu')
+                .setStyle(DJS.ButtonStyle.Primary)
+                .setCustomId('levelUpMenu')
+                .setEmoji('📖');
+
+            row.addComponents(menuButton);
+
+            if (guild == config.servers.vortex.id) {
+                const vortexMoreInfoButton = new DJS.ButtonBuilder()
+                    .setLabel('More Info')
+                    .setStyle(DJS.ButtonStyle.Link)
+                    .setURL('https://discord.com/channels/973711816226136095/1001724255215558766')
+                    .setEmoji('🔗');
+
+                row.addComponents(vortexMoreInfoButton);
+            }
+
+            levelUpChannel.send({
+                content: silentUsers.includes(user) ? null : `<@${user}>`,
+                embeds: [levelUpEmbed],
+                components: [row]
+            })
+        })
+}
+
 const timestampEvents = new EventEmitter();
 
 setInterval(() => {
@@ -532,6 +685,25 @@ async function getFutureDiscordTimestamp(ms) {
 
     // Convert the future time to a Discord timestamp (epoch time)
     return Math.floor(futureTime / 1000);
+}
+
+/**
+ * @param {string} message
+ * @param {string} guild
+ * @param {Object | undefined} data
+*/
+async function convertMetaText(message, guild, data) {
+    // Remove the client object from the data object incase it's there because of the token property o~o
+    const replacementData = data.client ? {
+        ...data,
+        client: {}
+    } : data;
+    replacementData.guild = guild;
+
+    // Replace the placeholders in the message with the data
+    return message.replace(/%%{(\w+)}%%/g, (match, key) => {
+        return replacementData[key.toLowerCase()] || match;
+    });
 }
 
 const youtube = {
@@ -565,7 +737,13 @@ const better_fs = {
 
 const db = {
     setChannel: DatabaseSetChannel,
-    getChannel: DatabaseGetChannel
+    getChannel: DatabaseGetChannel,
+    managed: {
+        set: managedDBSet,
+        get: managedDBGet,
+        exists: managedDBExists,
+        delete: managedDBDelete
+    }
 }
 
 const guilds = {
@@ -584,9 +762,35 @@ const api = {
     }
 }
 
-const colours = {
-    daalbot_purple: '#502898'
+const xp = {
+    add: addXP
 }
+
+const colours = {
+    daalbot_purple: '#826ae3',
+    vortex_blue: '#00aae3'
+}
+
+const emojis = {
+    '973711816226136095': {
+        coin: '<:VortexCoin:1245731439857766460>',
+    },
+    coin: '<:Coin:1247554973512896533>',
+    xp: '<:XP:1245805234115313747>'
+}
+
+/**
+ * @param {string} name
+ * @param {string?} guild
+*/
+const getEmoji = (name, guild) => {
+    if (guild && emojis[guild] && emojis[guild][name]) {
+        return emojis[guild][name];
+    } else {
+        return emojis[name];
+    }
+}
+emojis.get = getEmoji;
 
 const timestamps = {
     getFutureDiscordTimestamp
@@ -608,6 +812,8 @@ module.exports = {
     timestamps,
     youtube,
     items,
+    xp,
+    emojis,
     findServerVanity,
     fetchServer,
     fetchServerName,

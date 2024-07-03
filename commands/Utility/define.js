@@ -44,7 +44,7 @@ module.exports = {
                 ])
                 .setAuthor({
                     name: 'Data provided by dictionaryapi.dev',
-                    iconURL: 'https://pinymedia.web.app/dictionaryapi.dev.png',
+                    iconURL: 'https://media.piny.dev/dictionaryapi.dev.png',
                     url: 'https://dictionaryapi.dev/'
                 })
     

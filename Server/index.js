@@ -6,6 +6,7 @@ const express = require('express');
 const app = express();
 const port = 8923;
 const axios = require('axios');
+const path = require('path');
 
 app.use(express.json());
 
@@ -34,6 +35,15 @@ app.get('/api/status', (req, res) => {
             }
         })
     }
+})
+
+// Allow the user to get up to date information about the privacy policy and terms of service (incase i forget to commit the changes or smth)
+app.get('/md/privacy', (req, res) => {
+    res.sendFile(path.resolve(`./PRIVACY.md`)) // Send the privacy policy file
+})
+
+app.get('/md/tos', (req, res) => {
+    res.sendFile(path.resolve(`./TERMS.md`)) // Send the terms of service file
 })
 
 app.listen(port, () => {
@@ -90,8 +100,8 @@ setInterval(async() => {
     }
 
     const downServices = [
-        extAPIStatus === 0 ? 'EXTAPI' : '',
-        intAPIStatus === 0 ? 'INTAPI' : '',
+        extAPIStatus === 0 ? 'External API' : '',
+        intAPIStatus === 0 ? 'Internal API' : '',
         botAPIStatus === 0 ? 'Bot' : ''
     ].filter(Boolean)
 
@@ -108,6 +118,7 @@ setInterval(async() => {
         const downtimeWebhook = process.env.DOWNTIME_WEBHOOK;
 
         if (downtimeWebhook) {
+            return;
             await axios.post(downtimeWebhook, {
                 content: '<@&1173214195605590097> Shit happened lmao',
                 embeds: [embed]

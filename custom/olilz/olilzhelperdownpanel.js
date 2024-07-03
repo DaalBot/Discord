@@ -1,9 +1,10 @@
 const client = require('../../client.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
 require('dotenv').config();
 const daalbot = require('../../daalbot.js')
 
 client.on('messageCreate', async(message) => {
+    if (message.channel.type == ChannelType.DM) return; // Ignore DMs
     if (message.guild.id !== '1015322440152383539') return;
 
     if (message.content === '$summonolilzhelperdownpanel') {

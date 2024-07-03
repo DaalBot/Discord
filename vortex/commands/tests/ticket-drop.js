@@ -56,7 +56,7 @@ client.on('messageCreate', msg => {
                     .setColor('#00aae3')
                     .setFooter({
                         text: 'Vortex | Service Request',
-                        iconURL: 'https://pinymedia.web.app/VortexIcon.png'
+                        iconURL: 'https://media.piny.dev/VortexIcon.png'
                     })
 
                 msg.channel.send({

@@ -23,7 +23,7 @@ client.on('interactionCreate', async (interaction) => {
 
             successEmbed.setAuthor({
                 name: 'Vortex',
-                iconURL: interaction.guild.iconURL({ dynamic: true }) == null ? 'https://pinymedia.web.app/Daalbot.png' : interaction.guild.iconURL({ dynamic: true })
+                iconURL: interaction.guild.iconURL({ dynamic: true }) == null ? 'https://media.piny.dev/Daalbot.png' : interaction.guild.iconURL({ dynamic: true })
             })
 
             successEmbed.setColor('#57F28D')

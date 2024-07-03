@@ -13,7 +13,7 @@ require('./events/join.js');
 require('./events/messageCreate.js');
 require('./interactions/load.js');
 require('./events/channelCreate.js');
-// require('./V14/index.js') // DEPRICATED
+// require('./V14/index.js') // DEPRECATED
 
 // Premium
 // require('./premium/boostdetection.js');
@@ -50,3 +50,6 @@ require('./context/handler.js');
 
 // Listings
 require('./listings/top.gg.js');
+
+// Modmail
+require('./modmail/dm.js');

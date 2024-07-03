@@ -14,7 +14,7 @@ client.on('interactionCreate', async interaction => {
         const timeLimit = interaction.fields.getTextInputValue('poll_modal_time_limit');
 
         const embed = new DJS.EmbedBuilder()
-            .setThumbnail('https://pinymedia.web.app/daalbot/Poll.png')
+            .setThumbnail('https://media.piny.dev/daalbot/Poll.png')
             .setAuthor({
                 name: 'Poll'
             })

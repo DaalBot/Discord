@@ -24,3 +24,6 @@ require('./events/guildMemberUpdate.js');
 require('./events/guildRoleCreate.js');
 require('./events/guildRoleUpdate.js');
 require('./events/guildRoleDelete.js');
+
+// Interactions
+require('./events/interactionCreate.js');

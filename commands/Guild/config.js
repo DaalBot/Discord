@@ -72,6 +72,16 @@ module.exports = {
             // }
         ]
 
+        const admins = daalbot.config().WOKCommands.ownerIds;
+
+        if (admins.includes(interaction.user.id)) {
+            options.push({
+                label: 'Global',
+                value: 'admin_api',
+                emoji: '🌐'
+            })
+        }
+
         const row = new ActionRowBuilder()
 
         for (i = 0; i < options.length; i++) {

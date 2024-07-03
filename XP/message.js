@@ -6,6 +6,7 @@ const path = require('path');
 const DJS = require('discord.js');
 
 client.on('messageCreate', msg => {
+    if (msg.channel.type == DJS.ChannelType.DM) return; // Ignore DMs
     if (msg.author.bot) return;
     if (msg.content.startsWith(['!', '$', '.'])) return;
     const XPamount = Math.floor(Math.random() * 10) + 1;

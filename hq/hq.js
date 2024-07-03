@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
 const client = require('../client');
 const daalbot = require('../daalbot.js');
 const fs = require('fs');
@@ -74,7 +74,7 @@ client.on('guildMemberAdd', member => {
             .setTitle(`Welcome to the official DaalBot HQ!`)
             .setDescription(`You are member #${member.guild.memberCount}`)
             .setThumbnail(member.avatarURL)
-            .setImage('https://pinymedia.web.app/Daalbot.png')
+            .setImage('https://media.piny.dev/Daalbot.png')
             .setColor(0x9b24a9)
         client.channels.cache.find(channel => channel.id === '1010452045163143209').send({ content: `Everyone welcome <@${member.id}> to the server!`, embeds: [welcomeEmbed]});
     } else {
@@ -119,6 +119,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 })
 
 client.on('messageCreate', msg => {
+    if (msg.channel.type == ChannelType.DM) return; // Ignore DMs
     if (msg.guild.id === '1001929445478781030') {
         if (msg.author.bot && msg.author.id == '1052298562458898462') {
             // Triggers when a commit alert is sent by the webhook

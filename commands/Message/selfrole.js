@@ -2,6 +2,7 @@ const DJS = require('discord.js');
 const daalbot = require('../../daalbot.js');
 const fs = require('fs');
 const path = require('path');
+const client = daalbot.client;
 
 module.exports = {
     name: 'selfrole',
@@ -70,7 +71,22 @@ module.exports = {
                     value: role.id,
                 });
 
-                await message.edit({ components: [row] });
+                if (row.components[0].options.length > 25) return interaction.reply({ content: 'Cannot have more than 25 options in a dropdown', ephemeral: true });
+
+                if (message.author.id === client.user.id) {
+                    await message.edit({ components: [row] });
+                } else {
+                    const webhook = await message.fetchWebhook();
+    
+                    if (webhook?.owner?.id === client.user.id) {
+                        await webhook.editMessage(message.id, {
+                            components: [row]
+                        });
+                    } else {
+                        return interaction.reply({ content: 'Unsupported message', ephemeral: true });
+                    }
+                }
+
                 return interaction.reply({ content: 'Role added to dropdown', ephemeral: true });
             } else {
                 return interaction.reply({ content: 'Unsupported message', ephemeral: true });
@@ -90,7 +106,19 @@ module.exports = {
 
             row.addComponents(dropdown);
 
-            await message.edit({ components: [row] });
+            if (message.author.id === client.user.id) {
+                await message.edit({ components: [row] });
+            } else {
+                const webhook = await message.fetchWebhook();
+
+                if (webhook?.owner?.id === client.user.id) {
+                    await webhook.editMessage(message.id, {
+                        components: [row]
+                    });
+                } else {
+                    return interaction.reply({ content: 'Unsupported message', ephemeral: true });
+                }
+            }
 
             return interaction.reply({ content: 'Role added to dropdown', ephemeral: true });
         }

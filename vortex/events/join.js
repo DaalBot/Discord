@@ -42,8 +42,8 @@ client.on('guildMemberAdd', member => {
 > ***Use of Language -*** Our team is diverse and has people of many cultures, races and languages. But due to the fact that our team is mainly English it is difficult for moderators to moderate chats when people speak other languages. So for the sake of making our moderators jobs easier we ask that you only speak English within the server.
 > 
 > *These rules are discretionary, staff may choose to enforce punishment if they find someone’s behavior is inappropriate.*`)
-            .setImage('https://pinymedia.web.app/VortexExpanded.png')
-            .setThumbnail('https://pinymedia.web.app/VortexIcon.png')
+            .setImage('https://media.piny.dev/VortexExpanded.png')
+            .setThumbnail('https://media.piny.dev/VortexIcon.png')
             .setURL('https://www.vortexfnc.com')
 
         try {

@@ -1,8 +1,9 @@
 const client = require('../../client.js');
 const config = require('../../config.json');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ChannelType } = require('discord.js');
 
 client.on('messageCreate', msg => {
+    if (msg.channel.type == ChannelType.DM) return; // Ignore DMs
     if (msg.guild.id !== config.servers.vortex.id) return;
 
     if (msg.channel.id === '974375088642228344' && msg.author.id === '1030590008345768048') {
@@ -29,7 +30,7 @@ client.on('messageCreate', msg => {
             })
             .setFooter({
                 text: 'Tweet',
-                iconURL: 'https://pinymedia.web.app/DaalbotCircle.png'
+                iconURL: 'https://media.piny.dev/DaalbotCircle.png'
             })
             .setDescription(tweet.content)
             .setTitle(`New Tweet from ${tweet.author.name.split('(')[1].split(')')[0]}`)

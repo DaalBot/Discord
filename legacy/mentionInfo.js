@@ -8,7 +8,7 @@ client.on('messageCreate', msg => {
   .setTitle('Hello!')
   .setDescription(`My default prefix is \`${config.WOKCommands.prefix}\` though it may change depending on what server your in\n\n**LINKS:**\nWebsite: https://daalbot.xyz/\nInvite: https://daalbot.xyz/Invite\nCommands: https://daalbot.xyz/Commands`)
   .setTimestamp(msg.createdTimestamp)
-  .setImage('https://pinymedia.web.app/Daalbot.png');
+  .setImage('https://media.piny.dev/Daalbot.png');
 
     if (msg.author.bot) return;
     

@@ -42,5 +42,5 @@ function applyNewStatus() {
 
 client.on('ready', () => {
     applyNewStatus(); // apply status on startup
-    setInterval(() => applyNewStatus(), 3600000); // apply status every hour
+    setInterval(() => applyNewStatus(), 5 * 60 * 1000); // apply status every 5 minutes
 })

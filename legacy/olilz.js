@@ -2,8 +2,10 @@ const client = require('../client');
 const config = require('../config');
 const fs = require('fs');
 const path = require('path');
+const { ChannelType } = require('discord.js');
 
 client.on('messageCreate', msg => {
+    if (msg.channel.type == ChannelType.DM) return; // Ignore DMs
     if (msg.guild.id === '1015322440152383539') {
         fs.appendFileSync(path.resolve('./logs/olilz.log'), `[${new Date()}] ${msg.author.tag} / ${msg.author.id}: 
         content: ${msg.content}

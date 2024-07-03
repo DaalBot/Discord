@@ -50,7 +50,7 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
 
     const eventsJSON = JSON.parse(fs.readFileSync(path.resolve('./db/events/events.json'), 'utf8'));
 
-    const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObject.guild.id);
+    const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObject?.guild?.id);
 
     for (let i = 0; i < validEvents.length; i++) {
         const event = validEvents[i];

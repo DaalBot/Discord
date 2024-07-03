@@ -5,6 +5,7 @@ logs
 
 # Database
 db/
+backup/
 
 # Temporary files
 temp/

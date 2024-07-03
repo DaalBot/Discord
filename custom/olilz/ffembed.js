@@ -1,8 +1,10 @@
 const client = require('../../client.js');
 const Discord = require('discord.js');
 const csvman = require('@npiny/csvman');
+const daalbot = require('../../daalbot.js');
 
 client.on('messageCreate', async message => {
+    if (message.channel.type == Discord.ChannelType.DM) return; // Ignore DMs
     // || !message.channel.id == '1015649845287075840'
     if (!message.guild.id == '1015322440152383539') return;
     if (message.author.bot) return;
@@ -37,34 +39,50 @@ client.on('messageCreate', async message => {
 
         data = data.map(row => row.split('    '));
 
-        data.forEach(map => {
-            if (map[0].match(/[0-9]\./g)) {
-                // This is a bit of a hacky way to check how many elements to remove
-                if (map[1].includes('.')) {
-                    // Chances are this is useless
-                    map.shift();
-                    map.shift();
-                } else {
-                    map.shift();
-                }
+        data.forEach(async(map) => {
+            /**
+             * [0] = Playtesting team
+             * [1] = Type
+             * [2] = Creator (ping)
+             * [3] = Creator (code)
+             * [4] = Name
+             * [5] = Code
+             * [6] = Players
+             * [7] = Tested before
+             * [8] = Feature?
+             * [9] = Outstanding?
+             * [10] = Feedback (written after playtest)
+             * [11] = 'INTERNAL USE' (Previous feedback if applicable)
+            */
+            map.shift();
+
+            const mapData = {}
+
+            mapData.type = map[0];
+            mapData.creator = map[1];
+            mapData.creatorCode = map[2];
+            mapData.mapName = map[3];
+            mapData.mapCode = map[4];
+            mapData.playerCount = map[5];
+            mapData.testedBefore = map[6];
+            mapData.feature = map[7];
+            mapData.outstanding = map[8];
+            mapData.feedback = map[9];
+            mapData.previousFeedback = map[10];
+
+            desc += `## ${mapData.mapName} - ${mapData.creatorCode}\n`
+            desc += `Code: [${mapData.mapCode}](https://fchq.io/map/${mapData.mapCode})\n`
+            desc += `Type: ${mapData.type}\n`
+            desc += `Players: ${mapData.playerCount}\n`
+            desc += `Tested Before: ${mapData.testedBefore.toLowerCase() == true ? 'Yes' : 'No'}\n`
+            desc += `Previous Feedback: `
+
+            if (mapData.feedback || mapData.previousFeedback) {
+                const pasteURL = await daalbot.api.pasteapi.createPaste(`Feedback: ${mapData.feedback}\nPrevious Feedback: ${mapData.previousFeedback}`)
+                desc += `[View](${pasteURL})\n\n`
+            } else {
+                desc += `None\n\n`
             }
-
-            let creatorPing = null;
-            if (map[0].includes('<@')) {
-                creatorPing = map[0].trim();
-                map.shift();
-            }
-
-            const mapCreator = map[0];
-            const mapName = map[1];
-            const mapCode = map[2];
-            const playerCount = map[3];
-            const testedBefore = map[4] === 'TRUE' ? 'Yes' : 'No';
-
-            desc += `## ${mapName} - ${mapCreator}\n`
-            desc += `Code: [${mapCode}](https://fchq.io/map/${mapCode})\n`
-            desc += `Players: ${playerCount}\n`
-            desc += `Tested Before: ${testedBefore}\n\n`
         })
 
         embed.setDescription(desc)

@@ -34,6 +34,10 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
 
         // Override process.env
         process.env = overridenProcessEnv;
+
+        // Hide client data
+        eventObjectOld.client = {};
+        eventObjectNew.client = {};
         
         if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     

@@ -12,7 +12,7 @@ client.on('interactionCreate', async interaction => {
             .setDescription(`You should not be seeing this as it is meant to be switched to the reason before you see it please DM <@900126154881646634> about this`)
             .setAuthor({
                 name: 'Vortex creative',
-                iconURL: 'https://pinymedia.web.app/VortexIcon.png'
+                iconURL: 'https://media.piny.dev/VortexIcon.png'
             })
             .setTimestamp()
             .setColor('#EF3D48');

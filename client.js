@@ -1,4 +1,4 @@
-const { Client, IntentsBitField } = require('discord.js');
+const { Client, IntentsBitField, Partials } = require('discord.js');
 
 const client = new Client({
     intents: [
@@ -9,7 +9,12 @@ const client = new Client({
         IntentsBitField.Flags.GuildMembers,
         IntentsBitField.Flags.GuildWebhooks,
         IntentsBitField.Flags.MessageContent,
-        IntentsBitField.Flags.GuildVoiceStates
+        IntentsBitField.Flags.GuildVoiceStates,
+        IntentsBitField.Flags.DirectMessages
+    ],
+
+    partials: [
+        Partials.Channel
     ]
 })
 

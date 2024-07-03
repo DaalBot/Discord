@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 client.on('messageCreate', async (msg) => {
+    if (msg.channel.type == Discord.ChannelType.DM) return; // Ignore DMs
     const channel = msg.channel;
     const content = msg.content;
     const author = msg.author;
@@ -43,7 +44,7 @@ client.on('messageCreate', async (msg) => {
                 .setColor('#9B5AB4')
                 .setFooter({
                     text: 'DaalBot',
-                    iconURL: 'https://pinymedia.web.app/DaalbotCircle.png'
+                    iconURL: 'https://media.piny.dev/DaalbotCircle.png'
                 })
                 .setTimestamp();
             
@@ -57,7 +58,7 @@ client.on('messageCreate', async (msg) => {
                 .setDescription(`Username: ${issueAuthorUser.username}
 ID: ${issueAuthorUser.id}`)
                 .setColor('#9B5AB4')
-                .setThumbnail(issueAuthorUser.avatarURL() == null ? 'https://pinymedia.web.app/DaalbotCircle.png' : issueAuthorUser.avatarURL())
+                .setThumbnail(issueAuthorUser.avatarURL() == null ? 'https://media.piny.dev/DaalbotCircle.png' : issueAuthorUser.avatarURL())
                 .setTimestamp();
 
             await msg.channel.send({

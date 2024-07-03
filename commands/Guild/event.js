@@ -62,6 +62,18 @@ const eventTypes = [
     {
         name: 'Guild Role Remove',
         value: 'guildRoleRemove'
+    },
+    {
+        name: 'Message Reaction Add',
+        value: 'messageReactionAdd'
+    },
+    {
+        name: 'Message Reaction Remove',
+        value: 'messageReactionAdd'
+    },
+    {
+        name: 'Interaction Create',
+        value: 'interactionCreate'
     }
 ]
 
@@ -238,7 +250,7 @@ module.exports = {
                 fs.writeFileSync(path.resolve(`./db/events/events.json`), JSON.stringify(eventsJSON, null, 4))
 
                 interaction.editReply({
-                    content: `Event created. To edit the code for the event click [here](https://daalbot.xyz/Dashboard/${interaction.guild.id}/events/edit?id=${eventId}).`,
+                    content: `Event created. To edit the code for the event click [here](https://daalbot.xyz/Dashboard/Guild/${interaction.guild.id}/feature/guild/events/edit?id=${eventId}).`,
                     embeds: [embed],
                     ephemeral: true
                 })

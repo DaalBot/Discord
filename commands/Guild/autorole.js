@@ -149,7 +149,7 @@ module.exports = {
                 } else {
                     let roles = [];
                     files.forEach(file => {
-                        roles.push(`<@&${file.replace('.id', '')}>`);
+                        roles.push(`<@&${file.replace('.id', '')}> (${file.replace('.id', '')})`);
                     });
                     let rolesString = '';
                     roles.forEach(role => {

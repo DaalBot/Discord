@@ -227,7 +227,7 @@ module.exports = {
                     const embed = new Discord.EmbedBuilder()
                         .setTitle('Ticket Closed')
                         .setDescription(`Ticket ${ticket.name.replace('ticket-', '')} was closed by ${interaction.user.tag}.`)
-                        .setThumbnail('https://pinymedia.web.app/daalbot/embed/thumbnail/logs/Ticket.png')
+                        .setThumbnail('https://media.piny.dev/daalbot/embed/thumbnail/logs/Ticket.png')
                         .setColor('#EF3D48')
                         .setTimestamp();
 

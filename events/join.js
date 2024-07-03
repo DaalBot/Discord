@@ -8,7 +8,7 @@ client.on('guildMemberAdd', (member) => {
     const autorole_dbFolder = path.resolve(`./db/autorole/${member.guild.id}`);
     const welcomeData = path.resolve(`./db/welcome/${member.guild.id}.json`);
 
-    if (fs.existsSync(`${welcomeData}`)) {
+    if (fs.existsSync(`${welcomeData}`) && !member.user.bot) {
         const welcome = JSON.parse(fs.readFileSync(`${welcomeData}`, 'utf8'));
         const channel = daalbot.getChannel(member.guild.id, welcome.channel);
 

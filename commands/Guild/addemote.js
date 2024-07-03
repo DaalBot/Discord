@@ -33,7 +33,7 @@ module.exports = {
      * @param {DJS.Interaction} interaction 
      * @returns 
      */
-    callback: async (interaction) => {
+    callback: async ({interaction}) => {
         let emoteText = interaction.options.getString('emote').trim();
 
         let emoteArray = emoteText.split(' ');

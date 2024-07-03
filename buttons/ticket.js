@@ -44,7 +44,7 @@ client.on('interactionCreate', async (interaction) => {
                     const embed = new Discord.EmbedBuilder()
                         .setTitle('Ticket Created')
                         .setDescription(`User: ${interaction.user.tag}\nID: ${interaction.user.id}`)
-                        .setThumbnail('https://pinymedia.web.app/daalbot/embed/thumbnail/logs/Ticket.png')
+                        .setThumbnail('https://media.piny.dev/daalbot/embed/thumbnail/logs/Ticket.png')
                         .setColor('#57F28D')
                         .setTimestamp()
 

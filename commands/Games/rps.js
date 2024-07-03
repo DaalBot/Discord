@@ -26,7 +26,7 @@ function getRandomInt(max) {
           },
      ],
 
-     callback: ( interaction ) => {
+     callback: ({ interaction }) => {
         const cpuP = getRandomInt(3) // Returns a random number from 0 => 3
         const move = interaction.options.getString('move') // Gets the users move from the options
 
