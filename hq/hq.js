@@ -125,7 +125,11 @@ client.on('messageCreate', msg => {
             // Triggers when a commit alert is sent by the webhook
             const data = msg.content.split(';;[COMMITBOUND];;')
             const commitEmbed = new EmbedBuilder()
-                .setTitle(`New commit by ${data[0]} to ${data[2]}`)
+                .setAuthor({
+                    name: `${data[0]}`,
+                    iconURL: `https://github.com/${data[0]}.png` // Github pfp redirect (e.g. /NotPiny.png -> avatars.githubusercontent.com/u/...)
+                })
+                .setTitle(`New commit on ${data[2]}`)
                 .setDescription(data[1])
                 .setURL(data[3].replace(/commit/g, ' TRUE ').includes('TRUE') ? `${data[3]}` : `https://github.com/${data[2]}`)
 
@@ -135,14 +139,6 @@ client.on('messageCreate', msg => {
             msg.channel.send('<@&1016344487867457597>')
         } else if (msg.channel.id == '1003822202413662248' || msg.channel.id == '1118225367572951131') {
             msg.crosspost(); // Publish the message when it is sent in announcements
-        }
-
-        if (msg.content.toLowerCase().startsWith('$sendmsg') && msg.author.id === '900126154881646634') {
-            const messageJson = JSON.parse(msg.content.replace(/\$sendmsg /g, '').replace(/['`]/g, '"').replace('{{DB_PURPLE}}', '10167465'));
-
-            msg.delete();
-
-            msg.channel.send(messageJson);
         }
     } else {
         return;
