@@ -123,7 +123,7 @@ client.on('messageCreate', msg => {
     if (msg.guild.id === '1001929445478781030') {
         if (msg.author.bot && msg.author.id == '1052298562458898462') {
             // Triggers when a commit alert is sent by the webhook
-            const data = msg.content.split(':')
+            const data = msg.content.split(';;[COMMITBOUND];;')
             const commitEmbed = new EmbedBuilder()
                 .setTitle(`New commit by ${data[0]} to ${data[2]}`)
                 .setDescription(data[1])
