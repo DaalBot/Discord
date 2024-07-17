@@ -9,7 +9,7 @@ client.on('messageCreate', msg => {
     if (msg.channel.type == DJS.ChannelType.DM) return; // Ignore DMs
     if (msg.author.bot) return;
     if (msg.content.startsWith(['!', '$', '.'])) return;
-    const XPamount = Math.floor(Math.random() * 10) + 1;
+    const XPamount = msg.guild.id == config.servers.vortex.id ? 10 : Math.floor(Math.random() * 10) + 1;
     
     const GuildXpFolder = path.resolve(`./db/xp/${msg.guild.id}`);
     const MemberXpFile = path.resolve(`./db/xp/${msg.guild.id}/${msg.author.id}.xp`);

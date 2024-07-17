@@ -24,8 +24,6 @@ client.on('messageCreate', async message => {
             iconURL: `https://media.piny.dev/FCHQ.png`
         })
 
-        let desc = '';
-
         /**
          * @type {string[][]}
          */
@@ -38,6 +36,9 @@ client.on('messageCreate', async message => {
         })
 
         data = data.map(row => row.split('    '));
+
+        let mapsProcessed = 0;
+        const mapStrings = [];
 
         data.forEach(async(map) => {
             /**
@@ -70,28 +71,35 @@ client.on('messageCreate', async message => {
             mapData.feedback = map[9];
             mapData.previousFeedback = map[10];
 
-            desc += `## ${mapData.mapName} - ${mapData.creatorCode}\n`
-            desc += `Code: [${mapData.mapCode}](https://fchq.io/map/${mapData.mapCode})\n`
-            desc += `Type: ${mapData.type}\n`
-            desc += `Players: ${mapData.playerCount}\n`
-            desc += `Tested Before: ${mapData.testedBefore.toLowerCase() == true ? 'Yes' : 'No'}\n`
-            desc += `Previous Feedback: `
+            let output = '';
+
+            output += `## ${mapData.mapName} - ${mapData.creatorCode}\n`
+            output += `Code: [${mapData.mapCode}](https://fchq.io/map/${mapData.mapCode})\n`
+            output += `Type: ${mapData.type}\n`
+            output += `Players: ${mapData.playerCount}\n`
+            output += `Tested Before: ${`${mapData.testedBefore}`.toLowerCase() == true ? 'Yes' : 'No'}\n`
+            output += `Previous Feedback: `
 
             if (mapData.feedback || mapData.previousFeedback) {
-                const pasteURL = await daalbot.api.pasteapi.createPaste(`Feedback: ${mapData.feedback}\nPrevious Feedback: ${mapData.previousFeedback}`)
-                desc += `[View](${pasteURL})\n\n`
+                const pasteURL = await daalbot.api.pasteapi.createPaste(`${mapData.previousFeedback}`)
+                output += `[View](${pasteURL}&raw=1)`
             } else {
-                desc += `None\n\n`
+                output += `None`
+            }
+
+            mapsProcessed++;
+            mapStrings.push(output);
+
+            if (mapsProcessed == data.length) {
+                embed.setDescription(mapStrings.join('\n\n'));
+
+                message.channel.send({
+                    content: `<@&1015702175361540147>`,
+                    embeds: [embed]
+                })
+
+                message.delete();
             }
         })
-
-        embed.setDescription(desc)
-
-        message.channel.send({
-            content: `<@&1015702175361540147>`,
-            embeds: [embed]
-        })
-
-        message.delete();
     }
 })

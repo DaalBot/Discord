@@ -582,7 +582,7 @@ async function pasteapi_create_paste(string) {
         const response = await netcat('termbin.com', 9999, string);
 
         const data = {
-            termbin: response,
+            termbin: response.replace('https://termbin.com/', ''), // Just get the id
             ts: Date.now()
         }
 
@@ -773,7 +773,8 @@ const colours = {
 
 const emojis = {
     '973711816226136095': {
-        coin: '<:VortexCoin:1245731439857766460>',
+        coin: '<:VTXCoin:1261812231327318058>',
+        xp: '<:VTXXP:1261807723255955516>'
     },
     coin: '<:Coin:1247554973512896533>',
     xp: '<:XP:1245805234115313747>'

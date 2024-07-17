@@ -133,7 +133,7 @@ module.exports = {
                     .setFields([
                         {
                             name: 'Rewards',
-                            value: `${daalbot.emojis.xp} +${addedXP}`,
+                            value: `${daalbot.emojis.get('xp', interaction.guild.id)} +${addedXP}`,
                             inline: true
                         },
                         {
