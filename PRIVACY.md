@@ -1,4 +1,5 @@
 # Privacy Policy
+Github users: If you are viewing this file on github it may be slightly out of date please consider visiting [this page](https://daalbot.xyz/Legal/Privacy) for a up to date version.
 ## What we store
 By default, DaalBot does not store any data with the exception of data that is needed for the bot to function. This data is stored in a database and is only accessible by the bot owner.
 

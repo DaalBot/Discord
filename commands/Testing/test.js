@@ -60,19 +60,20 @@ module.exports = {
     /**
      * @param {{ interaction: DJS.ChatInputCommandInteraction }} param0
      */
-    callback: async({interaction}) => {
+    callback: ({interaction}) => {
         try {
-            interaction.deferReply({
-                ephemeral: true
-            })
-            const string = interaction.options.getString('string');
-            const res = JSON.stringify(daalbot.client.guilds.cache.get(string), null, 4);
+            // interaction.deferReply({
+            //     ephemeral: true
+            // })
 
-            const pasteapiLink = await daalbot.api.pasteapi.createPaste(res);
-            interaction.editReply({
-                content: `${pasteapiLink}`,
-                ephemeral: true
-            })
+            // const string = interaction.options.getString('string');
+            // const res = JSON.stringify(daalbot.client.guilds.cache.get(string), null, 4);
+
+            // const pasteapiLink = await daalbot.api.pasteapi.createPaste(res);
+            // interaction.editReply({
+            //     content: `${pasteapiLink}`,
+            //     ephemeral: true
+            // })
             // const url = await daalbot.api.pasteapi.createPaste(string);
 
             // interaction.reply({
