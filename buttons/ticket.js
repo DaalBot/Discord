@@ -1,4 +1,3 @@
-const { send } = require('process');
 const client = require('../client.js');
 const config = require('../config.json');
 const daalbot = require('../daalbot.js');

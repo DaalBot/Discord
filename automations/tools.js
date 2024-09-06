@@ -4,6 +4,7 @@ const DJS = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const daalbot = require('../daalbot.js');
+const csvman = require('@npiny/csvman');
 const client = require('../client.js');
 
 let checkSecurityRules = require('./sec.pub.js'); // Self hosted bot checks
@@ -68,21 +69,21 @@ const exportClass = new class {
     getUtils() {
         return {
             // Utils
-            webhooks: {
-                /**
-                 * @param {{ url: string, data: string }} param0
-                */
-                send: ({ url, data }) => {
-                    // Send webhook
-                    axios.post(url, data)
-                        .then(response => {
-                            return {response}
-                        })
-                        .catch(error => {
-                            return {error}
-                        })
-                }
-            },
+            // webhooks: {
+            //     /**
+            //      * @param {{ url: string, data: string }} param0
+            //     */
+            //     send: ({ url, data }) => {
+            //         // Send webhook
+            //         axios.post(url, data)
+            //             .then(response => {
+            //                 return {response}
+            //             })
+            //             .catch(error => {
+            //                 return {error}
+            //             })
+            //     }
+            // },
         
             // Variables
             variables: {
@@ -119,8 +120,8 @@ const exportClass = new class {
             // Libaries
             libaries: {
                 axios,
-                discord: DJS,
                 crypto,
+                csvman
             }
         };
     }

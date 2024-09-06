@@ -41,6 +41,7 @@ client.on('channelUpdate', async (oldChannel, newChannel) => {
         fs.writeFileSync(path.resolve(cooldownPath), 'true');
         setTimeout(() => fs.writeFileSync(path.resolve(cooldownPath), 'false'), 1000);
     } else {
+        if (!fs.existsSync(path.resolve(`./db/logging/${guildId}`))) fs.mkdirSync(path.resolve(`./db/logging/${guildId}`), { recursive: true });
         fs.appendFileSync(path.resolve(cooldownPath), 'true');
         setTimeout(() => fs.writeFileSync(path.resolve(cooldownPath), 'false'), 1000);
     }

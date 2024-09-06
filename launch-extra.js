@@ -7,6 +7,7 @@ require('./custom/launch.js');
 require('./automod/automod.js');
 require('./vortex/vortex.js');
 require('./buttons/ticket.js');
+require('./buttons/selfrole.js');
 require('./logging/load.js');
 require('./db-setup.js');
 require('./events/join.js');
@@ -53,3 +54,7 @@ require('./listings/top.gg.js');
 
 // Modmail
 require('./modmail/dm.js');
+
+// Tickets (V2)
+require('./tickets/button.js');
+require('./tickets/message.js');

@@ -11,10 +11,6 @@ const client = new Client({
         IntentsBitField.Flags.MessageContent,
         IntentsBitField.Flags.GuildVoiceStates,
         IntentsBitField.Flags.DirectMessages
-    ],
-
-    partials: [
-        Partials.Channel
     ]
 })
 

@@ -19,422 +19,240 @@ module.exports = {
 
     options: [
         {
-            name: 'send',
-            description: 'Send a ticket panel to a channel.',
-            type: Discord.ApplicationCommandOptionType.Subcommand,
+            name: 'panel',
+            description: 'Settings related to the ticket panel.',
+            type: Discord.ApplicationCommandOptionType.SubcommandGroup,
             options: [
                 {
-                    name: 'channel',
-                    description: 'The channel to send the ticket panel to.',
-                    type: Discord.ApplicationCommandOptionType.Channel,
-                    channel_types: [Discord.ChannelType.GuildText],
-                    required: true
-                },
-                {
-                    name: 'title',
-                    description: 'The title of the ticket panel.',
-                    type: Discord.ApplicationCommandOptionType.String,
-                    required: true
-                },
-                {
-                    name: 'colour',
-                    description: 'The colour of the ticket panel. (Hex)',
-                    type: Discord.ApplicationCommandOptionType.String,
-                    required: true
-                },
-                {
-                    name: 'message-id',
-                    description: 'If used, the bot will edit the message instead of sending a new one.',
-                    type: Discord.ApplicationCommandOptionType.String,
-                    required: false
-                }
-            ]
-        },
-        {
-            name: 'close',
-            description: 'Close a ticket.',
-            type: Discord.ApplicationCommandOptionType.Subcommand,
-            options: [
-                {
-                    name: 'ticket',
-                    description: 'The ticket to close.',
-                    type: Discord.ApplicationCommandOptionType.Channel,
-                    required: false
-                },
-                {
-                    name: 'transcript',
-                    description: 'Whether or not to send the transcript of the ticket.',
-                    type: Discord.ApplicationCommandOptionType.Boolean,
-                    required: false
-                }
-            ]
-        },
-        {
-            name: 'category',
-            description: 'Set the category for tickets.',
-            type: Discord.ApplicationCommandOptionType.Subcommand,
-            options: [
-                {
-                    name: 'category',
-                    description: 'The category to set.',
-                    type: Discord.ApplicationCommandOptionType.Channel,
-                    required: true
-                }
-            ]
-        },
-        {
-            name: 'permissions',
-            description: 'Modifies the permissions for the ticket channels.',
-            type: Discord.ApplicationCommandOptionType.Subcommand,
-            options: [
-                {
-                    name: 'role',
-                    description: 'The role to modify the permissions for.',
-                    type: Discord.ApplicationCommandOptionType.Role,
-                    required: true
-                },
-                {
-                    name: 'allow',
-                    description: 'Whether to allow or deny the role to see the tickets.',
-                    type: Discord.ApplicationCommandOptionType.Boolean,
-                }
-            ]
-        },
-        {
-            name: 'blacklist',
-            description: 'Blacklist a user from creating tickets.',
-            type: Discord.ApplicationCommandOptionType.Subcommand,
-            options: [
-                {
-                    name: Discord.ApplicationCommandOptionType.User,
-                    description: 'The user to blacklist / unblacklist.',
-                    type: Discord.ApplicationCommandOptionType.User,
-                    required: true
-                },
-                {
-                    name: 'action',
-                    description: 'Whether to blacklist or unblacklist the user.',
-                    type: Discord.ApplicationCommandOptionType.String,
-                    required: true,
-                    choices: [
+                    name: 'create',
+                    description: 'Create a ticket panel.',
+                    type: Discord.ApplicationCommandOptionType.Subcommand,
+                    options: [
                         {
-                            name: 'add',
-                            value: 'add'
+                            name: 'channel',
+                            description: 'The channel to create the ticket panel in.',
+                            type: Discord.ApplicationCommandOptionType.Channel,
+                            channel_types: [Discord.ChannelType.GuildText],
+                            required: true
                         },
                         {
-                            name: 'has',
-                            value: 'has'
+                            name: 'channel-name',
+                            description: 'Ticket channel name. Use `%%{ticketCount}%%` to add the ticket number.',
+                            type: Discord.ApplicationCommandOptionType.String,
+                            required: false // Can be null and will default to `ticket-%%{ticketCount}%%`
                         },
                         {
-                            name: 'remove',
-                            value: 'remove'
+                            name: 'category',
+                            description: 'The category for the ticket channels to be created in.',
+                            type: Discord.ApplicationCommandOptionType.Channel,
+                            channel_types: [Discord.ChannelType.GuildCategory],
+                            required: false // Can be null and will default to none
                         }
                     ]
-                },
-                {
-                    name: 'reason',
-                    description: 'The reason for blacklisting / unblacklisting the user.',
-                    type: Discord.ApplicationCommandOptionType.String,
-                    required: false
                 }
             ]
-        },
-        {
-            name: 'purge',
-            description: 'Purge all tickets.',
-            type: Discord.ApplicationCommandOptionType.Subcommand
         }
     ],
 
-    callback: ({ interaction }) => {
+    /**
+     * @param {{ interaction: Discord.ChatInputCommandInteraction }} param0
+     */
+    callback: async({ interaction }) => {
         const subCommand = interaction.options.getSubcommand();
+        const subCommandGroup = interaction.options.getSubcommandGroup();
 
-        if (subCommand === 'send') {
-            const channel = interaction.options.getChannel('channel');
-            const title = interaction.options.getString('title');
-            const colour = interaction.options.getString('colour');
-            const messageId = interaction.options.getString('message-id');
+        if (subCommandGroup === 'panel') {
+            if (subCommand === 'create') {
+                const channel = interaction.options.getChannel('channel');
+                const channelName = interaction.options.getString('channel-name') || null;
+                const category = interaction.options.getChannel('category') || null;
 
-            const embed = new Discord.EmbedBuilder()
-                .setTitle(title)
-                .setDescription('Click the button below to create a ticket.')
-                .setColor(colour);
+                const panelId = (await daalbot.items.generateId(6)).replace('-', '#');
 
-            const row = new Discord.ActionRowBuilder()
-                .addComponents(
-                    new Discord.ButtonBuilder()
-                        .setCustomId('create_ticket')
-                        .setLabel('Create Ticket')
-                        .setStyle(Discord.ButtonStyle.Success)
-                );
-
-            if (messageId == null) {
-                channel?.send({ embeds: [embed], components: [row] });
-            } else {
-                daalbot.getMessageFromString(messageId, channel).then((message) => {
-                    message.edit({ components: [row] });
-                });
-            }
-
-            return messageId == null ? 'Successfully sent the ticket panel.' : 'Successfully added a button to the message.';
-        }
-
-        if (subCommand === 'category') {
-            const category = interaction.options.getChannel('category');
-
-            if (category.type !== Discord.ChannelType.GuildCategory) {
-                return 'That is not a category.';
-            }
-
-            const guild = interaction.guild;
-
-            try {
-            if (fs.existsSync(`${config.botPath}/db/tickets/${guild.id}.category`)) {
-                fs.writeFileSync(`${config.botPath}/db/tickets/${guild.id}.category`, category.id);
-            } else {
-                fs.appendFileSync(`${config.botPath}/db/tickets/${guild.id}.category`, category.id);
-            }
-        } catch (err) {
-            console.error('Error writing to file: ' + err);
-        }
-
-            return 'Successfully set the category for tickets.';
-        }
-
-        if (subCommand === 'close') {
-            let ticket = interaction.options.getChannel('ticket');
-            let transcript = interaction.options.getBoolean('transcript');
-
-            if (ticket == null) {
-                ticket = interaction.channel;
-            }
-
-            if (transcript == null) {
-                transcript = false;
-            }
-
-            if (!ticket.name.startsWith('ticket-') && !ticket.name.startsWith('closed-')) return 'That is not a ticket.';
-
-            if (fs.existsSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '').replace('closed-', '')}.ticket`))) {
-                fs.unlinkSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '').replace('closed-', '')}.ticket`));
-                ticket.delete();
-
-                // Log the ticket closing if enabled.
-                if (fs.existsSync(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCLOSE.enabled`))) {
-                    if (!fs.existsSync(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`))) return 'We were unable to find a log channel to send the close message to.';
-                    const logChannel = daalbot.getChannel(interaction.guild.id, fs.readFileSync(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`), 'utf8'));
-
-                    const embed = new Discord.EmbedBuilder()
-                        .setTitle('Ticket Closed')
-                        .setDescription(`Ticket ${ticket.name.replace('ticket-', '')} was closed by ${interaction.user.tag}.`)
-                        .setThumbnail('https://media.piny.dev/daalbot/embed/thumbnail/logs/Ticket.png')
-                        .setColor('#EF3D48')
-                        .setTimestamp();
-
-                    logChannel.send({ content: 'Ticket Closed.', embeds: [embed] });
+                let panelSettings = {
+                    message: null,
+                    channelName,
+                    category: category ? category.id : null
                 }
 
-                // Sends transcript if enabled
-                if (transcript) {
-                    // Basic fs.existsSync checks to make sure the transcript can be sent.
-                    if (fs.existsSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '')}.txt`))) {
-                        if (!fs.existsSync(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`))) return 'We were unable to find a log channel to send the transcript to.';
-                        if (!fs.existsSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '')}.txt`))) return 'We were unable to find a transcript to send.';
+                const panelRow = new Discord.ActionRowBuilder()
+                const createBtn = new Discord.ButtonBuilder()
+                    .setCustomId(`ticket_v2-create-${panelId}`)
+                    .setLabel('Create Ticket')
+                    .setStyle(Discord.ButtonStyle.Primary) // Primary
 
-                        // Fetches the log channel and sends the transcript.
-                        const logChannelID = fs.readFileSync(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`), 'utf8');
+                panelRow.addComponents(createBtn)
 
-                        const logChannel = daalbot.getChannel(interaction.guild.id, logChannelID);
+                const row = new Discord.ActionRowBuilder()
+                const basic = new Discord.ButtonBuilder()
+                    .setCustomId(`ticket_panel_creation_basic`)
+                    .setLabel('Basic')
+                    .setStyle(Discord.ButtonStyle.Success) // Success is green
+                const advanced = new Discord.ButtonBuilder()
+                    .setCustomId(`ticket_panel_creation_advanced`)
+                    .setLabel('Advanced')
+                    .setStyle(Discord.ButtonStyle.Danger) // Danger is red
 
-                        logChannel.send({
-                            content: `Transcript for ticket #${ticket.name.replace('ticket-', '')}`,
-                            files: [path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '')}.txt`)]
-                        });
-
-                        // Tells the user that the transcript was sent.
-                        interaction.reply({
-                            content: `Ticket closed. Transcript sent to <#${logChannelID}>`,
-                            ephemeral: true
-                        })
-
-                        // Deletes the transcript but with a delay to make sure the file still exists when it gets sent to the log channel.
-                        setTimeout(() => {
-                            fs.unlinkSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '')}.ticket`));
-                            fs.unlinkSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '')}.txt`));
-                        }, 2500);
-                    }
-                } else {
-                    interaction.reply({
-                        content: 'Ticket closed.',
-                        ephemeral: true
+                await interaction.reply({
+                    content: `Let's create a ticket panel in ${channel}.`,
+                    components: [
+                        row.addComponents(basic, advanced)
+                    ],
+                    ephemeral: true
+                })
+                const filter = i => i.user.id === interaction.user.id && i.customId.startsWith('ticket_panel_creation_');
+                
+                try {
+                    const btnInt = await interaction.channel.awaitMessageComponent({
+                        filter,
+                        time: 60 * 1000,
+                        errors: ['time']
                     });
 
-                    if (!fs.existsSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '')}.txt`))) {
-                        console.error('No transcript found.');
-                    } else {
-                        fs.unlinkSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticket.name.replace('ticket-', '')}.txt`));
-                    }
-                }
-            } else {
-                return 'We could not find that ticket in the database.';
-            }
-        }
+                    const mode = btnInt.customId.split('_')[3];
 
-        if (subCommand === 'permissions') {
-            // return 'Disabled for now.';
-            const role = interaction.options.getRole('role');
-            const allow = interaction.options.getBoolean('allow');
+                    if (mode === 'basic') {
+                        // Basic mode
+                        const row2 = new Discord.ActionRowBuilder()
+                        const defaultBtn = new Discord.ButtonBuilder()
+                            .setCustomId(`ticket_defaults`)
+                            .setLabel('Defaults')
+                            .setStyle(Discord.ButtonStyle.Primary) // Primary is grey
 
-            const guild = interaction.guild;
-            const guildId = guild.id;
-
-            const folder = path.resolve(`./db/tickets/`);
-
-            if (fs.existsSync(`${folder}/${guildId}.permissions`)) {
-                const permissions = fs.readFileSync(`${folder}/${guildId}.permissions`, 'utf8').split('\n');
-                let newPerms = [];
-                let found = false;
-
-                for (let i = 0; i < permissions.length; i++) {
-                    const data = permissions[i].split(':');
-
-                    if (data[0] === role.id) {
-                        found = true;
-                        if (allow) {
-                            newPerms.push(`${role.id}:allow`);
-                        } else {
-                            newPerms.push(`${role.id}:deny`);
-                        }
-                    } else {
-                        if (permissions[i] == '') continue;
-                        newPerms.push(permissions[i]);
-                    }
-
-                    if (i === permissions.length - 1 && !found) {
-                        if (allow) {
-                            newPerms.push(`${role.id}:allow`);
-                        } else {
-                            newPerms.push(`${role.id}:deny`);
-                        }
-                    }
-                }
-
-                // Reset the file
-                fs.writeFileSync(`${folder}/${guildId}.permissions`, '');
-
-                newPerms.forEach(perm => {
-                    if (perm == '') return;
-                    fs.appendFileSync(`${folder}/${guildId}.permissions`, `${perm}\n`);
-                })
-                return 'Successfully updated the permissions.';
-            } else {
-                fs.appendFileSync(`${folder}/${guildId}.permissions`, `${role.id}:allow`);
-                return 'Successfully updated the permissions.';
-            }
-        }
-
-        if (subCommand === 'blacklist') {
-            const user = interaction.options.getUser('user');
-            const reason = interaction.options.getString('reason');
-            const action = interaction.options.getString('action');
-
-            const guild = interaction.guild;
-
-            const file = path.resolve(`./db/tickets/${guild.id}/blacklist/${user.id}.txt`);
-
-            if (action === 'add') {
-                if (fs.existsSync(file)) {
-                    interaction.reply({
-                        content: `<@${user.id}> is already blacklisted from creating tickets.`,
-                        ephemeral: true
-                    })
-                } else {
-                    if (fs.existsSync(path.resolve(`./db/tickets/${guild.id}/blacklist`))) {
-                        fs.appendFileSync(file, `${interaction.user.id}:${reason != null ? reason : 'No reason provided.'}`);
-                    } else {
-                        fs.mkdirSync(path.resolve(`./db/tickets/${guild.id}/blacklist`));
-                        fs.appendFileSync(file, `${interaction.user.id}:${reason != null ? reason : 'No reason provided.'}`);
-                    }
-
-                    interaction.reply({
-                        content: `<@${user.id}> has been blacklisted from creating tickets.`,
-                        ephemeral: true
-                    })
-                }
-            }
-
-            if (action === 'has') {
-                if (fs.existsSync(file)) {
-                    const embed = new Discord.EmbedBuilder()
-                        .setTitle('Ticket Blacklist')
-                        .addFields({
-                            name: 'User',
-                            value: `<@${user.id}>`,
-                        },
-                        {
-                            name: 'Reason',
-                            value: fs.readFileSync(file, 'utf8').split(':')[1]
-                        },
-                        {
-                            name: 'Blacklisted By',
-                            value: `<@${fs.readFileSync(file, 'utf8').split(':')[0]}>`
+                        const custom = new Discord.ButtonBuilder()
+                            .setCustomId(`ticket_custom`)
+                            .setLabel('Custom')
+                            .setStyle(Discord.ButtonStyle.Secondary) // Secondary is grey
+                            
+                        await interaction.editReply({
+                            content: `Do you want to customize the embed or go with the defaults?`,
+                            components: [
+                                row2.addComponents(defaultBtn, custom)
+                            ]
                         })
 
-                    interaction.reply({
-                        content: `<@${user.id}> is blacklisted from creating tickets.`,
-                        embeds: [embed],
-                        ephemeral: true
-                    })
-                } else {
-                    interaction.reply({
-                        content: `<@${user.id}> is not blacklisted from creating tickets.`,
-                        ephemeral: true
+                        const filter2 = i => i.user.id === interaction.user.id && i.customId.startsWith('ticket_');
+                        const embedModeInt = await interaction.channel.awaitMessageComponent({
+                            filter2,
+                            time: 60 * 1000,
+                            errors: ['time']
+                        });
+
+                        const embedMode = embedModeInt.customId.split('_')[1];
+
+                        if (embedMode == 'defaults') {
+                            // Defaults
+                            const embed = new Discord.EmbedBuilder()
+                                .setTitle('Create a ticket')
+                                .setDescription('Click the button below to create a ticket.')
+                                .setFooter({
+                                    text: `Panel ID: ${panelId}`
+                                })
+
+                            const panelMessage = await channel.send({
+                                embeds: [embed],
+                                components: [panelRow]
+                            })
+
+                            panelSettings.message = panelMessage.id;
+
+                            await interaction.editReply({
+                                content: `Panel created with ID \`${panelId}\``,
+                                components: []
+                            })
+                        }
+
+                        if (embedMode == 'custom') {
+                            // Custom
+                            await interaction.editReply({
+                                content: `Please enter the title of the embed.`,
+                                components: []
+                            })
+                            const filterUser = m => m.author.id === interaction.user.id;
+
+                            const titleMsg = await interaction.channel.awaitMessages({
+                                filterUser,
+                                time: 60 * 1000,
+                                errors: ['time'],
+                                max: 1
+                            });
+
+                            const title = titleMsg.first().content;
+
+                            await interaction.editReply({
+                                content: `Please enter the description of the embed.`,
+                                components: []
+                            })
+
+                            const descriptionMsg = await interaction.channel.awaitMessages({
+                                filterUser,
+                                time: 60 * 1000,
+                                errors: ['time'],
+                                max: 1
+                            });
+
+                            const description = descriptionMsg.first().content;
+
+                            const embed = new Discord.EmbedBuilder()
+                                .setTitle(title)
+                                .setDescription(description)
+                                .setFooter({
+                                    text: `Panel ID: ${panelId}`
+                                })
+
+                            const panelMessage = await channel.send({
+                                embeds: [embed],
+                                components: [panelRow]
+                            })
+
+                            panelSettings.message = panelMessage.id;
+
+                            await interaction.editReply({
+                                content: `Panel created with ID \`${panelId}\``,
+                                components: []
+                            })
+                        }
+                    }
+
+                    if (mode === 'advanced') {
+                        // Advanced mode
+                        await interaction.editReply({
+                            content: `Please enter the message payload for the panel message. (You can use our [embed builder](<https://daalbot.xyz/html/embedbuilder/index.html>) and copy the JSON)`,
+                            components: []
+                        })
+
+                        const filterUser = m => m.author.id === interaction.user.id;
+
+                        const messagePayloadMsg = await interaction.channel.awaitMessages({
+                            filterUser,
+                            time: 60 * 1000,
+                            errors: ['time'],
+                            max: 1
+                        });
+
+                        const messagePayload = messagePayloadMsg.first().content;
+
+                        const panelMessage = await channel.send({
+                            ...JSON.parse(messagePayload), // Add their message payload
+                            components: [panelRow] // Override components
+                        })
+
+                        panelSettings.message = panelMessage.id;
+
+                        await interaction.editReply({
+                            content: `Panel created with ID \`${panelId}\``,
+                            components: []
+                        })
+                    }
+
+                    await daalbot.db.managed.set(interaction.guild.id, `tickets/panel/${panelId}.json`, JSON.stringify(panelSettings));
+                } catch {
+                    await interaction.editReply({
+                        content: `Something went wrong. Did you take more than 60 seconds to respond?`,
+                        components: []
                     })
                 }
             }
-
-            if (action === 'remove') {
-                if (fs.existsSync(file)) {
-                    fs.unlinkSync(file);
-
-                    interaction.reply({
-                        content: `<@${user.id}> has been removed from the blacklist.`,
-                        ephemeral: true
-                    })
-                } else {
-                    interaction.reply({
-                        content: `<@${user.id}> is not blacklisted from creating tickets.`,
-                        ephemeral: true
-                    })
-                }
-            }
-        }
-
-        if (subCommand === 'purge') {
-            const row = new Discord.ActionRowBuilder()
-
-            const confirm = new Discord.ButtonBuilder()
-                .setCustomId('confirm-ticket-purge')
-                .setLabel('Confirm')
-                .setStyle(Discord.ButtonStyle.Success);
-
-            const cancel = new Discord.ButtonBuilder()
-                .setCustomId('cancel-ticket-purge')
-                .setLabel('Cancel')
-                .setStyle(Discord.ButtonStyle.Danger);
-
-            row.addComponents(confirm, cancel);
-
-            const embed = new Discord.EmbedBuilder()
-                .setTitle('Purge Tickets')
-                .setDescription('Are you sure you want to purge all tickets? This action cannot be undone.')
-                .setColor('#EF3D48');
-
-            interaction.reply({
-                embeds: [embed],
-                components: [row],
-                ephemeral: true
-            })
         }
     }
 }

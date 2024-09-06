@@ -1,10 +1,6 @@
 // Get message info
 const { EmbedBuilder, MessageContextMenuCommandInteraction } = require('discord.js');
-
-async function createPaste(content) {
-    // TODO: Add paste logic
-    return `https://daalbot.xyz/hooks/paste?pid=test&ex=${Date.now() + 2 * 7 * 24 * 60 * 60 * 1000}`;
-}
+const daalbot = require('../../../daalbot');
 
 /**
  * @param {MessageContextMenuCommandInteraction} interaction
@@ -32,7 +28,7 @@ module.exports = async (interaction) => {
             },
             {
                 name: `Raw`,
-                value: `[Click Here](${await createPaste()})`,
+                value: `[Click Here](${await daalbot.api.pasteapi.createPaste(JSON.stringify(message, null, 4))})`,
             }
         ])
 

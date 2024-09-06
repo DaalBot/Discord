@@ -48,7 +48,10 @@ module.exports = {
                 reason: `Webhook created by ${interaction.user.username} (${interaction.user.id})`
             })
 
-            await interaction.reply(`Webhook created with the name \`${webhook.name}\` in <#${channel.id}>.`);
+            await interaction.reply({
+                content: `Webhook created with the name \`${webhook.name}\` in <#${channel.id}>.`,
+                ephemeral: true
+            });
         }
     }
 }

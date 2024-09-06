@@ -18,7 +18,7 @@ General conditions regarding DaalBot are under this topic.<br/><br/>
 **2. We reserve the right to block or prohibit the use of services to any user / server found to be abusing them.**
 
 ### - Our definition of "Abuse"
-Any content that violates Discords Terms of Service / Community Guidelines, or Any kind of scams or content designed to mislead users.
+Any content that violates [Discords Terms of Service](https://discord.com/tos) / [Community Guidelines](https://discord.com/guidelines), or Any kind of scams or content designed to mislead users.
 
 ### - Means of Identification
 We may use your server ID, user ID, IP address, or any other means of indentification to track down users who are abusing our services.

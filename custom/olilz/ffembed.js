@@ -12,7 +12,7 @@ client.on('messageCreate', async message => {
     const command = message.content.toLowerCase().split(' ')[0].replace('$', '');
 
     if (command === 'ffembed') {
-        if (!message.member.roles.cache.has('1178297437123780668')) return message.reply('You do not have permission to use this command.');
+        if (!message.member.roles.cache.has('1178297437123780668')) return;
 
         const csvText = message.content.split(' ').slice(1).join(' ');
         const csvData = await csvman.tools.csvBuilder(csvText, '    ');

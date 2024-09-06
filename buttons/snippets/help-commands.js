@@ -10,7 +10,7 @@ module.exports = (interaction) => {
     const embed = new DJS.EmbedBuilder()
         .setTitle('Commands')
         .setDescription('Please select a category for the commands')
-        .setThumbnail('https://cdn.discordapp.com/emojis/1222659759908323520.png?v=1') // TODO: Change the URL to a higher quality export from figma
+        .setThumbnail('https://cdn.discordapp.com/emojis/1222659759908323520.png?v=1')
     
     const row = new DJS.ActionRowBuilder()
     const row2 = new DJS.ActionRowBuilder()
