@@ -25,19 +25,10 @@ We may use request data to enforce the terms of service. This may include but is
 This data is stored in a (*plain text*) database on api.daalbot.xyz and data from it is only accessible by the bot owner.
 
 #### What is stored
-We may need certain data to identify the server or user that is breaking the terms of service. This data may include but is not limited to:
-* Server ID [Hashed]
-* User ID [Hashed]
-* IP Address
-* Date and time of the request
-* User agent
-
-Reasons for storing this data may include but are not limited to:
-* Server ID - To identify anyone involved with a server that is breaking the terms of service however this can only be used to identify the users in the server and not the server itself from the user ID.
-* User ID - To identify the user that is breaking the terms of service. This value is hashed but can be used to identify the user across multiple servers.
-* IP Address - To identify the location of the user that is breaking the terms of service or to have a unique identifier for the user across multiple accounts.
-* Date and time of the request - To identify when the request was made.
-* User agent - To identify the device that the request was made from or if it was made by a automated system (Axios, cURL, etc.)
+We may store the following data:
+* User ID
+* Access Token / ID pairs [Hashed]
+* Previous dashboard related API requests (e.g. Modifying events) alongside your user ID
 
 ## Questions and removal
 If you have any questions about the privacy policy please or want your data removed please create a ticket in the [support server](https://lnk.daalbot.xyz/HQ) or contact the bot owner directly.

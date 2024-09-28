@@ -1,6 +1,7 @@
 const { ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder, ButtonStyle, ButtonBuilder, ActionRowBuilder } = require("discord.js");
 const fs = require('fs/promises');
 const path = require('path');
+const daalbot = require('../../daalbot.js');
 
 module.exports = {
     name: 'admin',
