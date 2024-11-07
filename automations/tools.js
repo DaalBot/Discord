@@ -121,7 +121,20 @@ const exportClass = new class {
             libaries: {
                 axios,
                 crypto,
-                csvman
+                csvman,
+                discord: {
+                    embed: DJS.EmbedBuilder,
+                    components: {
+                        row: DJS.ActionRowBuilder,
+                        button: DJS.ButtonBuilder,
+                        selectMenu: {
+                            string: {
+                                option: DJS.StringSelectMenuOptionBuilder,
+                                builder: DJS.StringSelectMenuBuilder
+                            }
+                        }
+                    }
+                }
             }
         };
     }

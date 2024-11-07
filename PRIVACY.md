@@ -33,5 +33,14 @@ We may store the following data:
 ## Questions and removal
 If you have any questions about the privacy policy please or want your data removed please create a ticket in the [support server](https://lnk.daalbot.xyz/HQ) or contact the bot owner directly.
 
+### Automatic removal
+There is currently no automatic removal system in place. If you want your data removed please follow the steps in the manual removal section below.
+
+### Manual removal
+To have your data removed please contact the bot owner directly or create a ticket in the [support server](https://lnk.daalbot.xyz/HQ). Please note that this process although should be quick to remove a majority of the data it may longer to remove all data.
+
+# Analytics & Statistics
+DaalBot may collect analytic data to either improve the services or to see how much traffic the bot is getting. This data is stored in a JSON database provided by [pantry](https://getpantry.cloud) that is governed by their privacy policy; however, this data doesnt contain identifiable information and may be used to provide anonymous statistics to the public. (e.g. Total servers, Messages processed, etc.)
+
 ## Changes
 DaalBot reserves the right to change the privacy policy at any time with or without notice. It is your responsibility to check this page for any changes. If you do not agree with the changes you may remove the bot from your server at any time.

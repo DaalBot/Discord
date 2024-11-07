@@ -370,6 +370,7 @@ async function createPermanentImgLink(url, checkHash = false) {
         return imageUrl;
     } catch (err) {
         console.error(err.response.data.error)
+        console.error(err.response)
         return 'https://media.piny.dev/Error.png'
     }
 }
