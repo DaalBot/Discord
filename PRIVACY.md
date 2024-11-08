@@ -39,6 +39,21 @@ There is currently no automatic removal system in place. If you want your data r
 ### Manual removal
 To have your data removed please contact the bot owner directly or create a ticket in the [support server](https://lnk.daalbot.xyz/HQ). Please note that this process although should be quick to remove a majority of the data it may longer to remove all data.
 
+## Data requests
+If you would like to request a copy of the data that is stored about you or your server you can create a ticket in the [support server](https://lnk.daalbot.xyz/HQ) or use our automated system by running `/data actions downloads` in your server.
+
+### Automated downloads
+Automated downloads is currently only available to find data about servers. Inside of this data package you will find the following (if applicable):
+* Event data (e.g. list of events and thier status, code, and variables) - "events/"
+* Server configuration (e.g. level up message channel) - "config/"
+* Autorole settings - "autorole/"
+* Logging settings - "logging/"
+* Managed data (other data that is managed by a helper function) - "managed/"
+* Tickets (transcripts and other ticket related data) - "tickets/"
+* Verification settings - "verify/"
+* Welcomer settings - "welcome/"
+* User XP and level rewards - "xp/"
+
 # Analytics & Statistics
 DaalBot may collect analytic data to either improve the services or to see how much traffic the bot is getting. This data is stored in a JSON database provided by [pantry](https://getpantry.cloud) that is governed by their privacy policy; however, this data doesnt contain identifiable information and may be used to provide anonymous statistics to the public. (e.g. Total servers, Messages processed, etc.)
 
