@@ -72,12 +72,36 @@ module.exports = {
                             required: true,
                             choices: [
                                 {
-                                    name: 'User (Data that includes your user id)',
+                                    name: 'User (Data that includes your user)',
                                     value: 'user'
                                 },
                                 {
-                                    name: 'Guild (Data that includes the current guild id)',
+                                    name: 'Server (Data that includes the current server)',
                                     value: 'guild'
+                                }
+                            ]
+                        },
+                        {
+                            name: 'delay',
+                            description: 'The delay before the data is deleted',
+                            type: ApplicationCommandOptionType.String,
+                            required: true,
+                            choices: [
+                                {
+                                    name: '1 Day',
+                                    value: `${(24 * 60 * 60 * 1000).toString()}`
+                                },
+                                {
+                                    name: '3 Days',
+                                    value: `${(3 * 24 * 60 * 60 * 1000).toString()}`
+                                },
+                                {
+                                    name: '1 Week',
+                                    value: `${(7 * 24 * 60 * 60 * 1000).toString()}`
+                                },
+                                {
+                                    name: '1 Month',
+                                    value: `${(30 * 24 * 60 * 60 * 1000).toString()}`
                                 }
                             ]
                         }
@@ -95,11 +119,11 @@ module.exports = {
                             required: true,
                             choices: [
                                 {
-                                    name: 'User (Data that includes your user id)',
+                                    name: 'User (Data that includes your user)',
                                     value: 'user'
                                 },
                                 {
-                                    name: 'Guild (Data that includes the current guild id)',
+                                    name: 'Server (Data that includes the current server)',
                                     value: 'guild'
                                 }
                             ]
@@ -134,28 +158,25 @@ module.exports = {
                 const type = interaction.options.getString('type');
 
                 if (type === 'guild') {
-                    // if (fs.existsSync(path.resolve(`./temp/${interaction.guild.id}.del`))) {
-                    //     return interaction.reply({ content: 'Deletion already scheduled.', ephemeral: true });
-                    // }
+                    if (fs.existsSync(path.resolve(`./temp/del/${interaction.guild.id}.json`))) {
+                        return interaction.reply({ content: 'Deletion already scheduled.', ephemeral: true });
+                    }
 
-                    // const embed = new EmbedBuilder()
-                    //     .setTitle('Deletion scheduled (TEST)')
-                    //     .setDescription(`Guild data for ${interaction.guild.name} will be deleted <t:${(Math.floor(Date.now() / 1000)) + 24 * 60 * 60}:R> unless you cancel it with \`/data actions cancel\``)
-                    //     .setFooter({
-                    //         text: 'All current data will be deleted, this will not affect any data that is added after the deletion is complete'
-                    //     })
-                    //     .setColor('Red');
+                    const delay = interaction.options.getString('delay');
+                    const delayNum = parseInt(delay);
 
-                    // interaction.reply({ embeds: [embed] });
+                    const deletionObj = {
+                        time: Date.now() + delayNum,
+                        reason: `Data Deletion Requested by ${interaction.user.tag} (${interaction.user.id})`,
+                        type: 'guild'
+                    };
 
-                    // fs.appendFileSync(path.resolve(`./temp/${interaction.guild.id}.del`), Math.floor(Date.now()) + 24 * 60 * 60 * 1000);
-
-                    // daalbot.timestampEvents.once(`${Math.floor(Date.now()) + 24 * 60 * 60 * 1000}`, () => {
-                    //     // Executes once the countdown is over
-                    //     if (fs.readFileSync(path.resolve(`./temp/${interaction.guild.id}.del`), 'utf8') === 'ABORTED') return; // If the deletion was aborted, don't delete the data
-
-                    //     // TODO
-                    // })
+                    await fsp.writeFile(path.resolve(`./temp/del/${interaction.guild.id}.json`), JSON.stringify(deletionObj, null, 4));
+                } else if (type === 'user') {
+                    return interaction.reply({
+                        content: `To request a data deletion, please create a support ticket in at [go.daalbot.xyz/HQ](https://discord.com/invite/mGacnqE7qk)`,
+                        ephemeral: true
+                    })
                 }
             }
 

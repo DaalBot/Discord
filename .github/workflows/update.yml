@@ -1,0 +1,17 @@
+name: update
+run-name: ${{ github.actor }}
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'test.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Send request
+      run: |
+        curl -X POST -H "Authorization: ${{ secrets.API_KEY }}" https://link.bot.daalbot.xyz/api/update

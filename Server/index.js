@@ -7,6 +7,7 @@ const app = express();
 const port = 8923;
 const axios = require('axios');
 const path = require('path');
+const { execSync } = require('child_process');
 
 app.use(express.json());
 
@@ -36,6 +37,16 @@ app.get('/api/status', (req, res) => {
         })
     }
 })
+
+app.post('/api/update', (req, res) => {
+    if (!req.headers.authorization || req.headers.authorization !== process.env.ActionCommunicationKey) {
+        return res.status(401).send('Unauthorized');
+    }
+    execSync('git pull', { stdio: 'inherit' }); // Pull the latest changes from the repo
+    execSync('npm install', { stdio: 'inherit' }); // Install any new dependencies
+    res.status(200).send('OK');
+    execSync('pm2 restart 1', { stdio: 'inherit' }); // Restart the bot
+});
 
 // Allow the user to get up to date information about the privacy policy and terms of service (incase i forget to commit the changes or smth)
 app.get('/md/privacy', (req, res) => {
