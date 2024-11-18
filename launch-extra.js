@@ -14,15 +14,9 @@ require('./events/join.js');
 require('./events/messageCreate.js');
 require('./interactions/load.js');
 require('./events/channelCreate.js');
-// require('./V14/index.js') // DEPRECATED
-
-// Premium
-// require('./premium/boostdetection.js');
-// require('./premium/activateserverpanel.js');
 
 // Social links
 require('./social/twitch.js');
-// require('./social/twitter.js');
 // require('./social/youtube.js');
 
 // Monitoring
@@ -58,3 +52,6 @@ require('./modmail/dm.js');
 // Tickets (V2)
 require('./tickets/button.js');
 require('./tickets/message.js');
+
+// Data privacy tools
+require('./tasks/deletion.js'); // Deletes old unused and manually deleted data

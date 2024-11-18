@@ -145,16 +145,19 @@ module.exports = {
 
         if (subCommandGroup === 'info') {
             if (subCommand === 'policy') {
-                const embed = new EmbedBuilder()
-                    .setDescription(fs.readFileSync(path.resolve(`./PRIVACY.md`), 'utf8').replace('<br/>', '\n'));
-
-                interaction.reply({ embeds: [embed], ephemeral: true });
+                interaction.reply({ content: `https://daalbot.xyz/Legal/Privacy`, ephemeral: true });
             }
         }
 
+        // Actions require the user to have the `Manage Server` permission
+        if (!interaction.member.permissions.has(DJS.PermissionFlagsBits.ManageGuild)) return await interaction.reply({
+            content: 'You must have the `Manage Server` permission to perform actions on data.',
+            ephemeral: true
+        })
+
         if (subCommandGroup === 'actions') {
             if (subCommand === 'delete') {
-                return await interaction.reply({ content: 'This command is currently disabled. For data deletion please create a support ticket in our support server (go.daalbot.xyz/HQ)', ephemeral: true });
+                // return await interaction.reply({ content: 'This command is currently disabled. For data deletion please create a support ticket in our support server (go.daalbot.xyz/HQ)', ephemeral: true });
                 const type = interaction.options.getString('type');
 
                 if (type === 'guild') {
@@ -172,6 +175,30 @@ module.exports = {
                     };
 
                     await fsp.writeFile(path.resolve(`./temp/del/${interaction.guild.id}.json`), JSON.stringify(deletionObj, null, 4));
+
+                    await interaction.reply({ content: `Deletion scheduled for <t:${await daalbot.timestamps.getFutureDiscordTimestamp(delayNum)}:R>`, ephemeral: true });
+
+                    const guildOwner = await interaction.guild.fetchOwner();
+
+                    if (guildOwner.id !== interaction.user.id) {
+                        try {
+                            const embed = new EmbedBuilder()
+                                .setTitle('Data Deletion Scheduled')
+                                .setDescription(`A data deletion for the server ${interaction.guild.name} (${interaction.guild.id}) has been scheduled by ${interaction.user.username} (${interaction.user.id}). To cancel this deletion, use the \`/data actions cancel\` command.`)
+                                .addFields(
+                                    { name: 'Deletion time', value: `<t:${await daalbot.timestamps.getFutureDiscordTimestamp(delayNum)}:R>` },
+                                    { name: 'Reason', value: 'Data Deletion Requested' }
+                                )
+                                .setColor('Red');
+
+                            await guildOwner.send({ embeds: [embed] });
+                        } catch (err) {
+                            if (err?.code === 50007) {
+                                // User has DMs disabled
+                                await interaction.followUp({ content: 'The server owner has DMs disabled and thus could not be notified of the data deletion.', ephemeral: true });
+                            } else console.error(err);
+                        }
+                    }
                 } else if (type === 'user') {
                     return interaction.reply({
                         content: `To request a data deletion, please create a support ticket in at [go.daalbot.xyz/HQ](https://discord.com/invite/mGacnqE7qk)`,
@@ -180,14 +207,27 @@ module.exports = {
                 }
             }
 
+            if (subCommand === 'cancel') {
+                const type = interaction.options.getString('type');
+
+                if (type === 'user') return await interaction.reply({
+                    content: `This currently cannot be done automatically and thus there is no pending data removal for users.`,
+                });
+
+                if (type === 'guild') {
+                    if (!fs.existsSync(path.resolve(`./temp/del/${interaction.guild.id}.json`))) {
+                        return interaction.reply({ content: 'No deletion scheduled.', ephemeral: true });
+                    }
+
+                    await fsp.rm(path.resolve(`./temp/del/${interaction.guild.id}.json`));
+                    return interaction.reply({ content: 'Deletion cancelled.', ephemeral: true });
+                }
+            }
+
             if (subCommand == 'download') {
                 const type = interaction.options.getString('type');
 
                 if (type === 'auto') {
-                    if (!interaction.member.permissions.has(DJS.PermissionFlagsBits.ManageGuild)) return await interaction.reply({
-                        content: 'You must have the `Manage Server` permission to download data automatically.',
-                        ephemeral: true
-                    })
                     // Check if the user has requested a download in the last 24 hours
                     if (requests[interaction.user.id] && requests[interaction.user.id] > Date.now() - 24 * 60 * 60 * 1000) {
                         return interaction.reply({ content: 'You have already requested a download in the last 24 hours.', ephemeral: true });

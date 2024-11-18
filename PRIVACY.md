@@ -33,11 +33,19 @@ We may store the following data:
 ## Questions and removal
 If you have any questions about the privacy policy please or want your data removed please create a ticket in the [support server](https://lnk.daalbot.xyz/HQ) or contact the bot owner directly.
 
-### Automatic removal
-There is currently no automatic removal system in place. If you want your data removed please follow the steps in the manual removal section below.
+## Data Removal
 
-### Manual removal
-To have your data removed please contact the bot owner directly or create a ticket in the [support server](https://lnk.daalbot.xyz/HQ). Please note that this process although should be quick to remove a majority of the data it may longer to remove all data.
+### Automatic Removal
+To have your server data removed automatically, you can run `/data actions delete` in your server (currently guild only). This will initiate a timer to delete all data about your server after a customizable amount of time.
+
+This process will also start automatically if the bot is removed from your server, with a timer set to 1 week. This ensures that any unnecessary data is cleaned up and user data is protected. The process will stop if the bot is re-added to the server.
+
+Once the data is removed, it will not be recoverable, and no support will be provided to recover the data.
+
+In order to cancel the deletion process, you can run `/data actions cancel` in your server. Or, if the deletion process was initiated by the bot being removed, you can re-add the bot to your server. This will stop the deletion process.
+
+### Manual Removal
+If you wish to have your data removed, such as when you want to delete yourself from all servers, please contact the bot owner directly or create a ticket in the [support server](https://lnk.daalbot.xyz/HQ). While this process should quickly remove most of the data, it may take longer to remove all data completely.
 
 ## Data requests
 If you would like to request a copy of the data that is stored about you or your server you can create a ticket in the [support server](https://lnk.daalbot.xyz/HQ) or use our automated system by running `/data actions downloads` in your server.

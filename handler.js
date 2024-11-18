@@ -194,12 +194,12 @@ client.on('interactionCreate', async interaction => {
                 }
             }
         } 
-        else if (!interaction?.guild?.commands?.cache?.find(c => c.name === interaction.commandName)) { // Fail if its not a custom command and not in the commands array
-            interaction.reply({
-                content: `Hey, I dont know how to tell you this ${interaction.user.displayName} but that command doesnt exactly exist anymore...`,
-                ephemeral: true
-            })
-        }
+        // else if (!interaction?.guild?.commands?.cache?.find(c => c.name === interaction.commandName)) { // Fail if its not a custom command and not in the commands array
+        //     interaction.reply({
+        //         content: `Hey, I dont know how to tell you this ${interaction.user.displayName} but that command doesnt exactly exist anymore...`,
+        //         ephemeral: true
+        //     })
+        // }
     } catch (error) {
         const errorId = await daalbot.items.generateId(5);
 

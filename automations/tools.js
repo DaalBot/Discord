@@ -117,12 +117,24 @@ const exportClass = new class {
                 }
             },
         
-            // Libaries
-            libaries: {
+            // Libraries
+            libraries: {
                 axios,
                 crypto,
                 csvman,
                 discord: {
+                    builder: {
+                        ModalBuilder: DJS.ModalBuilder,
+                        TextInputBuilder: DJS.TextInputBuilder,
+                        EmbedBuilder: DJS.EmbedBuilder,
+                        ActionRowBuilder: DJS.ActionRowBuilder,
+                        ButtonBuilder: DJS.ButtonBuilder,
+                        StringSelectMenuOptionBuilder: DJS.StringSelectMenuOptionBuilder,
+                        StringSelectMenuBuilder: DJS.StringSelectMenuBuilder
+                    },
+                    enum: {
+                        TextInputStyle: DJS.TextInputStyle,
+                    },
                     embed: DJS.EmbedBuilder,
                     components: {
                         row: DJS.ActionRowBuilder,
@@ -134,6 +146,9 @@ const exportClass = new class {
                             }
                         }
                     }
+                },
+                daalbot: {
+                    tb: daalbot.api.pasteapi
                 }
             }
         };
