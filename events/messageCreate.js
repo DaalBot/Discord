@@ -89,7 +89,7 @@ ID: ${issueAuthorUser.id}`)
         const values = [
             ...knownBadLinks,
             {
-                value: '\[.*\]\(.*\)', // Markdown link
+                value: '[.*](.*)', // Markdown link
                 weight: 5,
                 reason: 'Markdown link'
             },
@@ -99,7 +99,7 @@ ID: ${issueAuthorUser.id}`)
                 reason: 'HTTP(s) link'
             },
             {
-                value: '\$[0-9]{1,}', // Money usually used in messages as "$50 Steam gift card giveaway!" or similar
+                value: '$[0-9]{1,}', // Money usually used in messages as "$50 Steam gift card giveaway!" or similar
                 weight: 1,
                 reason: 'Money'
             }
