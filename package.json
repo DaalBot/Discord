@@ -26,6 +26,7 @@
     "express": "^4.21.1",
     "node-html-parser": "^6.1.10",
     "rss-to-json": "^2.1.1",
-    "wokcommands": "^2.1.9"
+    "wokcommands": "^2.1.9",
+    "express-rate-limit": "^7.4.1"
   }
 }
