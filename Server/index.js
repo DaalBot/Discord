@@ -3,6 +3,7 @@ const { Colors } = require('discord.js');
 const DJS = require('discord.js');
 const client = require('../client');
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const app = express();
 const port = 8923;
 const axios = require('axios');
@@ -10,6 +11,16 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 app.use(express.json());
+
+// Set up rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
+
+// Apply rate limiter to specific routes
+app.use('/md/privacy', limiter);
+app.use('/md/tos', limiter);
 
 app.get('/api/status', (req, res) => {
     // Status type not defined so send all data about the client
