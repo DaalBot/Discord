@@ -14,6 +14,7 @@ require('./events/join.js');
 require('./events/messageCreate.js');
 require('./interactions/load.js');
 require('./events/channelCreate.js');
+require('./events/guildMemberUpdate.js');
 
 // Social links
 require('./social/twitch.js');

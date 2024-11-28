@@ -184,7 +184,8 @@ client.on('interactionCreate', async interaction => {
     
                     if (hasPermissions) {
                         const response = await command.callback({ interaction });
-                        if (response) interaction.reply(response); // Same as above
+                        
+                        if (response && !interaction.replied) interaction.reply(response); // This is a very old way of replying to an interaction but hey, it works
                     } else {
                         interaction.reply({
                             content: 'You do not have the required permissions to use this command.',
