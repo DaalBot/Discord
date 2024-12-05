@@ -12,6 +12,7 @@ const overridenProcessEnv = toolsClass.getOverridenProcessEnv();
 
 // Event handler
 client.on(`${filenameWithoutExtension}`, async eventObject => {
+    if (!eventObject.guild) return; // Ignore DMs
     async function executeEvent(inputFile) {
         // Unload input incase its already loaded
         delete require.cache[require.resolve(inputFile)];
@@ -39,7 +40,11 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
         if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     
         // All checks pass
-        input.execute(inputData, utils, input.id);
+        try {
+            input.execute(inputData, utils, input.id);
+        } catch (e) {
+            console.error(`${e}`);
+        }
 
         // Reset everything to normal
         toolsClass.reset();
@@ -50,7 +55,7 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
 
     const eventsJSON = JSON.parse(fs.readFileSync(path.resolve('./db/events/events.json'), 'utf8'));
 
-    const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObject?.guild?.id);
+    const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObject.guild.id);
 
     for (let i = 0; i < validEvents.length; i++) {
         const event = validEvents[i];

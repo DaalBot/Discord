@@ -30,6 +30,12 @@ We may store the following data:
 * Access Token / ID pairs [Hashed]
 * Previous dashboard related API requests (e.g. Modifying events) alongside your user ID
 
+Disclaimer: Any page that contacts api.daalbot.xyz or bot.daalbot.xyz will log your IP address and details about your request an example of which is provided below. This is to prevent abuse of our services.
+
+```log
+[ip hidden] - - [05/Dec/2024:15:49:48 +0000] "GET /get/bot/stats HTTP/1.1" 200 129 "https://daalbot.xyz/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+```
+
 ## Questions and removal
 If you have any questions about the privacy policy please or want your data removed please create a ticket in the [support server](https://lnk.daalbot.xyz/HQ) or contact the bot owner directly.
 

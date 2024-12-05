@@ -40,7 +40,11 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
         if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     
         // All checks pass
-        input.execute(inputData, utils, input.id);
+        try {
+            input.execute(inputData, utils, input.id);
+        } catch (e) {
+            console.error(`${e}`);
+        }
 
         // Reset everything to normal
         toolsClass.reset();

@@ -12,6 +12,7 @@ const overridenProcessEnv = toolsClass.getOverridenProcessEnv();
 
 // Event handler
 client.on(`${filenameWithoutExtension}`, async eventObject => {
+    if (!eventObject.guild) return; // Ignore DMs
     async function executeEvent(inputFile) {
         // Unload input incase its already loaded
         delete require.cache[require.resolve(inputFile)];
@@ -41,8 +42,8 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
         // All checks pass
         try {
             input.execute(inputData, utils, input.id);
-        } catch (error) {
-            console.error(error);
+        } catch (e) {
+            console.error(`${e}`);
         }
 
         // Reset everything to normal

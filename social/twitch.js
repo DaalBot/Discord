@@ -167,7 +167,7 @@ async function main() {
             path.resolve('./db/socialalert/twitch.detected'),
             newFile
         );
-      }, 1000 * 90);
+    }, 1000 * 90);
 };
 
 main();

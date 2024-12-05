@@ -72,7 +72,7 @@ module.exports = async (interaction) => {
                 content: `Adding item...`
             })
 
-            const currentShop = JSON.parse(await daalbot.db.managed.get(interaction.guild.id, `shop/items.json`)) || [];
+            const currentShop = JSON.parse((await daalbot.db.managed.exists('shop/items.json')) ? (await daalbot.db.managed.get(interaction.guild.id, `shop/items.json`)) : '[]') || [];
             currentShop.push(item);
             await daalbot.db.managed.set(interaction.guild.id, `shop/items.json`, JSON.stringify(currentShop));
 
