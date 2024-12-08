@@ -24,9 +24,9 @@
     "axios": "^1.6.3",
     "discord.js": "^14.16.1",
     "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
     "node-html-parser": "^6.1.10",
     "rss-to-json": "^2.1.1",
-    "wokcommands": "^2.1.9",
-    "express-rate-limit": "^7.4.1"
+    "wokcommands": "^2.1.9"
   }
 }

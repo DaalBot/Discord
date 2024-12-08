@@ -18,6 +18,7 @@ require('./events/guildMemberUpdate.js');
 
 // Social links
 require('./social/twitch.js');
+require('./social/bluesky.js');
 // require('./social/youtube.js');
 
 // Monitoring

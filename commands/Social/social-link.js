@@ -83,6 +83,38 @@ module.exports = {
                     ]
                 }
             ]
+        },
+        {
+            name: 'bluesky',
+            description: 'Modifies the Bluesky feeds for the server.',
+            type: ApplicationCommandOptionType.SubcommandGroup,
+            options: [
+                {
+                    name: 'add',
+                    description: 'Adds a Bluesky feed to a channel.',
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: 'channel',
+                            description: 'The channel to add the feed to.',
+                            type: ApplicationCommandOptionType.Channel,
+                            required: true
+                        },
+                        {
+                            name: 'account',
+                            description: 'The account to add the feed from.',
+                            type: ApplicationCommandOptionType.String,
+                            required: true
+                        },
+                        {
+                            name: 'message',
+                            description: 'The message to send when a new post is detected. (must include %%{LINK}%%)',
+                            type: ApplicationCommandOptionType.String,
+                            required: true
+                        }
+                    ]
+                }
+            ]
         }
     ],
 
@@ -160,41 +192,6 @@ module.exports = {
             }
         }
 
-        if (subCommandGroup == 'twitter') {
-            if (subCommand == 'add') {
-                /**
-                 * @type {string}
-                 */
-                const account = interaction.options.getString('account').toLowerCase();
-                const feedChannel = interaction.options.getChannel('channel')
-                const role = interaction.options.getRole('role')
-
-                /**
-                 * @type {{username: string, channel: {id: string, role: string}}[]}
-                 */
-                let twitterJson = JSON.parse(fs.readFileSync(path.resolve('./db/socialalert/twitter.json'), 'utf8'))
-
-                // Check if the user is already linked to the channel
-                if (twitterJson.find(i => i.username == account && i.channel.id == feedChannel.id)) {
-                    return await interaction.reply({ content: 'That Twitter account is already linked to the channel.', ephemeral: true })
-                }
-
-                // Add the user to the json
-                twitterJson.push({
-                    username: account,
-                    channel: {
-                        id: feedChannel.id,
-                        role: role == null ? null : role.id // If the role is null then set it to null otherwise set it to the role id :D
-                    }
-                })
-
-                // Write the json to the file
-                fs.writeFileSync(path.resolve('./db/socialalert/twitter.json'), JSON.stringify(twitterJson, null, 4))
-
-                await interaction.reply({ content: `Successfully added ${feedChannel} to the Twitter feed for ${account}.\nThis may take up to 30 minutes to apply`, ephemeral: true })
-            }
-        }
-
         if (subCommandGroup == 'youtube') {
             if (subCommand == 'add') {
                 const channel = interaction.options.getString('channel')
@@ -235,6 +232,73 @@ module.exports = {
             //     content: `This feature still needs more testing before it can be used. Sorry for the inconvenience.`,
             //     ephemeral: true
             // })
+        }
+
+        if (subCommandGroup == 'bluesky') {
+            if (subCommand == 'add') {
+                const feedChannel = interaction.options.getChannel('channel');
+                const accountInput = interaction.options.getString('account');
+                const message = interaction.options.getString('message');if (!message.includes('%%{LINK}%%')) return await interaction.reply({ content: 'The message must include %%{LINK}%%.', ephemeral: true })
+
+                let account = accountInput;
+
+                if (!account.includes('did:')) {
+                    // Account is a username not a id so we need to get the id
+                    const accountData = await axios.get(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${accountInput.replace('@', '')}`);
+
+                    if (accountData.data.error) return await interaction.reply({
+                        content: `Sorry, but we were unable to find that account (${accountData.data.message}). Please make sure you entered the correct account.`,
+                        ephemeral: true
+                    })
+
+                    account = accountData.data.did;
+                }
+
+                // Read the file
+                const blueskyData = fs.readFileSync(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
+
+                // Check if the channel is already linked to the account
+                if (blueskyData.split('\n').filter(i => i.split(';;[DCS];;')[0] == account).length > 0) {
+                    // Account is already linked to a channel so we need to check if the channel is the same
+                    if (blueskyData.split('\n').filter(i => i.split(';;[DCS];;')[0] == account)[0].split(';;[DCS];;')[1].includes(feedChannel.id)) { // {"id":"123","message":"%%{LINK}%%"};;[NC];;{"id":"456","message":"%%{LINK}%%"}
+                        return await interaction.reply({ content: `<#${feedChannel.id}> is already linked to that account.`, ephemeral: true })
+                    }
+
+                    // Account is linked to a different channel so we need to add the channel to the account
+                    const accountData = blueskyData.split('\n').filter(i => i.split(';;[DCS];;')[0] == account)[0];
+
+                    let accountChannels = accountData.split(';;[DCS];;')[1].split(';;[NC];;');
+
+                    accountChannels.push(JSON.stringify({
+                        id: feedChannel.id,
+                        message: message
+                    }));
+
+                    const newAccountData = `${account};;[DCS];;${accountChannels.join(';;[NC];;')}`;
+
+                    const newBlueskyData = blueskyData.split('\n').filter(i => !i.startsWith(account)).join('\n') + '\n' + newAccountData;
+
+                    fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), newBlueskyData);
+                    return await interaction.reply({ content: `Successfully added <#${feedChannel.id}> to the Bluesky feed for ${accountInput}.`, ephemeral: true });
+                }
+
+                // Account is not linked to any channel so we need to add the account and channel to the file
+                const newBlueskyData = `${account};;[DCS];;${JSON.stringify({ id: feedChannel.id, message: message })}`;
+
+                const blueskyPosts = fs.readFileSync(path.resolve('./db/socialalert/bsky.detected'), 'utf8').split('\n');
+                const usersPostsReq = await axios.get(`https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${account}`);
+                const usersPosts = usersPostsReq.data.feed;
+
+                let postCids = blueskyPosts;
+                for (let i = 0; i < usersPosts.length; i++) {
+                    postCids.push(usersPosts[i].post.cid);
+                }
+
+                fs.writeFileSync(path.resolve('./db/socialalert/bsky.detected'), postCids.join('\n')); // Add the new posts to prevent the bot from sending posts that have already been made
+                fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), `${blueskyData}\n${newBlueskyData}`);
+
+                await interaction.reply({ content: `Successfully added <#${feedChannel.id}> to the Bluesky feed for ${accountInput}.`, ephemeral: true });
+            }
         }
     }
 }
