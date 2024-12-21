@@ -22,6 +22,8 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
         const inputData = { old: eventObjectOld, new: eventObjectNew }; // The line that should be changed to the actual input data
         const inputFileContents = fs.readFileSync(inputFile, 'utf8');
 
+        if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
+
         toolsClass.setId(input.id);
 
         // Override console functions
@@ -38,10 +40,10 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
         // Hide client data
         eventObjectOld.client = {};
         eventObjectNew.client = {};
-        
-        if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     
         // All checks pass
+        toolsClass.setup();
+
         try {
             input.execute(inputData, utils, input.id);
         } catch (e) {

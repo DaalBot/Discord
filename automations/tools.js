@@ -6,6 +6,7 @@ const path = require('path');
 const daalbot = require('../daalbot.js');
 const csvman = require('@npiny/csvman');
 const client = require('../client.js');
+const originalRequire = require;
 
 let checkSecurityRules = require('./sec.pub.js'); // Self hosted bot checks
 
@@ -134,6 +135,7 @@ const exportClass = new class {
                     },
                     enum: {
                         TextInputStyle: DJS.TextInputStyle,
+                        ChannelType: DJS.ChannelType,
                     },
                     embed: DJS.EmbedBuilder,
                     components: {
@@ -171,11 +173,11 @@ const exportClass = new class {
     }
 
     setup() {
-        // NI
+        // Set require to null
+        require = null;
     }
 
     reset() {
-        // Reset console functions
         console.log = originalConsoleLog;
         console.error = originalConsoleError;
         console.warn = originalConsoleWarn;
@@ -183,8 +185,8 @@ const exportClass = new class {
         console.debug = originalConsoleDebug;
         console.trace = originalConsoleTrace;
 
-        // Reset process.env
         process.env = originalProcessEnv;
+        require = originalRequire;
     }
 }
 

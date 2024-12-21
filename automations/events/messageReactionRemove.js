@@ -22,6 +22,8 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
         const inputData = eventObject; // The line that should be changed to the actual input data
         const inputFileContents = fs.readFileSync(inputFile, 'utf8');
 
+        if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
+
         toolsClass.setId(input.id);
 
         // Override data
@@ -36,10 +38,10 @@ client.on(`${filenameWithoutExtension}`, async eventObject => {
 
         // Hide client data
         eventObject.client = {};
-        
-        if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     
         // All checks pass
+        toolsClass.setup();
+
         try {
             input.execute(inputData, utils, input.id);
         } catch (e) {

@@ -113,6 +113,25 @@ module.exports = {
                             required: true
                         }
                     ]
+                },
+                {
+                    name: 'remove',
+                    description: 'Removes a Bluesky feed from a channel.',
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: 'channel',
+                            description: 'The channel to remove the feed from.',
+                            type: ApplicationCommandOptionType.Channel,
+                            required: true
+                        },
+                        {
+                            name: 'account',
+                            description: 'The account to remove the feed from. (Default: All)',
+                            type: ApplicationCommandOptionType.String,
+                            required: false
+                        }
+                    ]
                 }
             ]
         }
@@ -235,9 +254,10 @@ module.exports = {
         }
 
         if (subCommandGroup == 'bluesky') {
+            const feedChannel = interaction.options.getChannel('channel');
+            const accountInput = interaction.options.getString('account');
+            
             if (subCommand == 'add') {
-                const feedChannel = interaction.options.getChannel('channel');
-                const accountInput = interaction.options.getString('account');
                 const message = interaction.options.getString('message');if (!message.includes('%%{LINK}%%')) return await interaction.reply({ content: 'The message must include %%{LINK}%%.', ephemeral: true })
 
                 let account = accountInput;
@@ -294,10 +314,75 @@ module.exports = {
                     postCids.push(usersPosts[i].post.cid);
                 }
 
+                await daalbot.createIdReference(interaction.guild.id, 'channel', feedChannel.id); // Create a reference for the channel
                 fs.writeFileSync(path.resolve('./db/socialalert/bsky.detected'), postCids.join('\n')); // Add the new posts to prevent the bot from sending posts that have already been made
                 fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), `${blueskyData}\n${newBlueskyData}`);
 
                 await interaction.reply({ content: `Successfully added <#${feedChannel.id}> to the Bluesky feed for ${accountInput}.`, ephemeral: true });
+            }
+
+            if (subCommand == 'remove') {
+                if (!accountInput) {
+                    // Remove all accounts from the channel
+                    const file = fs.readFileSync(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
+                    const accounts = file.split('\n').filter(i => i.split(';;[DCS];;')[1].includes(feedChannel.id));
+                    if (accounts.length == 0) return await interaction.reply({ content: 'There are no accounts linked to that channel.', ephemeral: true })
+                    
+                    for (let i = 0; i < accounts.length; i++) {
+                        const account = accounts[i];
+                        const channels = account.split(';;[DCS];;')[1];
+
+                        if (!channels.includes(';;[NC];;')) {
+                            // Account is only linked to one channel so we can remove the account instead
+                            const newBlueskyData = file.split('\n').filter(i => i != account).join('\n');
+                            fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), newBlueskyData);
+                            continue;
+                        } else {
+                            // Account is linked to multiple channels so we need to remove the channel from the account
+                            const channelObjects = channels.split(';;[NC];;').map(i => JSON.parse(i));
+                            const newChannels = channelObjects.filter(i => i.id != feedChannel.id);
+                            const newAccountData = `${account.split(';;[DCS];;')[0]};;[DCS];;${newChannels.map(i => JSON.stringify(i)).join(';;[NC];;')}`;
+
+                            const newBlueskyData = file.split('\n').filter(i => i != account).join('\n') + '\n' + newAccountData;
+                            fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), newBlueskyData);
+                        }
+                    }
+                } else {
+                    let account = accountInput;
+
+                    if (!account.includes('did:')) {
+                        // Account is a username not a id so we need to get the id
+                        const accountData = await axios.get(`https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${accountInput.replace('@', '')}`);
+
+                        if (accountData.data.error) return await interaction.reply({
+                            content: `Sorry, but we were unable to find that account (${accountData.data.message}). Please make sure you entered the correct account.`,
+                            ephemeral: true
+                        })
+
+                        account = accountData.data.did;
+                    }
+
+                    // Remove the account from the channel
+                    const file = fs.readFileSync(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
+                    const accountData = file.split('\n').filter(i => i.split(';;[DCS];;')[0] == account)[0];
+                    if (!accountData) return await interaction.reply({ content: 'That account is not linked to that channel.', ephemeral: true })
+                    
+                    const channels = accountData.split(';;[DCS];;')[1];
+
+                    if (!channels.includes(';;[NC];;')) {
+                        // Account is only linked to one channel so we can remove the account instead
+                        const newBlueskyData = file.split('\n').filter(i => i != accountData).join('\n');
+                        fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), newBlueskyData);
+                    } else {
+                        // Account is linked to multiple channels so we need to remove the channel from the account
+                        const channelObjects = channels.split(';;[NC];;').map(i => JSON.parse(i));
+                        const newChannels = channelObjects.filter(i => i.id != feedChannel.id);
+                        const newAccountData = `${account.split(';;[DCS];;')[0]};;[DCS];;${newChannels.map(i => JSON.stringify(i)).join(';;[NC];;')}`;
+
+                        const newBlueskyData = file.split('\n').filter(i => i != accountData).join('\n') + '\n' + newAccountData;
+                        fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), newBlueskyData);
+                    }
+                }
             }
         }
     }

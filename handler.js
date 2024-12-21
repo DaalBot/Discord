@@ -34,7 +34,7 @@ const testGuild = config.handler.testServer;
 */
 let commands = [];
 
-// Statup (called when the bot starts)
+// Startup (called when the bot starts)
 (async () => {
     // Retrive command hashes
     const hashFile = await readFile('./cmd.hash', 'utf-8') || 'empty|dummy';

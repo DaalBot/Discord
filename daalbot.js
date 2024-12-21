@@ -707,6 +707,41 @@ async function convertMetaText(message, guild, data) {
     });
 }
 
+/**
+ * Finds information related to a id (ex. find guild from channel id)
+ * @param {string} id 
+ * @param {"channel" | "guild" | "role"} from 
+ * @param {"channel" | "guild" | "role" | "all"} to 
+*/
+async function resolveId(id, from, to) {
+    const lookupFile = await fs.promises.readFile(path.resolve(`./db/lookup.json`), 'utf8');
+    const lookupJSON = JSON.parse(lookupFile);
+
+    if (from === 'guild') {
+        return lookupJSON.filter(l => l.guild === id); // [{type: 'channel', id: '1234', guild: '5678'}...]
+    } else if (to === 'guild') {
+        // Checking object type doesn't matter because the IDs are unique (I hope)
+        return lookupJSON.find(l => l.id == id).guild;
+    } else
+        throw new Error('Invalid from/to'); // Some day it will automatically find a link between the two but not today
+}
+
+/**
+ * @param {string} guild
+ * @param {string} type
+ * @param {string} id
+*/
+async function createIdReference(guild, type, id) {
+    const lookupFile = await fs.promises.readFile(path.resolve(`./db/lookup.json`), 'utf8');
+    const lookupJSON = JSON.parse(lookupFile);
+
+    lookupJSON.push({
+        type,
+        id,
+        guild
+    });
+}
+
 const youtube = {
     getChannelUploads: youtube_GetChannelUploads,
     isVideoValid: youtube_isVideoValid,
@@ -778,7 +813,8 @@ const emojis = {
         xp: '<:VTXXP:1261807723255955516>'
     },
     coin: '<:Coin:1247554973512896533>',
-    xp: '<:XP:1245805234115313747>'
+    xp: '<:XP:1245805234115313747>',
+    /**@param {string} name; @param {string?} guild*/get: (name,guild)=>{}
 }
 
 /**
@@ -830,6 +866,8 @@ module.exports = {
     getLogChannelId,
     logEvent,
     getMessageFromString,
+    resolveId,
+    createIdReference,
     api,
     embed: Discord.EmbedBuilder,
     DatabaseEntry
