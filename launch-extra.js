@@ -28,7 +28,7 @@ require('./monitoring/monitor.js');
 require('./modals/handler.js');
 
 // Automations
-require('./automations/launch.js');
+// require('./automations/launch.js');
 
 // Internal server
 require('./Server/index.js');
