@@ -1,5 +1,5 @@
 //const stuff
-const client = require('../client.js'); require('dotenv').config(); const path = require('path'); WOKCommands = require('wokcommands'); const fs = require('fs'); const config = require('../config.json'); const prefix = config.prefix; const LogIDs = config.LogIDs; const activities = config.activities;
+const client = require('../client.js'); require('dotenv').config(); const path = require('path'); const fs = require('fs'); const config = require('../config.json'); const prefix = config.prefix; const LogIDs = config.LogIDs; const activities = config.activities;
 // Command Stuff :P
 client.on("messageCreate", msg => {
     if (msg.content.toLowerCase().startsWith(`${prefix}game`)) {

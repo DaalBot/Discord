@@ -24,10 +24,9 @@
     "archiver": "^7.0.1",
     "axios": "^1.7.9",
     "discord.js": "^14.17.3",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "express-rate-limit": "^7.5.0",
-    "node-html-parser": "^7.0.1",
-    "rss-to-json": "^2.1.1",
-    "wokcommands": "^2.1.9"
+    "rss-to-json": "^2.1.1"
   }
 }

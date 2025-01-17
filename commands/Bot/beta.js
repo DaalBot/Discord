@@ -5,10 +5,6 @@ const path = require('path');
 
 const modules = [
     {
-        name: 'Social / Twitter',
-        value: 'socialtwt'
-    },
-    {
         name: 'Events / Creation',
         value: 'cmdevents'
     },

@@ -1,7 +1,6 @@
 //const stuff 
 const client = require('../client'); // Loads all info needed to login as the bot 
 const daalbot = require('../daalbot.js');
-const warnSchema = require('../models/warn-schema');
 const { EmbedBuilder, ChannelType } = require('discord.js');
 
 // Loading commands
