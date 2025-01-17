@@ -17,7 +17,7 @@ module.exports = {
     options: [
         {
             name: 'link',
-            description: 'Links two roles together.',
+            description: 'Links two roles.',
             type: ApplicationCommandOptionType.SubcommandGroup,
             options: [
                 {
@@ -36,6 +36,12 @@ module.exports = {
                             description: 'The second role to link.',
                             type: ApplicationCommandOptionType.Role,
                             required: true
+                        },
+                        {
+                            name: 'reverse',
+                            description: 'Whether or not to link the roles together or just one way.',
+                            type: ApplicationCommandOptionType.Boolean,
+                            required: false
                         }
                     ]
                 },
@@ -55,6 +61,12 @@ module.exports = {
                             description: 'The second role to unlink.',
                             type: ApplicationCommandOptionType.Role,
                             required: true
+                        },
+                        {
+                            name: 'reverse',
+                            description: 'Whether or not to apply the unlinking to both roles.',
+                            type: ApplicationCommandOptionType.Boolean,
+                            required: false
                         }
                     ]
                 },
@@ -109,7 +121,9 @@ module.exports = {
 
                 // Add the roles to the database
                 daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role1.id}`, `${role2.id}\n`, 'a');
-                daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role2.id}`, `${role1.id}\n`, 'a');
+                if (options.getBoolean('reverse'))
+                    daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role2.id}`, `${role1.id}\n`, 'a');
+                
                 return interaction.reply({ content: `Linked roles \`${role1.name}\` and \`${role2.name}\`.`, ephemeral: true });
             }
 
@@ -120,7 +134,9 @@ module.exports = {
 
                 // Remove the roles from the database
                 await daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role1.id}`, (await daalbot.db.managed.get(interaction.guild.id, `linkedRoles/${role1.id}`)).replace(`${role2.id}\n`, ''));
-                await daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role2.id}`, (await daalbot.db.managed.get(interaction.guild.id, `linkedRoles/${role2.id}`)).replace(`${role1.id}\n`, ''));
+                if (options.getBoolean('reverse'))
+                    await daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role2.id}`, (await daalbot.db.managed.get(interaction.guild.id, `linkedRoles/${role2.id}`)).replace(`${role1.id}\n`, ''));
+    
                 return await interaction.reply({ content: `Unlinked roles \`${role1.name}\` and \`${role2.name}\`.`, ephemeral: true });
             }
 

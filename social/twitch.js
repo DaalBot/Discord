@@ -26,6 +26,11 @@ async function updateBearer() {
             // If the request fails, it means the bearer is invalid
             const GetNewBearerReq = await axios.post(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENTID}&client_secret=${process.env.TWITCH_CLIENTSECRET}&grant_type=client_credentials`)
             Bearer = GetNewBearerReq.data.access_token
+
+            process.env = {
+                ...process.env,
+                TWITCH_BEARER: Bearer // Update the bearer everywhere (account id lookups)
+            }
     
             // Update the .env file
             const dotenvpath = path.resolve('./.env')

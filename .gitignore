@@ -19,3 +19,6 @@ node_modules/
 
 # Automations
 /automations/sec.js
+
+# Other
+TODO.md

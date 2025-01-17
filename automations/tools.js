@@ -1,4 +1,3 @@
-const axios = require('axios')
 const crypto = require('crypto');
 const DJS = require('discord.js');
 const fs = require('fs');
@@ -8,10 +7,11 @@ const csvman = require('@npiny/csvman');
 const client = require('../client.js');
 const originalRequire = require;
 
-let checkSecurityRules = require('./sec.pub.js'); // Self hosted bot checks
+let { checkSecurityRules, requireAllowedEvents } = require('./sec.pub.js'); // Self hosted bot checks
 
 if (fs.existsSync(path.resolve('./automations/sec.js'))) { // Main bot checks
-    checkSecurityRules = require('./sec.js');
+    checkSecurityRules = require('./sec.js').checkSecurityRules;
+    requireAllowedEvents = require('./sec.js').requireAllowedEvents;
 }
 
 const originalConsoleLog = console.log;
@@ -120,7 +120,6 @@ const exportClass = new class {
         
             // Libraries
             libraries: {
-                axios,
                 crypto,
                 csvman,
                 discord: {
@@ -151,6 +150,17 @@ const exportClass = new class {
                 },
                 daalbot: {
                     tb: daalbot.api.pasteapi
+                },
+                /**
+                 * @param {string} module
+                */
+                load: (module) => {
+                    const eventId = this.getId();
+                    const hashedId = crypto.createHash('sha256').update(eventId).digest('hex');
+                    if (!requireAllowedEvents.find(event => event.id === hashedId)) throw new Error('[SECURITY] This event is not allowed to use require statements');
+                    if (!requireAllowedEvents.find(event => event.id === hashedId).modules.includes(module)) throw new Error(`[SECURITY] You are not allowed to import the ${module} module`);
+
+                    return originalRequire(module);
                 }
             }
         };

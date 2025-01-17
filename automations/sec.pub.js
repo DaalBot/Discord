@@ -16,4 +16,9 @@ async function checkSecurityRules(inputFileContents) {
     return allowed;
 }
 
-module.exports = checkSecurityRules;
+/**
+ * @type {{ id: string, modules: string[] }[]}
+*/
+const requireAllowedEvents = []; // Events that are allowed to use require statements
+
+module.exports = {checkSecurityRules,requireAllowedEvents};

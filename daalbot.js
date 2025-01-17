@@ -735,6 +735,8 @@ async function createIdReference(guild, type, id) {
     const lookupFile = await fs.promises.readFile(path.resolve(`./db/lookup.json`), 'utf8');
     const lookupJSON = JSON.parse(lookupFile);
 
+    if (lookupJSON.find(l => l.id == id)) return 'ID already exists';
+
     lookupJSON.push({
         type,
         id,

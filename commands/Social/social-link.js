@@ -52,38 +52,38 @@ module.exports = {
                 }
             ]
         },
-        {
-            name: 'youtube',
-            description: 'Modifies the YouTube feeds for the server.',
-            type: ApplicationCommandOptionType.SubcommandGroup,
-            options: [
-                {
-                    name: 'add',
-                    description: 'Adds a YouTube feed to a channel.',
-                    type: ApplicationCommandOptionType.Subcommand,
-                    options: [
-                        {
-                            name: 'channel',
-                            description: 'The id of the channel to add. (lnk.daalbot.xyz/1)',
-                            type: ApplicationCommandOptionType.String,
-                            required: true
-                        },
-                        {
-                            name: 'feed_channel',
-                            description: 'The channel to send the feed to.',
-                            type: ApplicationCommandOptionType.Channel,
-                            required: true
-                        },
-                        {
-                            name: 'role',
-                            description: 'The role to ping when a new video is uploaded.',
-                            type: ApplicationCommandOptionType.Role,
-                            required: false
-                        }
-                    ]
-                }
-            ]
-        },
+        // {
+        //     name: 'youtube',
+        //     description: 'Modifies the YouTube feeds for the server.',
+        //     type: ApplicationCommandOptionType.SubcommandGroup,
+        //     options: [
+        //         {
+        //             name: 'add',
+        //             description: 'Adds a YouTube feed to a channel.',
+        //             type: ApplicationCommandOptionType.Subcommand,
+        //             options: [
+        //                 {
+        //                     name: 'channel',
+        //                     description: 'The id of the channel to add. (lnk.daalbot.xyz/1)',
+        //                     type: ApplicationCommandOptionType.String,
+        //                     required: true
+        //                 },
+        //                 {
+        //                     name: 'feed_channel',
+        //                     description: 'The channel to send the feed to.',
+        //                     type: ApplicationCommandOptionType.Channel,
+        //                     required: true
+        //                 },
+        //                 {
+        //                     name: 'role',
+        //                     description: 'The role to ping when a new video is uploaded.',
+        //                     type: ApplicationCommandOptionType.Role,
+        //                     required: false
+        //                 }
+        //             ]
+        //         }
+        //     ]
+        // },
         {
             name: 'bluesky',
             description: 'Modifies the Bluesky feeds for the server.',
@@ -207,51 +207,52 @@ module.exports = {
 
                 fs.writeFileSync(path.resolve('./db/socialalert/twitch.txt'), newTwitchData);
 
+                await daalbot.createIdReference(interaction.guild.id, 'channel', feedChannel.id); // Create a reference for the channel
                 await interaction.reply({ content: `Successfully added ${feedChannel} to the Twitch feed for ${startingChannel}.`, ephemeral: true })
             }
         }
 
-        if (subCommandGroup == 'youtube') {
-            if (subCommand == 'add') {
-                const channel = interaction.options.getString('channel')
-                const feedChannel = interaction.options.getChannel('feed_channel')
-                const role = interaction.options.getRole('role')
+        // if (subCommandGroup == 'youtube') {
+        //     if (subCommand == 'add') {
+        //         const channel = interaction.options.getString('channel')
+        //         const feedChannel = interaction.options.getChannel('feed_channel')
+        //         const role = interaction.options.getRole('role')
 
-                // Create a regex to check if the feedchannel is already linked to the channel
-                const regex = new RegExp(`^${channel}.*?,.*?,${feedChannel.id}$`);
+        //         // Create a regex to check if the feedchannel is already linked to the channel
+        //         const regex = new RegExp(`^${channel}.*?,.*?,${feedChannel.id}$`);
 
-                // Read the file
-                const youtubeData = fs.readFileSync(path.resolve('./db/socialalert/youtube.csv'), 'utf8');
+        //         // Read the file
+        //         const youtubeData = fs.readFileSync(path.resolve('./db/socialalert/youtube.csv'), 'utf8');
 
-                if (youtubeData.split('\n').filter(i => regex.test(i)).length > 0) {
-                    return await interaction.reply({ content: 'That channel is already linked to that channel.', ephemeral: true })
-                }
+        //         if (youtubeData.split('\n').filter(i => regex.test(i)).length > 0) {
+        //             return await interaction.reply({ content: 'That channel is already linked to that channel.', ephemeral: true })
+        //         }
 
-                // Get the channel name / Check if the channel exists
-                const channelData = await daalbot.youtube.channelIdToName(channel)
-                if (channelData == null) return await interaction.reply({ content: 'That channel does not exist.', ephemeral: true })
+        //         // Get the channel name / Check if the channel exists
+        //         const channelData = await daalbot.youtube.channelIdToName(channel)
+        //         if (channelData == null) return await interaction.reply({ content: 'That channel does not exist.', ephemeral: true })
 
-                // Add the channel to the file
-                fs.writeFileSync(path.resolve('./db/socialalert/youtube.csv'), `${youtubeData}\n${channel},${role.id || 'None'},${feedChannel.id}`)
+        //         // Add the channel to the file
+        //         fs.writeFileSync(path.resolve('./db/socialalert/youtube.csv'), `${youtubeData}\n${channel},${role.id || 'None'},${feedChannel.id}`)
 
-                await interaction.reply({ content: `Successfully added ${channel} to the YouTube feed for <#${feedChannel.id}>.`, ephemeral: true })
+        //         await interaction.reply({ content: `Successfully added ${channel} to the YouTube feed for <#${feedChannel.id}>.`, ephemeral: true })
 
-                // Update youtube lock file to prevent bot from throwing up all the current videos in the channel
-                const currentDetectedChannels = fs.readFileSync(path.resolve('./db/socialalert/youtube.detected'), 'utf8').split('\n').map(i => i.split('|')[0]);
+        //         // Update youtube lock file to prevent bot from throwing up all the current videos in the channel
+        //         const currentDetectedChannels = fs.readFileSync(path.resolve('./db/socialalert/youtube.detected'), 'utf8').split('\n').map(i => i.split('|')[0]);
 
-                if (currentDetectedChannels.includes(channel)) return; // If the channel already has its uploads detected then return because it will already know about the videos
+        //         if (currentDetectedChannels.includes(channel)) return; // If the channel already has its uploads detected then return because it will already know about the videos
 
-                let youtubeLock = fs.readFileSync(path.resolve('./db/socialalert/youtube.lock'), 'utf8').split(',');
-                youtubeLock.push(channel);
+        //         let youtubeLock = fs.readFileSync(path.resolve('./db/socialalert/youtube.lock'), 'utf8').split(',');
+        //         youtubeLock.push(channel);
 
-                fs.writeFileSync(path.resolve('./db/socialalert/youtube.lock'), youtubeLock.join(','))
-            }
+        //         fs.writeFileSync(path.resolve('./db/socialalert/youtube.lock'), youtubeLock.join(','))
+        //     }
 
-            // return interaction.reply({
-            //     content: `This feature still needs more testing before it can be used. Sorry for the inconvenience.`,
-            //     ephemeral: true
-            // })
-        }
+        //     // return interaction.reply({
+        //     //     content: `This feature still needs more testing before it can be used. Sorry for the inconvenience.`,
+        //     //     ephemeral: true
+        //     // })
+        // }
 
         if (subCommandGroup == 'bluesky') {
             const feedChannel = interaction.options.getChannel('channel');
@@ -298,6 +299,7 @@ module.exports = {
 
                     const newBlueskyData = blueskyData.split('\n').filter(i => !i.startsWith(account)).join('\n') + '\n' + newAccountData;
 
+                    await daalbot.createIdReference(interaction.guild.id, 'channel', feedChannel.id); // Create a reference for the channel
                     fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), newBlueskyData);
                     return await interaction.reply({ content: `Successfully added <#${feedChannel.id}> to the Bluesky feed for ${accountInput}.`, ephemeral: true });
                 }

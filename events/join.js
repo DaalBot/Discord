@@ -94,4 +94,12 @@ client.on('guildMemberAdd', (member) => {
             member.roles.add(lockdownJSON.role, `Lockdown is active. This role is granted to everyone during lockdown.`)
         }
     }
+
+    // Invite tracking
+    (async() => {
+        if (await daalbot.db.managed.exists(member.guild.id, 'invitetracker/enabled')) {
+            const data = JSON.parse(await daalbot.db.managed.get(member.guild.id, 'invitetracker/data.json'));
+            
+        }
+    })();
 });
