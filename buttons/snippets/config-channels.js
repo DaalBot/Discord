@@ -42,6 +42,6 @@ module.exports = (interaction) => {
     interaction.reply({
         content: 'Please select what kind of channel you want to configure.',
         components: [row],
-        ephemeral: true
+        flags: DJS.MessageFlags.Ephemeral
     })
 }

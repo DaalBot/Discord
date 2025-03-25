@@ -17,12 +17,12 @@ module.exports = async (interaction) => {
 
     switch (activation) {
         case 1:
-            return interaction.reply({ content: 'You do not have DaalBot premium!', ephemeral: true });
+            return interaction.reply({ content: 'You do not have DaalBot premium!', flags: DJS.MessageFlags.Ephemeral });
         case 2:
-            return interaction.reply({ content: 'You have activated all the servers you can. If you want to activate the server you need more credits or deactivate a server', ephemeral: true });
+            return interaction.reply({ content: 'You have activated all the servers you can. If you want to activate the server you need more credits or deactivate a server', flags: DJS.MessageFlags.Ephemeral });
         case 3:
-            return interaction.reply({ content: 'This server is already activated.', ephemeral: true });
+            return interaction.reply({ content: 'This server is already activated.', flags: DJS.MessageFlags.Ephemeral });
         case 0:
-            return interaction.reply({ content: 'Server activated!', ephemeral: true });
+            return interaction.reply({ content: 'Server activated!', flags: DJS.MessageFlags.Ephemeral });
     }
 }

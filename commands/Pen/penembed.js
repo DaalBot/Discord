@@ -132,7 +132,7 @@ module.exports = {
             
             await interaction.reply({
                 content: 'Generating embed...',
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
     
             const isValidImage = (attachment) => {

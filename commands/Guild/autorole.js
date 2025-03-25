@@ -76,7 +76,7 @@ module.exports = {
                     if (interaction.replied) {
                         interaction.editReply({
                             content: `Added <@&${roleID}> to the autorole list.\n\nPlease note: The role <@&${roleID}> is higher than my role, I will not be able to assign it to new members. Please move my role above <@&${roleID}> in the role list.\n[Learn more](https://docs.daalbot.xyz/guides/setup/permissions)`,
-                            ephemeral: true,
+                            flags: Discord.MessageFlags.Ephemeral,
                             allowedMentions: {
                                 roles: []
                             }
@@ -84,7 +84,7 @@ module.exports = {
                     } else {
                         interaction.channel.send({
                             content: `<@${interaction.user.id}>Please note: The role <@&${roleID}> is higher than my role, I will not be able to assign it to new members. Please move my role above <@&${roleID}> in the role list.\n[Learn more](https://docs.daalbot.xyz/guides/setup/permissions)`,
-                            ephemeral: true,
+                            flags: Discord.MessageFlags.Ephemeral,
                             allowedMentions: {
                                 roles: []
                             }
@@ -99,7 +99,7 @@ module.exports = {
                     fs.appendFileSync(`${dbFolder}/${roleID}.id`, roleID);
                     interaction.reply({
                         content: `Added <@&${roleID}> to the autorole list.`,
-                        ephemeral: true,
+                        flags: Discord.MessageFlags.Ephemeral,
                         allowedMentions: {
                             roles: []
                         }
@@ -112,7 +112,7 @@ module.exports = {
                 fs.appendFileSync(`${dbFolder}/${roleID}.id`, roleID);
                 interaction.reply({
                     content: `Added <@&${roleID}> to the autorole list.`,
-                    ephemeral: true,
+                    flags: Discord.MessageFlags.Ephemeral,
                     allowedMentions: {
                         roles: []
                     }
@@ -129,7 +129,7 @@ module.exports = {
                     return {
                         custom: true,
                         content: `Removed <@&${roleID}> from the autorole list.`,
-                        ephemeral: true,
+                        flags: Discord.MessageFlags.Ephemeral,
                         allowedMentions: {
                             roles: []
                         }
@@ -158,7 +158,7 @@ module.exports = {
                     return {
                         custom: true,
                         content: `Roles in the autorole list:\n${rolesString}`,
-                        ephemeral: true,
+                        flags: Discord.MessageFlags.Ephemeral,
                         allowedMentions: {
                             roles: []
                         }

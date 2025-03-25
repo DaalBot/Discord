@@ -4,6 +4,7 @@ const daalbot = require('../daalbot.js');
 const Discord = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const { MessageFlags } = require('discord.js');
 
 client.on('interactionCreate', async (interaction) => {
     try {
@@ -13,7 +14,7 @@ client.on('interactionCreate', async (interaction) => {
             if (fs.existsSync(path.resolve(`./db/tickets/${interaction.guild.id}/blacklist/${interaction.user.id}.txt`))) {
                 return await interaction.reply({
                     content: `You cannot create a ticket in this server!`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
             }
 
@@ -22,12 +23,12 @@ client.on('interactionCreate', async (interaction) => {
                 // if (interaction.user.id === interaction.guild.ownerId) {
                 //     return await interaction.reply({
                 //         content: `This server has reached the maximum amount of tickets. You can upgrade to DaalBot Premium to increase the limit.`,
-                //         ephemeral: true
+                //         flags: MessageFlags.Ephemeral
                 //     })
                 // } else {
                     return await interaction.reply({
                         content: `This server has reached the maximum amount of tickets. Please wait until a ticket is closed to open a new one.`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 // }
             }
@@ -55,7 +56,7 @@ client.on('interactionCreate', async (interaction) => {
             }
 
             const ticketCategory = daalbot.getChannel(interaction.guild.id, fs.readFileSync(`${config.botPath}/db/tickets/${interaction.guild.id}.category`, 'utf8'));
-            if (!ticketCategory) return interaction.reply({ content: 'The ticket category is not set up.', ephemeral: true });
+            if (!ticketCategory) return interaction.reply({ content: 'The ticket category is not set up.', flags: MessageFlags.Ephemeral });
 
             // Check the ticket amount
             if (!fs.existsSync(`${config.botPath}/db/tickets/${interaction.guild.id}/`)) {
@@ -136,7 +137,7 @@ client.on('interactionCreate', async (interaction) => {
                 fs.appendFileSync(`${config.botPath}/db/tickets/${interaction.guild.id}/${ticketAmount}.ticket`, `\n${ticketMessage.id}\n${ticketChannel.id}`);
             }
 
-            interaction.reply({ content: 'Your ticket has been created.', ephemeral: true })
+            interaction.reply({ content: 'Your ticket has been created.', flags: MessageFlags.Ephemeral })
             .then(() => {
                 // Everything is fine :)
             })
@@ -147,7 +148,7 @@ client.on('interactionCreate', async (interaction) => {
 
         if (interaction.customId == 'close_ticket') {
             const ticketChannel = daalbot.getChannel(interaction.guild.id, interaction.channel.id);
-            if (!ticketChannel) return interaction.reply({ content: 'Something went wrong and we were unable to find the ticket channel.', ephemeral: true });
+            if (!ticketChannel) return interaction.reply({ content: 'Something went wrong and we were unable to find the ticket channel.', flags: MessageFlags.Ephemeral });
 
             ticketChannel.setName(`closed-${ticketChannel.name.replace('ticket-', '')}`);
 
@@ -171,16 +172,16 @@ client.on('interactionCreate', async (interaction) => {
 
             ticketMessage.edit({ components: [row] })
 
-            if (ticketChannel.type != Discord.ChannelType.GuildText) return interaction.reply({ content: 'Something went wrong and we were unable to find the ticket channel.', ephemeral: true });
+            if (ticketChannel.type != Discord.ChannelType.GuildText) return interaction.reply({ content: 'Something went wrong and we were unable to find the ticket channel.', flags: MessageFlags.Ephemeral });
 
             const { Permissions } = require('discord.js');
 
-            interaction.reply({ content: 'Your ticket has been closed.', ephemeral: true });
+            interaction.reply({ content: 'Your ticket has been closed.', flags: MessageFlags.Ephemeral });
         }
 
         if (interaction.customId == 'open_ticket') {
             const ticketChannel = daalbot.getChannel(interaction.guild.id, interaction.channel.id);
-            if (!ticketChannel) return interaction.reply({ content: 'Something went wrong and we were unable to find the ticket channel.', ephemeral: true });
+            if (!ticketChannel) return interaction.reply({ content: 'Something went wrong and we were unable to find the ticket channel.', flags: MessageFlags.Ephemeral });
 
             ticketChannel.setName(`ticket-${ticketChannel.name.replace('closed-', '')}`);
 
@@ -213,7 +214,7 @@ client.on('interactionCreate', async (interaction) => {
                 SEND_MESSAGES: true,
             })
 
-            interaction.reply({ content: 'Your ticket has been opened.', ephemeral: true })
+            interaction.reply({ content: 'Your ticket has been opened.', flags: MessageFlags.Ephemeral })
         } 
 
         if (interaction.customId === 'cancel-ticket-purge') {
@@ -254,7 +255,7 @@ client.on('interactionCreate', async (interaction) => {
                 await interaction.reply({
                     embeds: [purgeEmbed],
                     components: [],
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
 
             ticketFiles.forEach(async(ticketFile) => {
@@ -328,11 +329,11 @@ client.on('interactionCreate', async (interaction) => {
             }   
         } catch(e) {
             console.error(e)
-            interaction.reply({ content: 'Something went wrong and we were unable to process your request.', ephemeral: true });
+            interaction.reply({ content: 'Something went wrong and we were unable to process your request.', flags: MessageFlags.Ephemeral });
         }
     }
 } catch {
     console.error('Tickets > Error encountered while dealing with a request.');
-    return interaction.reply({ content: 'An error occurred.', ephemeral: true });
+    return interaction.reply({ content: 'An error occurred.', flags: MessageFlags.Ephemeral });
 }
 })

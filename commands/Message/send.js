@@ -1,4 +1,4 @@
-const { ChannelType, PermissionFlagsBits, ApplicationCommandOptionType } = require("discord.js");
+const { ChannelType, PermissionFlagsBits, ApplicationCommandOptionType, MessageFlags } = require("discord.js");
 
 module.exports = {
   category: 'Message',
@@ -40,7 +40,7 @@ module.exports = {
     return {
       custom: true,
       content: `Sent \`\`\`\n${result}\n\`\`\` to ${channel}`,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     }
   }
 }

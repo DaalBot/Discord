@@ -34,7 +34,7 @@ module.exports = {
   
       interaction.reply({
         content: `Deleted ${size} messages.`,
-        ephemeral: true
+        flags: DJS.MessageFlags.Ephemeral
       })
     },
   }

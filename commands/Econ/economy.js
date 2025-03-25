@@ -64,7 +64,7 @@ module.exports = {
 
         if (user.bot) return await interaction.reply({
             content: `Uhh hey if you haven't noticed, bots can't have coins.`,
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         })
         
         const userCoinsFile = await daalbot.db.managed.get(interaction.guild.id, `coins/${user.id}`);
@@ -82,7 +82,7 @@ module.exports = {
             if (userCoins < 0) {
                 return await interaction.reply({
                     content: `You cannot remove more coins than the user has.`,
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             }
 
@@ -93,7 +93,7 @@ module.exports = {
             if (userCoins < 0) {
                 return await interaction.reply({
                     content: `You cannot set a user's coins to a negative value.`,
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             }
 
@@ -101,7 +101,7 @@ module.exports = {
         } else if (action == `view`) {
             return await interaction.reply({
                 content: `**${user.tag}** has ${userCoins} coins.`,
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             });
         }
 
@@ -109,17 +109,17 @@ module.exports = {
             case `add`:
                 return await interaction.reply({
                     content: `Added ${amount} coins to **${user.tag}**. They now have ${userCoins} coins.`,
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             case `remove`:
                 return await interaction.reply({
                     content: `Removed ${amount} coins from **${user.tag}**. They now have ${userCoins} coins.`,
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             case `set`:
                 return await interaction.reply({
                     content: `Set **${user.tag}**'s coins to ${userCoins}.`,
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
         }
     }

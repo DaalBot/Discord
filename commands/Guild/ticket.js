@@ -98,7 +98,7 @@ module.exports = {
                     components: [
                         row.addComponents(basic, advanced)
                     ],
-                    ephemeral: true
+                    flags: Discord.MessageFlags.Ephemeral
                 })
                 const filter = i => i.user.id === interaction.user.id && i.customId.startsWith('ticket_panel_creation_');
                 

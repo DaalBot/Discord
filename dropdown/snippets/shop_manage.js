@@ -18,7 +18,7 @@ module.exports = async (interaction) => {
         if (mode == 'add') {
             await interaction.reply({
                 content: `Loading...`,
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
             const item = {
                 name: '',
@@ -82,7 +82,7 @@ module.exports = async (interaction) => {
         } else if (mode == 'remove') {
             await interaction.reply({
                 content: `Loading...`,
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
 
             const currentShop = JSON.parse(await daalbot.db.managed.get(interaction.guild.id, `shop/items.json`));
@@ -115,14 +115,14 @@ module.exports = async (interaction) => {
 
             await interaction.reply({
                 content: `Shop enabled!`,
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         } else if (mode == 'disable') {
             await daalbot.db.managed.delete(interaction.guild.id, `shop/enabled`);
 
             await interaction.reply({
                 content: `Shop disabled!`,
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         }
     } else if (action == 'remove') {
@@ -130,7 +130,7 @@ module.exports = async (interaction) => {
 
         await interaction.reply({
             content: `Removing item...`,
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         })
 
         const currentShop = JSON.parse(await daalbot.db.managed.get(interaction.guild.id, `shop/items.json`));

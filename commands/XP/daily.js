@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const daalbot = require('../../daalbot');
-const { EmbedBuilder, Colors } = require('discord.js');
+const { EmbedBuilder, Colors, MessageFlags } = require('discord.js');
 
 async function getMsUntilTomorrow() {
     // Create a new Date object for the current date
@@ -84,7 +84,7 @@ module.exports = {
 
                 await interaction.reply({
                     embeds: [embed],
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             } else {
                 let streak = 0;

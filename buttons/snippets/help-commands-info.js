@@ -1,4 +1,4 @@
-const { ButtonInteraction } = require("discord.js");
+const { ButtonInteraction, MessageFlags } = require("discord.js");
 const DJS = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -31,5 +31,5 @@ module.exports = (interaction) => {
         ]);
     }
 
-    interaction.reply({ embeds: [embed], ephemeral: true })
+    interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral })
 }

@@ -1,4 +1,5 @@
-const { readdir, readFile, writeFile } = require('fs/promises')
+const { readdir, readFile, writeFile } = require('fs/promises');
+const { MessageFlags } = require('discord.js');
 const { createHash } = require('crypto');
 const daalbot = require('./daalbot');
 const config = require('./config.json');
@@ -136,7 +137,7 @@ client.on('interactionCreate', async interaction => {
         if (command) {
             if (command.guildOnly && (!(interaction?.guild ?? false))) return await interaction.reply({
                 content: 'This command can only be used in a server.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
     
             if (command.ownerOnly) {
@@ -149,14 +150,14 @@ client.on('interactionCreate', async interaction => {
     
                 return interaction.reply({
                     content: 'This command is owner only.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
             }
     
             if (command.testOnly && interaction.guild.id !== testGuild && !command.beta) {
                 interaction.reply({
                     content: `This command has been disabled due to it being in testing. We apologize for the inconvenience.`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
             } else {
                 if (!command.permissions) { // The command does not require any permissions
@@ -169,7 +170,7 @@ client.on('interactionCreate', async interaction => {
                     if (!memberPermissions) {
                         interaction.reply({
                             content: 'This command requires special permissions to use however you do not have any permissions.',
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         })
                     }
     
@@ -189,7 +190,7 @@ client.on('interactionCreate', async interaction => {
                     } else {
                         interaction.reply({
                             content: 'You do not have the required permissions to use this command.',
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         })
                     }
                 }
@@ -198,7 +199,7 @@ client.on('interactionCreate', async interaction => {
         // else if (!interaction?.guild?.commands?.cache?.find(c => c.name === interaction.commandName)) { // Fail if its not a custom command and not in the commands array
         //     interaction.reply({
         //         content: `Hey, I dont know how to tell you this ${interaction.user.displayName} but that command doesnt exactly exist anymore...`,
-        //         ephemeral: true
+        //         flags: MessageFlags.Ephemeral
         //     })
         // }
     } catch (error) {
@@ -210,7 +211,7 @@ client.on('interactionCreate', async interaction => {
 
             interaction.reply({
                 content: `Something went wrong, We have no clue what you somehow messed up so bad you discovered a new bug. Though do report it in the [support server](https://lnk.daalbot.xyz/HQ) (Error ID: ${errorId})`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
         } catch (e) {
             // Give up

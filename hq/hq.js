@@ -1,67 +1,29 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, MessageFlags, ApplicationCommandOptionType, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
 const client = require('../client');
+const crypto = require('crypto');
 const daalbot = require('../daalbot.js');
 const fs = require('fs');
 const path = require('path');
-function botLog(text) {
-    client.channels.cache.find(channel => channel.id === config.Logchannel).send(text);
-    console.log(text);
-};
-
-/**
- * @param {string} user 
- * @param {boolean} premium 
- * @returns {void}
- */
-function updatePremiumStatus(user, premium) {
-    const premiumRole = client.guilds.cache.get('1001929445478781030').roles.cache.find(role => role.id === '1166772281029173389');
-    const member = client.guilds.cache.get('1001929445478781030').members.cache.find(member => member.id === user);
-
-    if (premium) {
-        member.roles.add(premiumRole);
-    } else {
-        member.roles.remove(premiumRole);
-    }
-
-    /**
-     * @type {users: {id: string, boosts: number, servers_activated: number, servers: string[]}[], guilds: {id: string, activatedBy: string}[]}
-    */
-    const premiumJson = JSON.parse(fs.readFileSync(path.resolve('./db/premium.json'), 'utf8'));
-    const premiumUser = premiumJson.users.find(user => user.id === member.id);
-
-    if (!premiumUser) {
-        premiumJson.users.push({
-            id: member.id,
-            boosts: 1,
-            servers_activated: 0,
-            servers: []
-        })
-
-        fs.writeFileSync(path.resolve('./db/premium.json'), JSON.stringify(premiumJson, null, 4));
-    } else {
-        if (premium) {
-            premiumUser.boosts++;
-        } else {
-            premiumUser.boosts--;
-        }
-
-        fs.writeFileSync(path.resolve('./db/premium.json'), JSON.stringify(premiumJson, null, 4));
-    }
-}
 
 client.on('ready', () => {
     const server = client.guilds.cache.get('1001929445478781030');
     const commands = server?.commands
 
     commands?.create({
-        name: 'suggest',
-        description: 'Suggest a feature for the bot',
+        name: 'api',
+        description: 'API related actions',
         options: [
             {
-                name: 'suggestion',
-                description: 'The suggestion',
-                type: 3,
-                required: true
+                name: 'keys',
+                description: 'Manage API keys',
+                type: ApplicationCommandOptionType.SubcommandGroup,
+                options: [
+                    {
+                        name: 'generate',
+                        description: 'Generate a api key.',
+                        type: ApplicationCommandOptionType.Subcommand
+                    }
+                ]
             }
         ]
     })
@@ -89,34 +51,6 @@ client.on('guildMemberRemove', member => {
         return;
     }
 });
-
-client.on('guildMemberUpdate', (oldMember, newMember) => {
-    if (newMember.guild.id === '1001929445478781030') {
-        // Premium
-
-        // Boost detection
-        const oldBoosts = oldMember.premiumSinceTimestamp;
-        const newBoosts = newMember.premiumSinceTimestamp;
-
-        const type = newMember.guild.premiumSubscriptionCount > oldMember.guild.premiumSubscriptionCount ? 'boost' : 'unboost';
-
-        if (type === 'boost') {
-            const boostEmbed = new EmbedBuilder()
-                .setTitle(`Thanks for boosting the server!`)
-                .setDescription(`Thanks for boosting the server, <@${newMember.id}>!`)
-                .setColor(0x9b24a9)
-            client.channels.cache.find(channel => channel.id === '1010452045163143209').send({ embeds: [boostEmbed] });
-
-            updatePremiumStatus(newMember.id, true);
-        }
-
-        if (oldBoosts !== null && newBoosts === null) {
-            updatePremiumStatus(newMember.id, false);
-        }
-    } else {
-        return;
-    }
-})
 
 client.on('messageCreate', msg => {
     if (msg.channel.type == ChannelType.DM) return; // Ignore DMs
@@ -147,50 +81,132 @@ client.on('messageCreate', msg => {
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.guildId === '1001929445478781030') return;
-    if (interaction.isButton()) {
-        const ID = interaction.customId;
+    if (!interaction.channel) return await interaction.reply({
+        content: 'Not sure how you even did this but you need to use this command in a channel',
+        flags: MessageFlags.Ephemeral
+    })
 
-        if (ID === 'hq-suggestion-approve') {
-            interaction.reply({
-                content: 'Suggestion has been approved!',
-                ephemeral: true
-            })
+    if (interaction.isChatInputCommand()) {
+        const { commandName, options } = interaction;
 
-            daalbot.getChannel('1001929445478781030', '1003825539766820904').send(`Suggestion "${interaction.message.embeds[0].description}" by ${interaction.message.embeds[0].title.replace(/Suggestion from /, '')}\nwas approved by <@${interaction.user.id}>`);
-        }
+        if (commandName === 'api') {
+            if (options.getSubcommandGroup() === 'keys') {
+                if (options.getSubcommand() === 'generate') {
+                    try {
+                        const rand = crypto.randomBytes(24).toString('base64url');
 
-        if (ID === 'hq-suggestion-deny') {
-            interaction.reply({
-                content: 'Suggestion has been denied!',
-                ephemeral: true
-            })
-        }
-    }
+                        if (interaction.channel.type != ChannelType.GuildText) return await interaction.reply({
+                            content: 'You can only run this command within text channels',
+                            flags: MessageFlags.Ephemeral
+                        })
+                        
+                        const startEmbed = new EmbedBuilder()
+                            .setTitle('API Key Generation')
+                            .setDescription('Please pick a server to generate the key for.')
+                            .setFooter({
+                                text: 'You have 60 seconds to select a server | Step 1',
 
-    if (interaction.isCommand()) {
-        if (interaction.commandName === 'suggest') {
-            const suggestion = interaction.options.getString('suggestion');
-            const Embed = new EmbedBuilder()
-            .setTitle(`Suggestion from ${interaction.user.tag}`)
-            .setDescription(`${suggestion}`)
-            .setColor(0xae00ff)
+                            })
+                            .setColor('Yellow')
 
-            const row = new ActionRowBuilder()
-            .addComponents(
-                new ButtonBuilder()
-                .setCustomId('hq-suggestion-approve')
-                .setLabel('Approve')
-                .setStyle(ButtonStyle.Success),
-                new ButtonBuilder()
-                .setCustomId('hq-suggestion-deny')
-                .setLabel('Deny')
-                .setStyle(ButtonStyle.Danger)
-            )
-            client.channels.cache.find(channel => channel.id === '1004505732512747583').send({
-                embeds: [Embed],
-                components: [row]
-            })
-            interaction.reply('Suggestion has been sent!')
+                        const row = new ActionRowBuilder()
+                        const menu = new StringSelectMenuBuilder()
+                            .setCustomId('hq_api_keygen_selector')
+                            .setPlaceholder('Select a server')
+                            .setMaxValues(1)
+
+                        client.guilds.cache.forEach(guild => {
+                            if (guild.ownerId == interaction.user.id) menu.addOptions(
+                                new StringSelectMenuOptionBuilder()
+                                    .setLabel(guild.name)
+                                    .setValue(guild.id)
+                                    .setDescription(guild.id)
+                            )
+                        })
+
+                        row.addComponents(menu)
+
+                        interaction.reply({
+                            embeds: [startEmbed],
+                            components: [row],
+                            flags: MessageFlags.Ephemeral // Message is gonna contain api keys so it should be hidden
+                        })
+
+                        const filter = i => i.customId === 'hq_api_keygen_selector' && i.user.id === interaction.user.id
+                        const collector = await interaction.channel.awaitMessageComponent({ filter, time: 60000 });
+
+                        if (!collector.isStringSelectMenu()) return await interaction.editReply({
+                            content: 'Selected component is not a string select menu',
+                        });
+
+                        const guild = client.guilds.cache.get(collector.values[0]);
+
+                        if (!guild) return await interaction.editReply({
+                            content: 'Invalid server selected',
+                        });
+
+                        const confirmEmbed = new EmbedBuilder()
+                            .setTitle('API Key Generation')
+                            .setDescription(`Are you sure you want to generate a key for ${guild.name}? Doing so will invalidate any previous keys.`)
+                            .setFooter({
+                                text: 'You have 60 seconds to confirm | Step 2',
+                            })
+                            .setColor('Yellow')
+
+                        const confirmRow = new ActionRowBuilder()
+                            .addComponents(
+                                new ButtonBuilder()
+                                    .setCustomId('hq_api_keygen_confirm')
+                                    .setLabel('Confirm')
+                                    .setStyle(ButtonStyle.Success),
+
+                                new ButtonBuilder()
+                                    .setCustomId('hq_api_keygen_cancel')
+                                    .setLabel('Cancel')
+                                    .setStyle(ButtonStyle.Danger)
+                            )
+
+                        await interaction.editReply({
+                            embeds: [confirmEmbed],
+                            components: [confirmRow]
+                        })
+
+                        const confirmFilter = i => i.customId === 'hq_api_keygen_confirm' || i.customId === 'hq_api_keygen_cancel'
+                        const confirmCollector = await interaction.channel.awaitMessageComponent({ filter: confirmFilter, time: 60000 });
+
+                        if (confirmCollector.customId === 'hq_api_keygen_cancel') {
+                            const cancelEmbed = new EmbedBuilder()
+                                .setTitle('API Key Generation')
+                                .setDescription('Key generation cancelled - No key was added')
+                                .setColor('Red')
+
+                            return await interaction.editReply({
+                                embeds: [cancelEmbed],
+                                components: []
+                            })
+                        }
+
+                        if (confirmCollector.customId === 'hq_api_keygen_confirm') {
+                            const resultEmbed = new EmbedBuilder()
+                                .setTitle('API Key Generation')
+                                .setDescription(`Key generated successfully for ${guild.name}. The key is \`${Buffer.from(guild.id).toString('base64').replace(/=/g, '')}.${rand}\` making your \`Authorization\` header \`Guild ${Buffer.from(guild.id).toString('base64').replace(/=/g, '')}.${rand}\``)
+                                .setColor('Green')
+
+                            await interaction.editReply({
+                                embeds: [resultEmbed],
+                                components: []
+                            })
+                        }
+                    } catch (err) {
+                        console.error(err)
+                        const errorEmbed = new EmbedBuilder()
+                            .setTitle('API Key Generation')
+                            .setDescription('An error occured while generating the key, This could be due to having too many servers owned or not answering in time. If you believe this is a mistake, please create a ticket')
+                            .setColor('Red')
+                        interaction.replied ? await interaction.editReply({ embeds: [errorEmbed], components: [] }) : await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral })
+                    }
+                }
+            }
         }
     }
 })

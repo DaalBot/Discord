@@ -1,7 +1,7 @@
 const config = require("../../config.json");
 const fs = require('fs');
 const daalbot = require('../../daalbot.js');
-const { PermissionFlagsBits, ApplicationCommandOptionType, ChatInputCommandInteraction, ChannelType } = require('discord.js');
+const { PermissionFlagsBits, ApplicationCommandOptionType, ChatInputCommandInteraction, ChannelType, MessageFlags } = require('discord.js');
 
 function save(GuildId, RoleId) {
     try {
@@ -64,7 +64,7 @@ module.exports = {
     callback: async({ interaction }) => {
         interaction.reply({
             content: `Please send a message link to a message you want to become the verification message. (Expires <t:${await daalbot.timestamps.getFutureDiscordTimestamp(60 * 1000)}:R>)`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         })
 
         const filter = m => (m.author.id === interaction.user.id);

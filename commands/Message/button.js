@@ -101,21 +101,21 @@ module.exports = {
             if (url && id) {
                 return interaction.reply({
                     content: 'You cannot specify both a URL and an ID.',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             }
 
             if (!url && !id) {
                 return interaction.reply({
                     content: 'You must specify either a URL or an ID.',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             }
 
             if (url && !url.match(/^https?:\/\//)) {
                 return interaction.reply({
                     content: 'The URL provided is invalid.',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             }
 
@@ -124,7 +124,7 @@ module.exports = {
             if (!message) {
                 return interaction.reply({
                     content: 'The message provided does not exist.',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             }
 
@@ -133,7 +133,7 @@ module.exports = {
                 if (webhook.owner.id !== daalbot.client.user.id) {
                     return interaction.reply({
                         content: 'I cannot modify buttons on this message.',
-                        ephemeral: true
+                        flags: DJS.MessageFlags.Ephemeral
                     });
                 }
             }
@@ -141,7 +141,7 @@ module.exports = {
             if (id.match(/[ .[\]\[{}]/)) {
                 return interaction.reply({
                     content: 'The ID provided is invalid.',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             }
 
@@ -160,7 +160,7 @@ module.exports = {
             if (row.components.length >= 5) {
                 return interaction.reply({
                     content: 'You cannot have more than 5 buttons in a row.',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             }
 
@@ -186,7 +186,7 @@ module.exports = {
 
             interaction.reply({
                 content: `Button added successfully.${styleChanged ? ` Your style selection has been discarded because you chose a url` : ''} with the custom id \`${url ? 'None' : `cust_${id}`}\``,
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             });
         }
     }

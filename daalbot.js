@@ -694,6 +694,8 @@ async function getFutureDiscordTimestamp(ms) {
  * @param {Object | undefined} data
 */
 async function convertMetaText(message, guild, data) {
+    if (!data) return message;
+    
     // Remove the client object from the data object incase it's there because of the token property o~o
     const replacementData = data.client ? {
         ...data,
@@ -701,9 +703,10 @@ async function convertMetaText(message, guild, data) {
     } : data;
     replacementData.guild = guild;
 
-    // Replace the placeholders in the message with the data
-    return message.replace(/%%{(\w+)}%%/g, (match, key) => {
-        return replacementData[key.toLowerCase()] || match;
+    // Replace the placeholders in the message with their values
+    return message.replace(/%%{([^}]+)}%%/g, (match, path) => {
+        const value = path.split('.').reduce((obj, key) => obj?.[key], replacementData);
+        return value !== undefined ? value : match;
     });
 }
 
@@ -718,7 +721,11 @@ async function resolveId(id, from, to) {
     const lookupJSON = JSON.parse(lookupFile);
 
     if (from === 'guild') {
-        return lookupJSON.filter(l => l.guild === id); // [{type: 'channel', id: '1234', guild: '5678'}...]
+        if (to == 'all') {
+            return lookupJSON.filter(l => l.guild === id); // [{type: 'channel', id: '1234', guild: '5678'}...] or [{type: 'role', id: '1234', guild: '5678'}...]
+        } else {
+            return lookupJSON.filter(l => l.guild === id).filter(l => l.type === to); // [{type: '[TYPE]', id: '1234', guild: '5678'}...]
+        }
     } else if (to === 'guild') {
         // Checking object type doesn't matter because the IDs are unique (I hope)
         return lookupJSON.find(l => l.id == id).guild;
@@ -870,6 +877,7 @@ module.exports = {
     getMessageFromString,
     resolveId,
     createIdReference,
+    convertMetaText,
     api,
     embed: Discord.EmbedBuilder,
     DatabaseEntry

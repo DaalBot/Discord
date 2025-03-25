@@ -1,4 +1,4 @@
-const { ButtonInteraction, EmbedBuilder } = require("discord.js");
+const { ButtonInteraction, EmbedBuilder, MessageFlags } = require("discord.js");
 const axios = require('axios');
 
 /**
@@ -21,7 +21,7 @@ module.exports = async(interaction) => {
 
     interaction.reply({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
     })
 
     const filter = m => m.author.id === interaction.user.id;
@@ -32,7 +32,7 @@ module.exports = async(interaction) => {
         if (!config) {
             return interaction.followUp({
                 content: 'Invalid configuration number',
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             })
         }
 
@@ -49,7 +49,7 @@ module.exports = async(interaction) => {
 
         interaction.followUp({
             embeds: [embed],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         })
 
         const collector = interaction.channel.createMessageCollector({ filter, time: 60 * 1000 });
@@ -68,12 +68,12 @@ module.exports = async(interaction) => {
 
                 interaction.followUp({
                     content: `Successfully updated the value of \`${config}\`.`,
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                 })
             } catch(e) {
                 interaction.followUp({
                     content: `Something went wrong :sob:\n\`\`\`json\n${e}\n\`\`\``,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
             }
 
@@ -84,7 +84,7 @@ module.exports = async(interaction) => {
         collector.on('end', () => {
             if (!updated) interaction.followUp({
                 content: 'You took too long to respond',
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             })
         })
     })

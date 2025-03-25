@@ -1,4 +1,4 @@
-const { PermissionFlagsBits, ApplicationCommandOptionType, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { PermissionFlagsBits, ApplicationCommandOptionType, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 
 module.exports = {
@@ -97,7 +97,7 @@ module.exports = {
         await interaction.reply({
             content: 'Please select a category to configure',
             components: [row],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         })
 
         // const subCommandGroup = interaction.options.getSubcommandGroup();

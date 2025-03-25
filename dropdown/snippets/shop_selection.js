@@ -10,22 +10,22 @@ module.exports = async (interaction) => {
     const items = JSON.parse(await daalbot.db.managed.get(interaction.guild.id, 'shop/items.json'));
     const userCoins = await daalbot.db.managed.get(interaction.guild.id, `coins/${interaction.user.id}`);
     if (userCoins == 'File not found.')
-        return interaction.reply({ content: 'You do not have any coins so where are you gonna get the money to buy this?', ephemeral: true });
+        return interaction.reply({ content: 'You do not have any coins so where are you gonna get the money to buy this?', flags: DJS.MessageFlags.Ephemeral });
 
     const itemData = items.find(i => i.id == item);
 
     if (itemData == undefined)
-        return interaction.reply({ content: 'That item does not exist.', ephemeral: true });
+        return interaction.reply({ content: 'That item does not exist.', flags: DJS.MessageFlags.Ephemeral });
 
     if (parseInt(userCoins) < itemData.price) 
-        return interaction.reply({ content: 'You do not have enough coins to buy this item.', ephemeral: true });
+        return interaction.reply({ content: 'You do not have enough coins to buy this item.', flags: DJS.MessageFlags.Ephemeral });
 
     if (itemData.role) {
         interaction.member.roles.add(itemData.role)
             .then(async() => {
                 await interaction.reply({
                     content: `You have bought the ${itemData.name} for ${daalbot.emojis.get('coin', interaction.guild.id)} ${itemData.price}. You now have ${daalbot.emojis.get('coin', interaction.guild.id)} ${userCoins - itemData.price} coins.`,
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
 
                 const newCoins = parseInt(userCoins) - itemData.price;
@@ -38,13 +38,13 @@ module.exports = async (interaction) => {
                 console.error(e);
                 interaction.reply({
                     content: `Something went wrong. You still have ${daalbot.emojis.get('coin', interaction.guild.id)} ${userCoins} coins.`,
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 });
             });
     } else {
         interaction.reply({
             content: 'This item does not have a role associated with it. Please contact an admin.',
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         })
     }
 }

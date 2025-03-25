@@ -56,26 +56,26 @@ module.exports = {
         if (role === 'Role not found.') {
             const embed = generateErrorEmbed('The bot could not find the role you specified.')
 
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: Discord.MessageFlags.Ephemeral });
         }
 
         if (role === 'Server not found.') {
             const embed = generateErrorEmbed('The bot could not find the server that you are in.')
 
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: Discord.MessageFlags.Ephemeral });
         }
 
         if (role == undefined) {
             const embed = generateErrorEmbed('The role just returned undefined and has no explanation as to why.')
 
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: Discord.MessageFlags.Ephemeral });
         }
 
         // Check if the level is a positive number and not 0.
         if (!(level >= 1)) {
             const embed = generateErrorEmbed('The level you specified is not a valid number.')
 
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: Discord.MessageFlags.Ephemeral });
         }
 
         // Write the reward to the file.
@@ -97,6 +97,6 @@ module.exports = {
             .setDescription(`The role <@&${role.id}> will be granted to users when they reach level ${level}.`)
             .setTimestamp();
 
-        return interaction.reply({ embeds: [embed], ephemeral: true });
+        return interaction.reply({ embeds: [embed], flags: Discord.MessageFlags.Ephemeral });
     }
 }

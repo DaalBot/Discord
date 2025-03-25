@@ -31,6 +31,6 @@ module.exports = {
 
         daalbot.client.user.setActivity(newActivity, { type: type })
 
-        interaction.reply(`Successfully changed status to "${newActivity}"`, { ephemeral: true })
+        interaction.reply(`Successfully changed status to \`${newActivity}\``)
     }
 }

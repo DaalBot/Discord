@@ -44,7 +44,7 @@ module.exports = async(interaction) => {
             interaction.reply({
                 content: `There are too many channels to display in a dropdown. Please send a message with the channel you want to configure. eg. "<#${interaction.guild.channels.cache.random().id}>"`,
                 components: [],
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
 
             const collector = await interaction.channel.awaitMessages({
@@ -57,7 +57,7 @@ module.exports = async(interaction) => {
                 return interaction.editReply({
                     content: `You took too long to respond. Please try again.`,
                     components: [],
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
             
             const channel = collector.first().mentions.channels.first();
@@ -65,7 +65,7 @@ module.exports = async(interaction) => {
                 return interaction.editReply({
                     content: `You didn't mention a channel. Please try again.`,
                     components: [],
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
             
             daalbot.db.setChannel(interaction.guild.id, category, channel.id);
@@ -73,7 +73,7 @@ module.exports = async(interaction) => {
             await interaction.editReply({
                 content: `The channel has been set to <#${channel.id}>.`,
                 components: [],
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
 
             return await collector.first().delete();
@@ -81,7 +81,7 @@ module.exports = async(interaction) => {
             interaction.reply({
                 content: `Please select a channel. (If you don't see the channel you're looking for, make sure I can send messages in that channel and it's a text channel.)`,
                 components: [row],
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         }
     } else {
@@ -93,7 +93,7 @@ module.exports = async(interaction) => {
 
         interaction.reply({
             content: `The channel has been set to <#${channelId}>.`,
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         })
     }
 }

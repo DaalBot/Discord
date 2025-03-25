@@ -1,5 +1,5 @@
 const client = require('../../client.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, MessageFlags } = require('discord.js');
 require('dotenv').config();
 const daalbot = require('../../daalbot.js')
 
@@ -63,7 +63,7 @@ client.on('interactionCreate', async(interaction) => {
 
                 interaction.reply({
                     content: 'Status set.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
             } else if (interaction.customId === 'oh-downtimepanel-offline') {
                 const embed = new EmbedBuilder()
@@ -78,7 +78,7 @@ client.on('interactionCreate', async(interaction) => {
 
                 interaction.reply({
                     content: 'Status set.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
             } else if (interaction.customId === 'oh-downtimepanel-notresponding') {
                 const embed = new EmbedBuilder()
@@ -93,7 +93,7 @@ client.on('interactionCreate', async(interaction) => {
 
                 interaction.reply({
                     content: 'Status set.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
             } else if (interaction.customId === 'oh-downtimepanel-custom') {
                 // Get the current timestamp in milliseconds
@@ -107,7 +107,7 @@ client.on('interactionCreate', async(interaction) => {
                 
                 await interaction.reply({
                     content: `Please enter a custom status message. (expires ${discordTimestamp})`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
 
                 const filter = m => m.author.id === interaction.user.id;
@@ -131,7 +131,7 @@ client.on('interactionCreate', async(interaction) => {
 
                     interaction.editReply({
                         content: 'Custom status message set.',
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 } catch (error) {
                     interaction.update({

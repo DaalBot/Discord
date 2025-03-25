@@ -135,6 +135,8 @@ const exportClass = new class {
                     enum: {
                         TextInputStyle: DJS.TextInputStyle,
                         ChannelType: DJS.ChannelType,
+                        ButtonStyle: DJS.ButtonStyle,
+                        MessageFlags: DJS.MessageFlags
                     },
                     embed: DJS.EmbedBuilder,
                     components: {

@@ -92,6 +92,6 @@ module.exports = (interaction) => {
             row2,
             row3
         ],
-        ephemeral: true
+        flags: DJS.MessageFlags.Ephemeral
     })
 }

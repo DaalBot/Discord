@@ -126,8 +126,8 @@ module.exports = {
     callback: async ({ interaction }) => {
         const role = interaction.options.getRole('role');
 
-        if (role.position >= interaction.guild.members.me.roles.highest.position) return interaction.reply({ content: 'Role is higher than my highest role', ephemeral: true });
-        if (role.position >= interaction.member.roles.highest.position && interaction.guild.ownerId != interaction.user.id) return interaction.reply({ content: 'Role is higher than your highest role', ephemeral: true });
+        if (role.position >= interaction.guild.members.me.roles.highest.position) return interaction.reply({ content: 'Role is higher than my highest role', flags: DJS.MessageFlags.Ephemeral });
+        if (role.position >= interaction.member.roles.highest.position && interaction.guild.ownerId != interaction.user.id) return interaction.reply({ content: 'Role is higher than your highest role', flags: DJS.MessageFlags.Ephemeral });
 
         if (interaction.options.getSubcommand() === 'button') {
             // Yay some new code
@@ -140,9 +140,9 @@ module.exports = {
             const emoji = interaction.options.getString('emoji');
             const style = interaction.options.getString('style') ?? DJS.ButtonStyle.Secondary;
 
-            if (channel == undefined) return interaction.reply({ content: 'Channel not found', ephemeral: true });
-            if (channel == 'Channel not found.') return interaction.reply({ content: 'Channel not found', ephemeral: true });
-            if (channel == 'Server not found.') return interaction.reply({ content: 'Server not found', ephemeral: true });
+            if (channel == undefined) return interaction.reply({ content: 'Channel not found', flags: DJS.MessageFlags.Ephemeral });
+            if (channel == 'Channel not found.') return interaction.reply({ content: 'Channel not found', flags: DJS.MessageFlags.Ephemeral });
+            if (channel == 'Server not found.') return interaction.reply({ content: 'Server not found', flags: DJS.MessageFlags.Ephemeral });
 
             const message = await daalbot.getMessageFromString(message_input, channel);
             const button = new DJS.ButtonBuilder()
@@ -152,7 +152,7 @@ module.exports = {
 
             if (emoji) button.setEmoji(emoji.trim().replace(/[<>:A-Za-z_ ]/g, ''));
 
-            if (message.id == undefined) return interaction.reply({ content: 'Message not found', ephemeral: true });
+            if (message.id == undefined) return interaction.reply({ content: 'Message not found', flags: DJS.MessageFlags.Ephemeral });
 
             if (message.components.length > 0) {
                 const row = message.components[0];
@@ -160,7 +160,7 @@ module.exports = {
                 if (row.components[0].type == DJS.ComponentType.Button) {
                     row.components.push(button);
 
-                    if (row.components.length > 5) return interaction.reply({ content: `Cannot have more than 5 buttons in a row`, ephemeral: true });
+                    if (row.components.length > 5) return interaction.reply({ content: `Cannot have more than 5 buttons in a row`, flags: DJS.MessageFlags.Ephemeral });
 
                     if (message.author.id === client.user.id) {
                         await message.edit({ components: [row] });
@@ -172,13 +172,13 @@ module.exports = {
                                 components: [row]
                             });
                         } else {
-                            return interaction.reply({ content: 'Unsupported message', ephemeral: true });
+                            return interaction.reply({ content: 'Unsupported message', flags: DJS.MessageFlags.Ephemeral });
                         }
                     }
 
-                    return interaction.reply({ content: 'Button added to message.', ephemeral: true });
+                    return interaction.reply({ content: 'Button added to message.', flags: DJS.MessageFlags.Ephemeral });
                 } else {
-                    return interaction.reply({ content: 'Unsupported message', ephemeral: true });
+                    return interaction.reply({ content: 'Unsupported message', flags: DJS.MessageFlags.Ephemeral });
                 }
             } else {
                 const row = new DJS.ActionRowBuilder()
@@ -194,11 +194,11 @@ module.exports = {
                             components: [row]
                         });
                     } else {
-                        return interaction.reply({ content: 'Unsupported message', ephemeral: true });
+                        return interaction.reply({ content: 'Unsupported message', flags: DJS.MessageFlags.Ephemeral });
                     }
                 }
 
-                return interaction.reply({ content: 'Button added to message.', ephemeral: true });
+                return interaction.reply({ content: 'Button added to message.', flags: DJS.MessageFlags.Ephemeral });
             }
         }
 
@@ -211,13 +211,13 @@ module.exports = {
             const message_input = interaction.options.getString('message_link');
             const placeholder = interaction.options.getString('placeholder') || 'Select a role';
     
-            if (channel == undefined) return interaction.reply({ content: 'Channel not found', ephemeral: true });
-            if (channel == 'Channel not found.') return interaction.reply({ content: 'Channel not found', ephemeral: true });
-            if (channel == 'Server not found.') return interaction.reply({ content: 'Server not found', ephemeral: true });
+            if (channel == undefined) return interaction.reply({ content: 'Channel not found', flags: DJS.MessageFlags.Ephemeral });
+            if (channel == 'Channel not found.') return interaction.reply({ content: 'Channel not found', flags: DJS.MessageFlags.Ephemeral });
+            if (channel == 'Server not found.') return interaction.reply({ content: 'Server not found', flags: DJS.MessageFlags.Ephemeral });
     
             const message = await daalbot.getMessageFromString(message_input, channel);
     
-            if (message.id == undefined) return interaction.reply({ content: 'Message not found', ephemeral: true });
+            if (message.id == undefined) return interaction.reply({ content: 'Message not found', flags: DJS.MessageFlags.Ephemeral });
     
             if (message.components.length > 0) {
                 const row = message.components[0];
@@ -228,7 +228,7 @@ module.exports = {
                         value: role.id,
                     });
     
-                    if (row.components[0].options.length > 25) return interaction.reply({ content: 'Cannot have more than 25 options in a dropdown', ephemeral: true });
+                    if (row.components[0].options.length > 25) return interaction.reply({ content: 'Cannot have more than 25 options in a dropdown', flags: DJS.MessageFlags.Ephemeral });
     
                     if (message.author.id === client.user.id) {
                         await message.edit({ components: [row] });
@@ -240,13 +240,13 @@ module.exports = {
                                 components: [row]
                             });
                         } else {
-                            return interaction.reply({ content: 'Unsupported message', ephemeral: true });
+                            return interaction.reply({ content: 'Unsupported message', flags: DJS.MessageFlags.Ephemeral });
                         }
                     }
     
-                    return interaction.reply({ content: 'Role added to dropdown', ephemeral: true });
+                    return interaction.reply({ content: 'Role added to dropdown', flags: DJS.MessageFlags.Ephemeral });
                 } else {
-                    return interaction.reply({ content: 'Unsupported message', ephemeral: true });
+                    return interaction.reply({ content: 'Unsupported message', flags: DJS.MessageFlags.Ephemeral });
                 }
             } else {
                 const row = new DJS.ActionRowBuilder()
@@ -273,11 +273,11 @@ module.exports = {
                             components: [row]
                         });
                     } else {
-                        return interaction.reply({ content: 'Unsupported message', ephemeral: true });
+                        return interaction.reply({ content: 'Unsupported message', flags: DJS.MessageFlags.Ephemeral });
                     }
                 }
     
-                return interaction.reply({ content: 'Role added to dropdown', ephemeral: true });
+                return interaction.reply({ content: 'Role added to dropdown', flags: DJS.MessageFlags.Ephemeral });
             }
         }
     }

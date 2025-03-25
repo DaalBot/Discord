@@ -23,7 +23,7 @@ client.on('interactionCreate', async interaction => {
                 .setDescription('Something went wrong and the dropdown failed to execute please try again later.')
                 .setTimestamp();
 
-            interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            interaction.reply({ embeds: [errorEmbed], flags: DJS.MessageFlags.Ephemeral });
         }
     // } else {
     //     const errorEmbed = new DJS.EmbedBuilder()
@@ -32,6 +32,6 @@ client.on('interactionCreate', async interaction => {
     //         .setDescription('It seems like the modal you are trying to execute does not exist.')
     //         .setTimestamp();
 
-    //     interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+    //     interaction.reply({ embeds: [errorEmbed], flags: DJS.MessageFlags.Ephemeral });
     // }
 })

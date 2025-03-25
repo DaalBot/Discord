@@ -145,24 +145,24 @@ module.exports = {
 
         if (subCommandGroup === 'info') {
             if (subCommand === 'policy') {
-                interaction.reply({ content: `https://daalbot.xyz/Legal/Privacy`, ephemeral: true });
+                interaction.reply({ content: `https://daalbot.xyz/Legal/Privacy`, flags: DJS.MessageFlags.Ephemeral });
             }
         }
 
         // Actions require the user to have the `Manage Server` permission
         if (!interaction.member.permissions.has(DJS.PermissionFlagsBits.ManageGuild)) return await interaction.reply({
             content: 'You must have the `Manage Server` permission to perform actions on data.',
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         })
 
         if (subCommandGroup === 'actions') {
             if (subCommand === 'delete') {
-                // return await interaction.reply({ content: 'This command is currently disabled. For data deletion please create a support ticket in our support server (go.daalbot.xyz/HQ)', ephemeral: true });
+                // return await interaction.reply({ content: 'This command is currently disabled. For data deletion please create a support ticket in our support server (go.daalbot.xyz/HQ)', flags: DJS.MessageFlags.Ephemeral });
                 const type = interaction.options.getString('type');
 
                 if (type === 'guild') {
                     if (fs.existsSync(path.resolve(`./temp/del/${interaction.guild.id}.json`))) {
-                        return interaction.reply({ content: 'Deletion already scheduled.', ephemeral: true });
+                        return interaction.reply({ content: 'Deletion already scheduled.', flags: DJS.MessageFlags.Ephemeral });
                     }
 
                     const delay = interaction.options.getString('delay');
@@ -176,7 +176,7 @@ module.exports = {
 
                     await fsp.writeFile(path.resolve(`./temp/del/${interaction.guild.id}.json`), JSON.stringify(deletionObj, null, 4));
 
-                    await interaction.reply({ content: `Deletion scheduled for <t:${await daalbot.timestamps.getFutureDiscordTimestamp(delayNum)}:R>`, ephemeral: true });
+                    await interaction.reply({ content: `Deletion scheduled for <t:${await daalbot.timestamps.getFutureDiscordTimestamp(delayNum)}:R>`, flags: DJS.MessageFlags.Ephemeral });
 
                     const guildOwner = await interaction.guild.fetchOwner();
 
@@ -195,14 +195,14 @@ module.exports = {
                         } catch (err) {
                             if (err?.code === 50007) {
                                 // User has DMs disabled
-                                await interaction.followUp({ content: 'The server owner has DMs disabled and thus could not be notified of the data deletion.', ephemeral: true });
+                                await interaction.followUp({ content: 'The server owner has DMs disabled and thus could not be notified of the data deletion.', flags: DJS.MessageFlags.Ephemeral });
                             } else console.error(err);
                         }
                     }
                 } else if (type === 'user') {
                     return interaction.reply({
                         content: `To request a data deletion, please create a support ticket in at [go.daalbot.xyz/HQ](https://discord.com/invite/mGacnqE7qk)`,
-                        ephemeral: true
+                        flags: DJS.MessageFlags.Ephemeral
                     })
                 }
             }
@@ -216,11 +216,11 @@ module.exports = {
 
                 if (type === 'guild') {
                     if (!fs.existsSync(path.resolve(`./temp/del/${interaction.guild.id}.json`))) {
-                        return interaction.reply({ content: 'No deletion scheduled.', ephemeral: true });
+                        return interaction.reply({ content: 'No deletion scheduled.', flags: DJS.MessageFlags.Ephemeral });
                     }
 
                     await fsp.rm(path.resolve(`./temp/del/${interaction.guild.id}.json`));
-                    return interaction.reply({ content: 'Deletion cancelled.', ephemeral: true });
+                    return interaction.reply({ content: 'Deletion cancelled.', flags: DJS.MessageFlags.Ephemeral });
                 }
             }
 
@@ -230,7 +230,7 @@ module.exports = {
                 if (type === 'auto') {
                     // Check if the user has requested a download in the last 24 hours
                     if (requests[interaction.user.id] && requests[interaction.user.id] > Date.now() - 24 * 60 * 60 * 1000) {
-                        return interaction.reply({ content: 'You have already requested a download in the last 24 hours.', ephemeral: true });
+                        return interaction.reply({ content: 'You have already requested a download in the last 24 hours.', flags: DJS.MessageFlags.Ephemeral });
                     }
 
                     const embed = new EmbedBuilder()
@@ -238,7 +238,7 @@ module.exports = {
                         .setDescription('This may take a while, please be patient.')
                         .setColor('Yellow');
 
-                    interaction.reply({ embeds: [embed], ephemeral: true });
+                    interaction.reply({ embeds: [embed], flags: DJS.MessageFlags.Ephemeral });
 
                     const downloadKey = crypto.randomBytes(16).toString('hex');
 
@@ -267,6 +267,37 @@ module.exports = {
                     }
 
                     // Special cases
+
+                    await fsp.mkdir(path.resolve(`./temp/down/${interaction.guild.id}-${downloadKey}/socialalert/`), { recursive: true });
+
+                    // Twitch social link
+                    const twitchData = await fsp.readFile(path.resolve(`./db/socialalert/twitch.txt`), 'utf8');
+                    const twitchAccounts = twitchData.split('\n');
+
+                    /**
+                     * Not objects only IDs
+                     * @type {string[]}
+                    */
+                    const guildChannels = await daalbot.resolveId(interaction.guild.id, 'guild', 'channel');
+
+                    let twitchOutputFile = '';
+
+                    for (let i = 0; i < guildChannels.length; i++) {
+                        const matchingAccounts = twitchAccounts.filter(account => account.includes(guildChannels[i])).map(account => account.split(',')[0]);
+
+                        for (let j = 0; j < matchingAccounts.length; j++) {
+                            if (twitchOutputFile.includes(matchingAccounts[j])) {
+                                // Add `|${channelID}` to the end of the line
+                                twitchOutputFile = twitchOutputFile.replace(new RegExp(`(${matchingAccounts[j]}),(.*)`), `$1,${guildChannels[i]}`);
+                            } else {
+                                twitchOutputFile += `${matchingAccounts[j]},${guildChannels[i]}\n`;
+                            }
+                        }
+                    }
+
+                    if (twitchOutputFile) await fsp.writeFile(path.resolve(`./temp/down/${interaction.guild.id}-${downloadKey}/socialalert/twitch.txt`), twitchOutputFile, {
+                        flag: 'w'
+                    });
 
                     // Tickets
                     await fsp.copyFile(path.resolve(`./db/tickets/${interaction.guild.id}.category`), path.resolve(`./temp/down/${interaction.guild.id}-${downloadKey}/tickets/category`));
@@ -316,7 +347,7 @@ module.exports = {
                 } else {
                     await interaction.reply({
                         content: 'To request a detailed download, please create a support ticket in at [go.daalbot.xyz/HQ](https://discord.com/invite/mGacnqE7qk)',
-                        ephemeral: true
+                        flags: DJS.MessageFlags.Ephemeral
                     })
                 }
             }

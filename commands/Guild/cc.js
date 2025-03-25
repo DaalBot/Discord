@@ -31,6 +31,12 @@ module.exports = {
                     description: 'The description of the custom command',
                     type: ApplicationCommandOptionType.String,
                     required: true
+                },
+                {
+                    name: 'options',
+                    description: 'JSON representation of a discord.js options array',
+                    type: ApplicationCommandOptionType.String,
+                    required: false
                 }
             ]
         }, {
@@ -51,36 +57,52 @@ module.exports = {
     /**
      * @param {{ interaction: Discord.ChatInputCommandInteraction }} param0
      */
-    callback: ({ interaction }) => {
+    callback: async ({ interaction }) => {
         const subCommand = interaction.options.getSubcommand();
 
         if (subCommand === 'create') {
             const name = interaction.options.getString('name');
             const description = interaction.options.getString('description');
+            const oOptions = interaction.options.getString('options');
+            const options = await daalbot.convertMetaText(oOptions, interaction.guild, { // Allow them to do things like type: %%{ApplicationCommandOptionType.String}%% instead of hardcoding the values
+                ApplicationCommandOptionType
+            });
 
             if (!name.match(/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u)) {
                 return interaction.reply({
                     content: 'The name of the command must be between 1 and 32 characters long and can only contain letters, numbers, dashes and underscores.',
-                    ephemeral: true
+                    flags: Discord.MessageFlags.Ephemeral
                 });
+            }
+
+            if (options) {
+                try {
+                    JSON.parse(options);
+                } catch (error) {
+                    return interaction.reply({
+                        content: 'The options you provided threw an error when parsed. Are you sure you provided a valid JSON representation of a discord.js options array? If you\'re using templating, make sure the formatting is correct (`%%{...}%%`).',
+                        flags: Discord.MessageFlags.Ephemeral
+                    })
+                }
             }
 
             // Check if the command already exists
             if (interaction.guild.commands.cache.find(command => command.name === name)) {
                 return interaction.reply({
                     content: 'This command already exists.',
-                    ephemeral: true
+                    flags: Discord.MessageFlags.Ephemeral
                 });
             }
 
             // Create the command
             interaction.guild.commands.create({
                 name: name,
-                description: description
+                description: description,
+                options: options ? JSON.parse(options) : []
             }).then(() => {
                 interaction.reply({
                     content: `Successfully created the command \`${name}\`. You can configure it in a interactionCreate [event](https://daalbot.xyz/Dashboard/Guild/${interaction.guild.id}/feature/guild/events).`,
-                    ephemeral: true
+                    flags: Discord.MessageFlags.Ephemeral
                 });
             })
         } else if (subCommand === 'delete') {
@@ -91,7 +113,7 @@ module.exports = {
             if (!command) {
                 return interaction.reply({
                     content: 'This command does not exist.',
-                    ephemeral: true
+                    flags: Discord.MessageFlags.Ephemeral
                 });
             }
 
@@ -99,7 +121,7 @@ module.exports = {
             command.delete().then(() => {
                 interaction.reply({
                     content: `Successfully deleted the command \`${name}\`.`,
-                    ephemeral: true
+                    flags: Discord.MessageFlags.Ephemeral
                 });
             })
         }

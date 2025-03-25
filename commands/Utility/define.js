@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType, MessageFlags } = require('discord.js');
 
 module.exports = {
     name: 'define',
@@ -50,12 +50,12 @@ module.exports = {
     
             interaction.reply({
                 embeds: [embed],
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         } catch {
             interaction.reply({
                 content: `Something went wrong while trying to define ${interaction.options.getString('word')} chances are this is because the api doesnt have a definition for this word yet.\nYou can try to [search it for yourself](<https://www.google.com/search?q=define+${interaction.options.getString('word')}>)`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
         }
     }

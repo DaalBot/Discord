@@ -65,7 +65,7 @@ module.exports = {
             return {
                 custom: true,
                 content: 'You are not allowed to use this command.',
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             }
         }
 
@@ -75,7 +75,7 @@ module.exports = {
             return {
                 custom: true,
                 content: 'Executing code...',
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             }
         } catch (err) {
             return err;

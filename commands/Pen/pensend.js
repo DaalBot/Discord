@@ -62,9 +62,9 @@ module.exports = {
   
       const channel = daalbot.getChannel(interaction.guild.id, channelID)
   
-      if (channel == undefined) return interaction.reply({ content: 'The channel you provided is not a valid channel.', ephemeral: true })
-      if (channel == 'Channel not found.') return interaction.reply({ content: 'The channel you provided is not a valid channel.', ephemeral: true })
-      if (channel == 'Server not found.') return interaction.reply({ content: 'The channel you provided is not a valid channel.', ephemeral: true })
+      if (channel == undefined) return interaction.reply({ content: 'The channel you provided is not a valid channel.', flags: DJS.MessageFlags.Ephemeral })
+      if (channel == 'Channel not found.') return interaction.reply({ content: 'The channel you provided is not a valid channel.', flags: DJS.MessageFlags.Ephemeral })
+      if (channel == 'Server not found.') return interaction.reply({ content: 'The channel you provided is not a valid channel.', flags: DJS.MessageFlags.Ephemeral })
   
       const getAttachmentLink = (attachment) => `${attachment.proxyURL}`;
   
@@ -73,7 +73,7 @@ module.exports = {
       try {
         if (!isUsed(message)) {
           if (!isUsed(attachment)) {
-            return interaction.reply({ content: 'You must provide a message or attachment to send.', ephemeral: true })
+            return interaction.reply({ content: 'You must provide a message or attachment to send.', flags: DJS.MessageFlags.Ephemeral })
           } else {
             channel.send({ files: [attachmentLink] })
           }
@@ -82,7 +82,7 @@ module.exports = {
             channel.send(message)
           } else {
             if (message != 'null') {
-              channel.send({ content: message, files: [attachmentLink] })
+              channel.send({ content: DJS.message, files: [attachmentLink] })
             } else {
               channel.send({ files: [attachmentLink] })
             }
@@ -94,14 +94,14 @@ module.exports = {
           .setTitle('Success')
           .setDescription('Message sent successfully.')
   
-        return interaction.reply({ embeds: [successEmbed], ephemeral: true })
+        return interaction.reply({ embeds: [successEmbed], flags: DJS.MessageFlags.Ephemeral })
       } catch (error) {
         const errorEmbed = new EmbedBuilder()
           .setColor('#EF3D48')
           .setTitle('Error')
           .setDescription(`An error occured while sending the message:\n\`\`\`${error}\n\`\`\``)
   
-        return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+        return interaction.reply({ embeds: [errorEmbed], flags: DJS.MessageFlags.Ephemeral })
       }
     } else if (interaction.options.getSubcommand() === 'json') {
       const modal = new DJS.ModalBuilder()

@@ -84,6 +84,6 @@ module.exports = {
             new DJS.ButtonBuilder().setCustomId('handler_lockdown-config').setLabel('Config').setStyle(DJS.ButtonStyle.Secondary).setEmoji('⚙️'),
         ])
 
-        interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+        interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
     }
 }

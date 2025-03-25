@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder, ButtonStyle, ButtonBuilder, ActionRowBuilder } = require("discord.js");
+const { ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder, ButtonStyle, ButtonBuilder, ActionRowBuilder, MessageFlags } = require("discord.js");
 const fs = require('fs/promises');
 const path = require('path');
 const daalbot = require('../../daalbot.js');
@@ -167,7 +167,7 @@ module.exports = {
 
                 if (user && guild) return interaction.reply({
                     content: 'Pick a side bro :sob:',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
 
                 if (guild) {
@@ -181,7 +181,7 @@ module.exports = {
 
                     if (deletionPaths.length === 0) return interaction.reply({
                         content: 'No data found for the specified guild',
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                     const diff = deletionPaths.map(p => path.relative('./db/', p)).join('\n- ');
 
@@ -274,7 +274,7 @@ module.exports = {
             if (Subcommand === 'eval') {
                 if (!(interaction.user.id === '900126154881646634')) return interaction.reply({
                     content: 'No, Just no. Never gonna happen.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
                 const code = options.getString('code');
 
@@ -289,7 +289,7 @@ module.exports = {
                                     attachment: output,
                                     name: 'output.txt'
                                 }],
-                                ephemeral: true
+                                flags: MessageFlags.Ephemeral
                             })
                         } else {
                             await interaction.reply({
@@ -298,19 +298,19 @@ module.exports = {
                                     attachment: Buffer.from(JSON.stringify(output, null, 2)),
                                     name: 'output.json'
                                 }],
-                                ephemeral: true
+                                flags: MessageFlags.Ephemeral
                             })
                         }
                     } else {
                         await interaction.reply({
                             content: `\`\`\`js\n${output}\n\`\`\``,
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         })
                     }
                 } catch (e) {
                     await interaction.reply({
                         content: `\`\`\`js\n${e}\n\`\`\``,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 }
             }
@@ -325,7 +325,7 @@ module.exports = {
 
                 if (obj === null) return interaction.reply({
                     content: 'No object found',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
 
                 const reply = `\`\`\`json\n${JSON.stringify(obj, null, 2)}\n\`\`\``
@@ -338,12 +338,12 @@ module.exports = {
                             attachment: Buffer.from(JSON.stringify(obj, null, 2)),
                             name: 'output.json'
                         }],
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 } else {
                     await interaction.reply({
                         content: reply.substring(0, 2000),
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 }
             }

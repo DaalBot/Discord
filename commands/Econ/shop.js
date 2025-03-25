@@ -27,7 +27,7 @@ module.exports = {
                             .setStyle(DJS.ButtonStyle.Primary)
                     ) : null
                 ],
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         }
 
@@ -43,7 +43,7 @@ module.exports = {
                             .setStyle(DJS.ButtonStyle.Primary)
                     ) : null
                 ],
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         }
 
@@ -105,7 +105,7 @@ module.exports = {
         await interaction.reply({
             embeds: [embed],
             components,
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         });
     }
 }

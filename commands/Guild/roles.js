@@ -1,4 +1,4 @@
-const { ChatInputCommandInteraction, ApplicationCommandOptionType } = require('discord.js');
+const { ChatInputCommandInteraction, ApplicationCommandOptionType, MessageFlags } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 
 module.exports = {
@@ -97,7 +97,7 @@ module.exports = {
      * @param {{interaction:ChatInputCommandInteraction}} param0
     */
     callback: async({interaction}) => {
-        if (!interaction.guild.members.me.permissions.has(daalbot.DJS.PermissionFlagsBits.ManageRoles, true)) return await interaction.reply({ content: `I need the Manage Roles permission to do this.`, ephemeral: true });
+        if (!interaction.guild.members.me.permissions.has(daalbot.DJS.PermissionFlagsBits.ManageRoles, true)) return await interaction.reply({ content: `I need the Manage Roles permission to do this.`, flags: MessageFlags.Ephemeral });
         const topPos = interaction.guild.members.me.roles.highest.position;
         const options = interaction.options;
         const subcommand = options.getSubcommand();
@@ -109,51 +109,51 @@ module.exports = {
             if (subcommand == 'add') {
                 // Check if the roles are already linked
                 if (daalbot.db.managed.exists(interaction.guild.id, `linkedRoles/${role1.id}`) && (await daalbot.db.managed.get(interaction.guild.id, `linkedRoles/${role1.id}`)).includes(role2.id))
-                    return await interaction.reply({ content: `Roles \`${role1.name}\` and \`${role2.name}\` are already linked.`, ephemeral: true });
+                    return await interaction.reply({ content: `Roles \`${role1.name}\` and \`${role2.name}\` are already linked.`, flags: MessageFlags.Ephemeral });
 
                 // Check if the roles are the same
                 if (role1.id == role2.id)
-                    return await interaction.reply({ content: `Roles cannot be linked to themselves.`, ephemeral: true });
+                    return await interaction.reply({ content: `Roles cannot be linked to themselves.`, flags: MessageFlags.Ephemeral });
 
                 // Check if the roles are manageable
                 if (role1.position >= topPos || role2.position >= topPos)
-                    return await interaction.reply({ content: `Roles must be lower than the bot's highest role.`, ephemeral: true });
+                    return await interaction.reply({ content: `Roles must be lower than the bot's highest role.`, flags: MessageFlags.Ephemeral });
 
                 // Add the roles to the database
                 daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role1.id}`, `${role2.id}\n`, 'a');
                 if (options.getBoolean('reverse'))
                     daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role2.id}`, `${role1.id}\n`, 'a');
                 
-                return interaction.reply({ content: `Linked roles \`${role1.name}\` and \`${role2.name}\`.`, ephemeral: true });
+                return interaction.reply({ content: `Linked roles \`${role1.name}\` and \`${role2.name}\`.`, flags: MessageFlags.Ephemeral });
             }
 
             if (subcommand == 'remove') {
                 // Check if the roles are not linked
                 if (!daalbot.db.managed.exists(interaction.guild.id, `linkedRoles/${role1.id}`) || !(await daalbot.db.managed.get(interaction.guild.id, `linkedRoles/${role1.id}`)).includes(role2.id))
-                    return await interaction.reply({ content: `Roles \`${role1.name}\` and \`${role2.name}\` are not linked.`, ephemeral: true });
+                    return await interaction.reply({ content: `Roles \`${role1.name}\` and \`${role2.name}\` are not linked.`, flags: MessageFlags.Ephemeral });
 
                 // Remove the roles from the database
                 await daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role1.id}`, (await daalbot.db.managed.get(interaction.guild.id, `linkedRoles/${role1.id}`)).replace(`${role2.id}\n`, ''));
                 if (options.getBoolean('reverse'))
                     await daalbot.db.managed.set(interaction.guild.id, `linkedRoles/${role2.id}`, (await daalbot.db.managed.get(interaction.guild.id, `linkedRoles/${role2.id}`)).replace(`${role1.id}\n`, ''));
     
-                return await interaction.reply({ content: `Unlinked roles \`${role1.name}\` and \`${role2.name}\`.`, ephemeral: true });
+                return await interaction.reply({ content: `Unlinked roles \`${role1.name}\` and \`${role2.name}\`.`, flags: MessageFlags.Ephemeral });
             }
 
             if (subcommand == 'list') {
                 // Check if the role is linked
                 if (!(await daalbot.db.managed.exists(interaction.guild.id, `linkedRoles/${role1.id}`)))
-                    return await interaction.reply({ content: `Role \`${role1.name}\` is not linked to any roles.`, ephemeral: true });
+                    return await interaction.reply({ content: `Role \`${role1.name}\` is not linked to any roles.`, flags: MessageFlags.Ephemeral });
 
                 const linkedRoles = (await daalbot.db.managed.get(interaction.guild.id, `linkedRoles/${role1.id}`)).split('\n').filter(Boolean);
 
                 if (role2) {
                     if (linkedRoles.includes(role2.id))
-                        return await interaction.reply({ content: `Roles \`${role1.name}\` and \`${role2.name}\` are linked.`, ephemeral: true });
-                    return await interaction.reply({ content: `Roles \`${role1.name}\` and \`${role2.name}\` are not linked.`, ephemeral: true });
+                        return await interaction.reply({ content: `Roles \`${role1.name}\` and \`${role2.name}\` are linked.`, flags: MessageFlags.Ephemeral });
+                    return await interaction.reply({ content: `Roles \`${role1.name}\` and \`${role2.name}\` are not linked.`, flags: MessageFlags.Ephemeral });
                 }
 
-                return await interaction.reply({ content: `Roles linked to \`${role1.name}\`:\n* ${linkedRoles.map(id => `<@&${id}>`).join('\n')}`, ephemeral: true });
+                return await interaction.reply({ content: `Roles linked to \`${role1.name}\`:\n* ${linkedRoles.map(id => `<@&${id}>`).join('\n')}`, flags: MessageFlags.Ephemeral });
             }
         }
     }

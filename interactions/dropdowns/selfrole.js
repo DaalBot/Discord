@@ -1,5 +1,5 @@
 const client = require('../../client.js');
-const { GuildMember } = require('discord.js');
+const { GuildMember, MessageFlags } = require('discord.js');
 const daalbot = require('../../daalbot.js');
 
 client.on('interactionCreate', (interaction) => {
@@ -31,7 +31,7 @@ client.on('interactionCreate', (interaction) => {
 
       interaction.reply({
         content: 'Roles updated!',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       })
       .catch(() => { console.error('bruh') })
     }

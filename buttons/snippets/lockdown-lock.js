@@ -24,7 +24,7 @@ module.exports = (interaction) => {
                             .setStyle(DJS.ButtonStyle.Success)
                     ])
             ],
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         })
     }
 

@@ -1,4 +1,4 @@
-const { ChatInputCommandInteraction, ApplicationCommandOptionType, PermissionsBitField } = require('discord.js');
+const { ChatInputCommandInteraction, ApplicationCommandOptionType, PermissionsBitField, MessageFlags } = require('discord.js');
 const client = require('../../client.js');
 
 module.exports = {
@@ -50,7 +50,7 @@ module.exports = {
 
             await interaction.reply({
                 content: `Webhook created with the name \`${webhook.name}\` in <#${channel.id}>.`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }

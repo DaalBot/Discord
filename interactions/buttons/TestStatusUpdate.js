@@ -1,3 +1,4 @@
+const { MessageFlags } = require('discord.js');
 const client = require('../../client.js');
 
 client.on('interactionCreate', (interaction) => {
@@ -5,7 +6,7 @@ client.on('interactionCreate', (interaction) => {
         if (interaction.customId == 'testPingButtonStatusUpdate') {
             interaction.reply({
                 content: `If you see this everything is working fine (i hope)`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
         }
     }   

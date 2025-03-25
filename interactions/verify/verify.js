@@ -1,6 +1,7 @@
 const fs = require('fs');
 const config = require("../../config.json");
 const client = require('../../client.js');
+const { MessageFlags } = require('discord.js');
 
 function read(GuildId) {
     try {
@@ -29,6 +30,6 @@ client.on('interactionCreate', async (interaction) => {
             })
         // })
 
-        interaction.reply({ content: 'You have been verified!', ephemeral: true })
+        interaction.reply({ content: 'You have been verified!', flags: MessageFlags.Ephemeral })
     }
 })

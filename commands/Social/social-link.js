@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { EmbedBuilder, PermissionFlagsBits, ApplicationCommandOptionType, ChannelType } = require('discord.js')
+const { EmbedBuilder, PermissionFlagsBits, ApplicationCommandOptionType, ChannelType, MessageFlags } = require('discord.js')
 const daalbot = require('../../daalbot.js')
 require('dotenv').config()
 const axios = require('axios')
@@ -157,7 +157,7 @@ module.exports = {
                         }
                     })
 
-                    if (channelData.data.data.length == 0) return await interaction.reply({ content: 'That Twitch channel does not exist.', ephemeral: true })
+                    if (channelData.data.data.length == 0) return await interaction.reply({ content: 'That Twitch channel does not exist.', flags: MessageFlags.Ephemeral })
 
                     channel = channelData.data.data[0].id
                 }
@@ -196,7 +196,7 @@ module.exports = {
                 const channels = channelData[0] ? channelData[0].split(',')[1].split('|') : [];
 
                 if (channels.includes(feedChannel.id)) {
-                    return await interaction.reply({ content: 'This channel is already linked to that Twitch channel.', ephemeral: true });
+                    return await interaction.reply({ content: 'This channel is already linked to that Twitch channel.', flags: MessageFlags.Ephemeral });
                 }
 
                 channels.push(feedChannel.id);
@@ -208,7 +208,7 @@ module.exports = {
                 fs.writeFileSync(path.resolve('./db/socialalert/twitch.txt'), newTwitchData);
 
                 await daalbot.createIdReference(interaction.guild.id, 'channel', feedChannel.id); // Create a reference for the channel
-                await interaction.reply({ content: `Successfully added ${feedChannel} to the Twitch feed for ${startingChannel}.`, ephemeral: true })
+                await interaction.reply({ content: `Successfully added ${feedChannel} to the Twitch feed for ${startingChannel}.`, flags: MessageFlags.Ephemeral })
             }
         }
 
@@ -225,17 +225,17 @@ module.exports = {
         //         const youtubeData = fs.readFileSync(path.resolve('./db/socialalert/youtube.csv'), 'utf8');
 
         //         if (youtubeData.split('\n').filter(i => regex.test(i)).length > 0) {
-        //             return await interaction.reply({ content: 'That channel is already linked to that channel.', ephemeral: true })
+        //             return await interaction.reply({ content: 'That channel is already linked to that channel.', flags: MessageFlags.Ephemeral })
         //         }
 
         //         // Get the channel name / Check if the channel exists
         //         const channelData = await daalbot.youtube.channelIdToName(channel)
-        //         if (channelData == null) return await interaction.reply({ content: 'That channel does not exist.', ephemeral: true })
+        //         if (channelData == null) return await interaction.reply({ content: 'That channel does not exist.', flags: MessageFlags.Ephemeral })
 
         //         // Add the channel to the file
         //         fs.writeFileSync(path.resolve('./db/socialalert/youtube.csv'), `${youtubeData}\n${channel},${role.id || 'None'},${feedChannel.id}`)
 
-        //         await interaction.reply({ content: `Successfully added ${channel} to the YouTube feed for <#${feedChannel.id}>.`, ephemeral: true })
+        //         await interaction.reply({ content: `Successfully added ${channel} to the YouTube feed for <#${feedChannel.id}>.`, flags: MessageFlags.Ephemeral })
 
         //         // Update youtube lock file to prevent bot from throwing up all the current videos in the channel
         //         const currentDetectedChannels = fs.readFileSync(path.resolve('./db/socialalert/youtube.detected'), 'utf8').split('\n').map(i => i.split('|')[0]);
@@ -250,7 +250,7 @@ module.exports = {
 
         //     // return interaction.reply({
         //     //     content: `This feature still needs more testing before it can be used. Sorry for the inconvenience.`,
-        //     //     ephemeral: true
+        //     //     flags: MessageFlags.Ephemeral
         //     // })
         // }
 
@@ -259,7 +259,7 @@ module.exports = {
             const accountInput = interaction.options.getString('account');
             
             if (subCommand == 'add') {
-                const message = interaction.options.getString('message');if (!message.includes('%%{LINK}%%')) return await interaction.reply({ content: 'The message must include %%{LINK}%%.', ephemeral: true })
+                const message = interaction.options.getString('message');if (!message.includes('%%{LINK}%%')) return await interaction.reply({ content: 'The message must include %%{LINK}%%.', flags: MessageFlags.Ephemeral })
 
                 let account = accountInput;
 
@@ -269,7 +269,7 @@ module.exports = {
 
                     if (accountData.data.error) return await interaction.reply({
                         content: `Sorry, but we were unable to find that account (${accountData.data.message}). Please make sure you entered the correct account.`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
 
                     account = accountData.data.did;
@@ -282,7 +282,7 @@ module.exports = {
                 if (blueskyData.split('\n').filter(i => i.split(';;[DCS];;')[0] == account).length > 0) {
                     // Account is already linked to a channel so we need to check if the channel is the same
                     if (blueskyData.split('\n').filter(i => i.split(';;[DCS];;')[0] == account)[0].split(';;[DCS];;')[1].includes(feedChannel.id)) { // {"id":"123","message":"%%{LINK}%%"};;[NC];;{"id":"456","message":"%%{LINK}%%"}
-                        return await interaction.reply({ content: `<#${feedChannel.id}> is already linked to that account.`, ephemeral: true })
+                        return await interaction.reply({ content: `<#${feedChannel.id}> is already linked to that account.`, flags: MessageFlags.Ephemeral })
                     }
 
                     // Account is linked to a different channel so we need to add the channel to the account
@@ -301,7 +301,7 @@ module.exports = {
 
                     await daalbot.createIdReference(interaction.guild.id, 'channel', feedChannel.id); // Create a reference for the channel
                     fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), newBlueskyData);
-                    return await interaction.reply({ content: `Successfully added <#${feedChannel.id}> to the Bluesky feed for ${accountInput}.`, ephemeral: true });
+                    return await interaction.reply({ content: `Successfully added <#${feedChannel.id}> to the Bluesky feed for ${accountInput}.`, flags: MessageFlags.Ephemeral });
                 }
 
                 // Account is not linked to any channel so we need to add the account and channel to the file
@@ -320,7 +320,7 @@ module.exports = {
                 fs.writeFileSync(path.resolve('./db/socialalert/bsky.detected'), postCids.join('\n')); // Add the new posts to prevent the bot from sending posts that have already been made
                 fs.writeFileSync(path.resolve('./db/socialalert/bsky.txt'), `${blueskyData}\n${newBlueskyData}`);
 
-                await interaction.reply({ content: `Successfully added <#${feedChannel.id}> to the Bluesky feed for ${accountInput}.`, ephemeral: true });
+                await interaction.reply({ content: `Successfully added <#${feedChannel.id}> to the Bluesky feed for ${accountInput}.`, flags: MessageFlags.Ephemeral });
             }
 
             if (subCommand == 'remove') {
@@ -328,7 +328,7 @@ module.exports = {
                     // Remove all accounts from the channel
                     const file = fs.readFileSync(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
                     const accounts = file.split('\n').filter(i => i.split(';;[DCS];;')[1].includes(feedChannel.id));
-                    if (accounts.length == 0) return await interaction.reply({ content: 'There are no accounts linked to that channel.', ephemeral: true })
+                    if (accounts.length == 0) return await interaction.reply({ content: 'There are no accounts linked to that channel.', flags: MessageFlags.Ephemeral })
                     
                     for (let i = 0; i < accounts.length; i++) {
                         const account = accounts[i];
@@ -358,7 +358,7 @@ module.exports = {
 
                         if (accountData.data.error) return await interaction.reply({
                             content: `Sorry, but we were unable to find that account (${accountData.data.message}). Please make sure you entered the correct account.`,
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         })
 
                         account = accountData.data.did;
@@ -367,7 +367,7 @@ module.exports = {
                     // Remove the account from the channel
                     const file = fs.readFileSync(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
                     const accountData = file.split('\n').filter(i => i.split(';;[DCS];;')[0] == account)[0];
-                    if (!accountData) return await interaction.reply({ content: 'That account is not linked to that channel.', ephemeral: true })
+                    if (!accountData) return await interaction.reply({ content: 'That account is not linked to that channel.', flags: MessageFlags.Ephemeral })
                     
                     const channels = accountData.split(';;[DCS];;')[1];
 

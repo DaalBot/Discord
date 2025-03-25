@@ -39,6 +39,6 @@ module.exports = async(interaction) => {
     interaction.reply({
         content: 'Select an action to perform:',
         components: [row],
-        ephemeral: true
+        flags: DJS.MessageFlags.Ephemeral
     })
 }

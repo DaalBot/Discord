@@ -62,7 +62,7 @@ module.exports = async(interaction) => {
                     .setPlaceholder('Select an option to change the setting')
             );
 
-        interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+        interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
     }
 
     if (option === 'excluded_roles') {
@@ -98,7 +98,7 @@ module.exports = async(interaction) => {
                     .setPlaceholder('Select an option to change the setting')
             );
 
-        interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+        interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
     }
 
     if (option === 'excluded_users') {
@@ -134,7 +134,7 @@ module.exports = async(interaction) => {
                     .setPlaceholder('Select an option to change the setting')
             );
 
-        interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+        interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
     }
 
     if (option === 'new_users') {
@@ -170,7 +170,7 @@ module.exports = async(interaction) => {
                     .setPlaceholder('Select an option to change the setting')
             );
 
-        interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+        interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
     }
 
     if (option === 'bot_adding_kick') {
@@ -204,7 +204,7 @@ module.exports = async(interaction) => {
                         }
                     ])
             ],
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         })
 
         const filter = m => m.author.id === interaction.user.id;
@@ -234,10 +234,10 @@ module.exports = async(interaction) => {
 
                 fs.writeFileSync(path.resolve(`./db/lockdown/${guild.id}/config.json`), JSON.stringify(configData));
 
-                interaction.editReply({ content: 'Role(s) added to the list of excluded roles.', embeds: [], ephemeral: true });
+                interaction.editReply({ content: 'Role(s) added to the list of excluded roles.', embeds: [], flags: DJS.MessageFlags.Ephemeral });
             });
         } catch {
-            return interaction.editReply({ content: 'You took too long to respond. Please try again.', ephemeral: true });
+            return interaction.editReply({ content: 'You took too long to respond. Please try again.', flags: DJS.MessageFlags.Ephemeral });
         }
     }
 
@@ -264,7 +264,7 @@ module.exports = async(interaction) => {
                     .setPlaceholder('Select an option to change the setting')
             );
 
-        interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+        interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
     }
 
     if (option === 'excluded_users_add') {
@@ -290,7 +290,7 @@ module.exports = async(interaction) => {
                         }
                     ])
             ],
-            ephemeral: true
+            flags: DJS.MessageFlags.Ephemeral
         })
 
         const filter = m => m.author.id === interaction.user.id;
@@ -320,10 +320,10 @@ module.exports = async(interaction) => {
 
                 fs.writeFileSync(path.resolve(`./db/lockdown/${guild.id}/config.json`), JSON.stringify(configData));
 
-                interaction.editReply({ content: 'User(s) added to the list of excluded users.', embeds: [], ephemeral: true });
+                interaction.editReply({ content: 'User(s) added to the list of excluded users.', embeds: [], flags: DJS.MessageFlags.Ephemeral });
             });
         } catch {
-            return interaction.editReply({ content: 'You took too long to respond. Please try again.', ephemeral: true });
+            return interaction.editReply({ content: 'You took too long to respond. Please try again.', flags: DJS.MessageFlags.Ephemeral });
         }
     }
 
@@ -350,7 +350,7 @@ module.exports = async(interaction) => {
                     .setPlaceholder('Select an option to change the setting')
             );
 
-        interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+        interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
     }
 
     if (option === 'new_users_isolate') {
@@ -378,7 +378,7 @@ module.exports = async(interaction) => {
     }
 
     try {
-        interaction.reply({ content: 'Setting were updated however there was no reply sent to your action so your seing this, So just know your pretty cool :>', ephemeral: true });
+        interaction.reply({ content: 'Setting were updated however there was no reply sent to your action so your seing this, So just know your pretty cool :>', flags: DJS.MessageFlags.Ephemeral });
     } catch (e) {
         // Chances are the interaction was already replied to
     }

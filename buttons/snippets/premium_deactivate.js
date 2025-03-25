@@ -15,7 +15,7 @@ module.exports = async (interaction) => {
 
     if (guilds.size === 0) {
         embed.setDescription('You do not own any activated servers.');
-        interaction.reply({ embeds: [embed], ephemeral: true });
+        interaction.reply({ embeds: [embed], flags: DJS.MessageFlags.Ephemeral });
         return;
     }
 
@@ -32,5 +32,5 @@ module.exports = async (interaction) => {
                 }))
         );
 
-    interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+    interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
 }

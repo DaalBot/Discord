@@ -30,7 +30,7 @@ module.exports = {
             user = interaction.options.getUser('user');
         }
 
-        if (user.bot) return interaction.reply({ content: `Humans have levels, Bots don't`, ephemeral: true });
+        if (user.bot) return interaction.reply({ content: `Humans have levels, Bots don't`, flags: Discord.MessageFlags.Ephemeral });
 
         if (fs.existsSync(`${botPath}/db/xp/${interaction.guild.id}/${user.id}.xp`)) {
             let xp = fs.readFileSync(`${botPath}/db/xp/${interaction.guild.id}/${user.id}.xp`, 'utf8');
@@ -123,9 +123,9 @@ module.exports = {
             ctx.fillText(`${Math.round(parseInt(xp.slice(level.length)) / 10)}%`, 325, canvas.height / 1.6 + 17)
 
             const attachment = new Discord.AttachmentBuilder(await canvas.encode('png'), { name: 'profile-image.png' })
-            return interaction.reply({ content: `${user.username} is level ${level}.`, files: [attachment], ephemeral: true });
+            return interaction.reply({ content: `${user.username} is level ${level}.`, files: [attachment], flags: Discord.MessageFlags.Ephemeral });
         } else {
-            interaction.reply({ content: `We were unable to find a entry for ${user.username}`, ephemeral: true });
+            interaction.reply({ content: `We were unable to find a entry for ${user.username}`, flags: Discord.MessageFlags.Ephemeral });
         }
     }
 }

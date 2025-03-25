@@ -1,4 +1,4 @@
-const { ButtonInteraction } = require("discord.js");
+const { ButtonInteraction, MessageFlags } = require("discord.js");
 const fs = require('fs');
 const path = require('path');
 const daalbot = require('../../daalbot.js');
@@ -11,7 +11,7 @@ module.exports = async(interaction) => {
 
     const lockeddown = fs.existsSync(path.resolve(`./db/lockdown/${guild.id}/current.json`));
 
-    if (!lockeddown) return interaction.reply({ content: 'The server is not currently locked down.', ephemeral: true });
+    if (!lockeddown) return interaction.reply({ content: 'The server is not currently locked down.', flags: MessageFlags.Ephemeral });
 
     const currentLockdown = JSON.parse(fs.readFileSync(path.resolve(`./db/lockdown/${guild.id}/current.json`), 'utf-8'));
 
@@ -27,5 +27,5 @@ module.exports = async(interaction) => {
 
     fs.rmSync(path.resolve(`./db/lockdown/${guild.id}/current.json`));
 
-    interaction.reply({ content: 'The server has been unlocked.', ephemeral: true });
+    interaction.reply({ content: 'The server has been unlocked.', flags: MessageFlags.Ephemeral });
 }

@@ -62,78 +62,11 @@ module.exports = {
      */
     callback: ({interaction}) => {
         try {
-            // interaction.deferReply({
-            //     ephemeral: true
-            // })
-
-            // const string = interaction.options.getString('string');
-            // const res = JSON.stringify(daalbot.client.guilds.cache.get(string), null, 4);
-
-            // const pasteapiLink = await daalbot.api.pasteapi.createPaste(res);
-            // interaction.editReply({
-            //     content: `${pasteapiLink}`,
-            //     ephemeral: true
-            // })
-            // const url = await daalbot.api.pasteapi.createPaste(string);
-
-            // interaction.reply({
-            //     content: url,
-            //     ephemeral: true
-            // })
-
-            // const client = daalbot.client;
-
-            // // Guild mode
-            // const guilds = client.guilds.cache.filter(g => g.ownerId === string);
-
-            // if (guilds.size > 0) {
-            //     // Find the first guild
-            //     const guild = guilds.first();
-
-            //     if (guild) {
-            //         const sendableChannel = guild.channels.cache.find(c => c.sendable);
-
-            //         if (sendableChannel) {
-            //             sendableChannel.send({
-            //                 content: `<@${string}> Hey it seems DaalBot is lacking permissions in your server and cannot automatically add roles to users. [Learn more](https://docs.daalbot.xyz/guides/setup/permissions) or join the [Support Server](https://lnk.daalbot.xyz/HQ).\n\nThis message is automated and cannot be replied to. If you have any questions, please join the [Support Server](https://lnk.daalbot.xyz/HQ)`
-            //             })
-
-            //             interaction.reply({
-            //                 content: 'Guild found. Message sent.',
-            //                 ephemeral: true
-            //             })
-            //         } else {
-            //             interaction.reply({ 
-            //                 content: 'No sendable channel found.',
-            //                 ephemeral: true
-            //             });
-            //         }
-            //     }
-            // }
-
-            // // User mode
-            // const user = client.users.cache.get(string);
-
-            // if (user) {
-            //     user.send({
-            //         content: `Hey it seems DaalBot is lacking permissions in your server and cannot automatically add roles to users. [Learn more](https://docs.daalbot.xyz/guides/setup/permissions) or join the [Support Server](https://lnk.daalbot.xyz/HQ).\n\nThis message is automated and cannot be replied to. If you have any questions, please join the [Support Server](https://lnk.daalbot.xyz/HQ)`
-            //     })
-
-            //     interaction.reply({
-            //         content: 'User found. Message sent.',
-            //         ephemeral: true
-            //     })
-            // } else {
-            //     interaction.reply({ 
-            //         content: 'User not found.',
-            //         ephemeral: true
-            //     });
-            // }
         } catch (err) {
             console.error(err)
             interaction.reply({
                 content: `Error: ${err}`,
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         }
     },

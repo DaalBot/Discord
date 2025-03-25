@@ -145,7 +145,7 @@ module.exports = {
         if (!betaData.includes(interaction.guild.id)) {
             return interaction.reply({
                 content: 'This server is not in the beta for events please use `/beta change` to opt in. (Note: Beta does not yet support code editing)',
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         }
 
@@ -187,7 +187,7 @@ module.exports = {
             interaction.reply({
                 content: `Please send a message containing the name for the event (expires <t:${Math.floor((Date.now() + 30 * 1000) / 1000)}:R>).`,
                 embeds: [embed],
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
 
             const filter = (message) => message.author.id === interaction.user.id;
@@ -204,7 +204,7 @@ module.exports = {
                 interaction.editReply({
                     content: `Please send a message containing the description for the event (expires <t:${Math.floor((Date.now() + 5 * 60 * 1000) / 1000)}:R>).`,
                     embeds: [embed],
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
 
                 const collectorB = interaction.channel.createMessageCollector({ filter, time: 5 * 60 * 1000, max: 1, errors: ['time'] });
@@ -252,13 +252,13 @@ module.exports = {
                 interaction.editReply({
                     content: `Event created. To edit the code for the event click [here](https://daalbot.xyz/Dashboard/Guild/${interaction.guild.id}/feature/guild/events/edit?id=${eventId}).`,
                     embeds: [embed],
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
             } catch {
                 interaction.editReply({
                     content: 'You did not respond in time.',
                     embeds: [],
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
             }
         } else if (subCommand === 'delete') {
@@ -269,14 +269,14 @@ module.exports = {
             if (!event) {
                 return interaction.reply({
                     content: 'That event doesnt exist.',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
             }
 
             if (event.guild !== interaction.guild.id) {
                 return interaction.reply({
                     content: 'This server doesnt own that event',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
             }
 
@@ -291,7 +291,7 @@ module.exports = {
             
             interaction.reply({
                 content: `Successfully deleted event \`${eventId}\``,
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         } else if (subCommand === 'list') {
             // List events
@@ -300,7 +300,7 @@ module.exports = {
             if (events.length === 0) {
                 return await interaction.reply({
                     content: 'No events found.',
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
             }
 
@@ -325,13 +325,13 @@ ID: \`${event.id}\``)
             if (embed.data.description.length > 2048) {
                 return await interaction.reply({
                     content: `The list of events is too long to send. Please visit this [link](https://daalbot.xyz/Dashboard/${interaction.guild.id}/events/plaintext?filter=${interaction.options.getString('trigger') ?? 'none'}) to view the list.`,
-                    ephemeral: true
+                    flags: DJS.MessageFlags.Ephemeral
                 })
             }
 
             interaction.reply({
                 embeds: [embed],
-                ephemeral: true
+                flags: DJS.MessageFlags.Ephemeral
             })
         }
     }

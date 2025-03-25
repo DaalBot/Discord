@@ -1,6 +1,6 @@
 // JAVASCRIPT:
 const warnSchema = require('../../models/warn-schema')
-const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js')
+const { EmbedBuilder, ApplicationCommandOptionType, MessageFlags } = require('discord.js')
 const daalbot = require('../../daalbot.js');
 
 module.exports = {
@@ -105,7 +105,7 @@ module.exports = {
         allowedMentions: {
           users: [],
         },
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }
       
       
@@ -126,7 +126,7 @@ module.exports = {
         allowedMentions: {
           users: [],
         },
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }
     } else if (subCommand === "list") {
       const warnings = await warnSchema.find({
@@ -152,7 +152,7 @@ module.exports = {
         allowedMentions: {
           users: [],
         },
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }
     }
   },

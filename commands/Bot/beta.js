@@ -1,6 +1,6 @@
 const daalbot = require('../../daalbot.js');
 const fs = require('fs');
-const { PermissionFlagsBits, ApplicationCommandOptionType } = require('discord.js');
+const { PermissionFlagsBits, ApplicationCommandOptionType, MessageFlags } = require('discord.js');
 const path = require('path');
 
 const modules = [
@@ -68,12 +68,12 @@ module.exports = {
                     fs.writeFileSync(path.resolve(`./db/beta/${selectedModule}.txt`), newData);
                     return await interaction.reply({
                         content: `The server has been removed from the beta involvement for the \`${moduleName}\` module`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 } else {
                     return await interaction.reply({
                         content: `The server is already involved in the beta for the \`${moduleName}\` module`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 }
             } else {
@@ -82,12 +82,12 @@ module.exports = {
 
                     return await interaction.reply({
                         content: `The server has been added to the beta involvement for the \`${moduleName}\` module`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 } else {
                     return await interaction.reply({
                         content: `The server is not involved in the beta for the \`${moduleName}\` module`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                 }
             }

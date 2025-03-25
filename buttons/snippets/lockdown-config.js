@@ -35,5 +35,5 @@ module.exports = (interaction) => {
 
     row.addComponents([dropdown]);
 
-    interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+    interaction.reply({ embeds: [embed], components: [row], flags: DJS.MessageFlags.Ephemeral });
 }

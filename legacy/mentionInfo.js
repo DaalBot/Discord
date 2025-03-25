@@ -6,7 +6,7 @@ const config = require('../config.json')
 client.on('messageCreate', msg => {
   const iEmbed = new EmbedBuilder()
   .setTitle('Hello!')
-  .setDescription(`My default prefix is \`${config.WOKCommands.prefix}\` though it may change depending on what server your in\n\n**LINKS:**\nWebsite: https://daalbot.xyz/\nInvite: https://daalbot.xyz/Invite\nCommands: https://daalbot.xyz/Commands`)
+  .setDescription(`I'm DaalBot, a multi-purpose discord designed to be infinitely customisable. There's a lot of things I can do but I'm not going to list them all here. If you want a list of features please visit https://daalbot.xyz`)
   .setTimestamp(msg.createdTimestamp)
   .setImage('https://media.piny.dev/Daalbot.png');
 

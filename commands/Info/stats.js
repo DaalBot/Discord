@@ -64,7 +64,7 @@ module.exports = {
             return {
                 custom: true,
                 embeds: [embed],
-                ephemeral: true
+                flags: Discord.MessageFlags.Ephemeral
             }
     }
 }
