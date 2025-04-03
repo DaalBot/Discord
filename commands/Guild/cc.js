@@ -64,8 +64,9 @@ module.exports = {
             const name = interaction.options.getString('name');
             const description = interaction.options.getString('description');
             const oOptions = interaction.options.getString('options');
-            const options = await daalbot.convertMetaText(oOptions, interaction.guild, { // Allow them to do things like type: %%{ApplicationCommandOptionType.String}%% instead of hardcoding the values
-                ApplicationCommandOptionType
+            const options = await daalbot.convertMetaText(oOptions ?? '', interaction.guild, { // Allow them to do things like type: %%{ACOT.String}%% instead of hardcoding it
+                ApplicationCommandOptionType,
+                ACOT: ApplicationCommandOptionType // Shorthand for the above
             });
 
             if (!name.match(/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u)) {
@@ -75,7 +76,8 @@ module.exports = {
                 });
             }
 
-            if (options) {
+            if (options.length > 1) { // If string is empty, it will be parsed as an empty array
+                // Check if the provided options are valid
                 try {
                     JSON.parse(options);
                 } catch (error) {
