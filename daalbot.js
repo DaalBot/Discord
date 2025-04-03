@@ -124,7 +124,7 @@ const warnings = {
     delete: db_mongo_warn_delete
 }
 
-function betterFS_write(path, data) {
+function betterFS_write(path, data, encryptContents = false) {
     // Get file directory
     const fileDirectory = path.split('/').slice(0, -1).join('/');
 
@@ -133,18 +133,22 @@ function betterFS_write(path, data) {
         fs.mkdirSync(fileDirectory, { recursive: true });
     }
 
-    if (fs.existsSync(path)) {
-        fs.writeFileSync(path, data);
-        return "Success";
-    } else {
-        fs.appendFileSync(path, data);
-        return "Success";
-    }
+    const wData = encryptContents ? `ENC\n${encrypt(data)}` : data;
+    fs.writeFileSync(path, wData, { flag: 'w' });
+    return "Success";
 }
 
 function betterFS_read(path) {
     if (fs.existsSync(path)) {
-        return fs.readFileSync(path, 'utf8');
+        const data = fs.readFileSync(path, 'utf8');
+
+        if (data.startsWith('ENC\n')) {
+            // The data inside is encrypted
+            const encryptedData = data.replace('ENC\n', '');
+            return decrypt(encryptedData);
+        } 
+
+        else return data;
     } else {
         return "File not found.";
     }
@@ -243,14 +247,20 @@ async function DatabaseGetChannel(guild, type) {
 async function managedDBSet(guild, pathName, data, flags = 'w') {
     switch (flags) {
         case 'w':
-            betterFS_write(path.resolve(`./db/managed/${guild}/${pathName}`), `${data}`);
+            betterFS_write(path.resolve(`./db/managed/${guild}/${pathName}`), `${data}`, true);
             break;
         case 'a':
             if (!fs.existsSync(path.resolve(`./db/managed/${guild}/${pathName}`.split('/').slice(0, -1).join('/')))) {
                 fs.mkdirSync(path.resolve(`./db/managed/${guild}/${pathName}`.split('/').slice(0, -1).join('/')), { recursive: true });
+                return fs.appendFileSync(path.resolve(`./db/managed/${guild}/${pathName}`), `ENC\n${encrypt(data)}`);
             }
 
-            fs.appendFileSync(path.resolve(`./db/managed/${guild}/${pathName}`), `${data}`);
+            // If the file exists, It may be encrypted or not, so we need to use the betterFS_read function to get the data and manually append the data to it
+            const existingData = betterFS_read(path.resolve(`./db/managed/${guild}/${pathName}`));
+            const newData = existingData + data;
+            
+            betterFS_write(path.resolve(`./db/managed/${guild}/${pathName}`), newData, true);
+
             break;
     }
 }
@@ -751,6 +761,37 @@ async function createIdReference(guild, type, id) {
     });
 }
 
+const encryption_key = Buffer.from(process.env.DB_ENC_KEY, 'base64');
+
+/**
+ * @param {string} data 
+ * @returns {string}
+*/
+function encrypt(data) {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', encryption_key, iv);
+    
+    let encrypted = cipher.update(data, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+
+    return iv.toString('hex') + ':' + encrypted;
+}
+
+/**
+ * @param {string} data
+*/
+function decrypt(data) {
+    const parts = data.split(':')
+    const iv = Buffer.from(parts.shift(), 'hex');
+    const encryptedText = Buffer.from(parts.join(':'), 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', encryption_key, iv);
+    
+    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    return decrypted;
+}
+
 const youtube = {
     getChannelUploads: youtube_GetChannelUploads,
     isVideoValid: youtube_isVideoValid,
@@ -878,6 +919,8 @@ module.exports = {
     resolveId,
     createIdReference,
     convertMetaText,
+    encrypt,
+    decrypt,
     api,
     embed: Discord.EmbedBuilder,
     DatabaseEntry

@@ -318,6 +318,36 @@ module.exports = {
                         });
                     }
 
+                    // Loop through all files recursively and decrypt them if needed
+                    const files = await fsp.readdir(path.resolve(`./temp/down/${interaction.guild.id}-${downloadKey}/`), { withFileTypes: true });
+                    const decryptFiles = async(filePath) => {
+                        const stats = await fsp.stat(filePath);
+
+                        if (stats.isDirectory()) {
+                            const subFiles = await fsp.readdir(filePath, { withFileTypes: true });
+                            for (const subFile of subFiles) {
+                                await decryptFiles(path.join(filePath, subFile.name));
+                            }
+                        } else {
+                            // Check if the file is encrypted
+                            const fileData = await fsp.readFile(filePath, 'utf8');
+                            if (fileData.startsWith('ENC\n')) {
+                                const decryptedData = daalbot.decrypt(fileData.replace('ENC\n', ''));
+
+                                // Write the decrypted data to the file
+                                await fsp.writeFile(filePath, decryptedData, 'utf8');
+                            }
+                        }
+                    };
+
+                    for (const file of files) {
+                        if (file.isDirectory()) {
+                            await decryptFiles(path.resolve(`./temp/down/${interaction.guild.id}-${downloadKey}/`, file.name));
+                        } else {
+                            await decryptFiles(path.resolve(`./temp/down/${interaction.guild.id}-${downloadKey}/`, file.name));
+                        }
+                    }
+
                     // Zip the folder
                     const archiver = require('archiver');
                     const output = fs.createWriteStream(path.resolve(`./temp/down/${interaction.guild.id}-${downloadKey}.zip`));

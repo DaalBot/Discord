@@ -8,7 +8,10 @@ No other data relating to the server is stored except for events like the bot be
 DaalBot does not store any data about the users in the server except for when needed like tracking certain aspects of a user in the server but this data is never sent to logs of any kind.
 
 ## How the data is stored
-The data is stored in **plain text** in a folder on the bots server. The data is only accessible by the bot owner and is not shared with anyone else.
+Most data is stored within a plain text database on the bots server; however, some data is stored in a encrypted manner. This data is only accessible by the bot owner and is not shared with any 3rd party services.
+
+### Encrypted data
+While data is encrypted it is **not stored in a way that is impossible to decrypt**. Decryption keys are never stored on the same server as the data or on disk at all if possible. This means that even if the server is compromised the data is still safe.
 
 ## 3rd party services
 DaalBot sometimes reaches out to 3rd party services to store / retrieve data. You can see what services are used and find links to their sites where you can find a privacy policy.
@@ -67,6 +70,11 @@ Automated downloads is currently only available to find data about servers. Insi
 * Verification settings - "verify/"
 * Welcomer settings - "welcome/"
 * User XP and level rewards - "xp/"
+
+### Backups
+While data is wiped from the main database instantly it may be retained in backups until the backup is deleted. This is to ensure that data can be recovered in the event of a failure.
+
+These backups are stored until the backup store reaches storage limit and are deleted in a FIFO manner. This means that the oldest backup will be deleted first. Backups are also deleted after 90 days.
 
 # Analytics & Statistics
 DaalBot may collect analytic data to either improve the services or to see how much traffic the bot is getting. This data is stored in a JSON database provided by [pantry](https://getpantry.cloud) that is governed by their privacy policy; however, this data doesnt contain identifiable information and may be used to provide anonymous statistics to the public. (e.g. Total servers, Messages processed, etc.)
