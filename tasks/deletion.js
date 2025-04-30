@@ -12,6 +12,8 @@ async function deleteGuild(guild) {
 
         if (time < Date.now()) {
             console.log(`Deleting ${guild} with reason: ${reason}`);
+            await fs.appendFile(path.resolve('./db/deleted.txt'), `\nscript:${guild}:${reason}`)
+
             const categories = [
                 'autorole',
                 'config',
@@ -40,6 +42,10 @@ async function deleteGuild(guild) {
             const newEvents = eventsJson.filter(event => event.guild !== guild);
 
             await fs.writeFile(path.resolve(`./db/events/events.json`), JSON.stringify(newEvents, null, 4));
+
+            // Delete the deletion file.
+            await fs.rm(deletionFile);
+            console.log(`Deleted ${guild} and its data.`);
         }
     } catch (err) {
         console.error(err);

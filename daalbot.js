@@ -291,6 +291,50 @@ async function managedDBDelete(guild, pathName) {
     fs.unlinkSync(path.resolve(`./db/managed/${guild}/${pathName}`));
 }
 
+/**
+ * @param {string} guild
+ * @param {string} pathName
+ * @param {string | Object} data
+ * @param {('exists')[]} failures
+*/
+async function managedDBInsert(guild, pathName, data, failures) {
+    const dataType = typeof data;
+
+    const existingFile = await managedDBExists(guild, pathName) ? await managedDBGet(guild, pathName) : null;
+    
+    if (dataType == 'object' && data.id) {
+        if (existingFile) {
+            const existingData = JSON.parse(existingFile);
+            const existingDataIndex = existingData.findIndex(d => d.id === data.id);
+
+            if (existingDataIndex !== -1) {
+                if (failures.includes('exists')) throw new Error('Entry already exists.');
+
+                // Update the existing entry
+                existingData[existingDataIndex] = data;
+                await managedDBSet(guild, pathName, JSON.stringify(existingData));
+            } else {
+                // Add the new entry
+                existingData.push(data);
+                managedDBSet(guild, pathName, JSON.stringify(existingData));
+            }
+        } else {
+            await managedDBSet(guild, pathName, JSON.stringify([data]));
+        }
+    } else {
+        if (existingFile) {
+            const existingData = JSON.parse(existingFile);
+
+            if (existingData.includes(data) && failures.includes('exists'))
+                throw new Error('Entry already exists.');
+
+            managedDBSet(guild, pathName, JSON.stringify([...existingData, data]));
+        } else {
+            managedDBSet(guild, pathName, JSON.stringify([data]));
+        }
+    }
+}
+
 async function sendAlert(guild, embed, message) {
     const alertChannel = await DatabaseGetChannel(guild, 'alerts');
 
@@ -828,7 +872,8 @@ const db = {
         set: managedDBSet,
         get: managedDBGet,
         exists: managedDBExists,
-        delete: managedDBDelete
+        delete: managedDBDelete,
+        insert: managedDBInsert
     }
 }
 

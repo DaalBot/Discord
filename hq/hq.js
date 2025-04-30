@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const daalbot = require('../daalbot.js');
 const fs = require('fs');
 const path = require('path');
+const { default: axios } = require('axios');
 
 client.on('ready', () => {
     const server = client.guilds.cache.get('1001929445478781030');
@@ -191,6 +192,16 @@ client.on('interactionCreate', async interaction => {
                                 .setTitle('API Key Generation')
                                 .setDescription(`Key generated successfully for ${guild.name}. The key is \`${Buffer.from(guild.id).toString('base64').replace(/=/g, '')}.${rand}\` making your \`Authorization\` header \`Guild ${Buffer.from(guild.id).toString('base64').replace(/=/g, '')}.${rand}\``)
                                 .setColor('Green')
+
+                            // Send the key to the server
+                            const key = Buffer.from(guild.id).toString('base64').replace(/=/g, '') + '.' + rand
+
+                            await axios.post('https://api.daalbot.xyz/post/auth/guild', {}, {
+                                headers: {
+                                    'botauth': process.env.DBAPI_KEY,
+                                    'Authorization': key
+                                }
+                            })
 
                             await interaction.editReply({
                                 embeds: [resultEmbed],

@@ -1,159 +1,227 @@
-// JAVASCRIPT:
-const warnSchema = require('../../models/warn-schema')
-const { EmbedBuilder, ApplicationCommandOptionType, MessageFlags } = require('discord.js')
+const { EmbedBuilder, ApplicationCommandOptionType, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js')
 const daalbot = require('../../daalbot.js');
+const crypto = require('crypto');
+const client = daalbot.client;
 
 module.exports = {
-  category: "Moderation",
-  description: "Warns a user",
+    category: "Moderation",
+    description: "Warns a user",
 
-  permissions: [
-    `${daalbot.DJS.PermissionFlagsBits.ModerateMembers}`,
-  ],
+    permissions: [
+        `${daalbot.DJS.PermissionFlagsBits.ModerateMembers}`,
+    ],
 
-  slash: true,
-  testOnly: false,
-  guildOnly: true,
+    slash: true,
+    testOnly: false,
+    guildOnly: true,
 
-  options: [
-    {
-      type: ApplicationCommandOptionType.Subcommand,
-      name: "add",
-      description: "Adds a warning to the user",
-      options: [
+    options: [
         {
-          name: "user",
-          type: ApplicationCommandOptionType.User,
-          description: "The user to add a warning to",
-          required: true,
-        },
-        {
-          name: "reason",
-          type: ApplicationCommandOptionType.String,
-          description: "The reason for the warning",
-          required: true,
-        },
-      ],
-    },
-    {
-      type: ApplicationCommandOptionType.Subcommand,
-      name: "remove",
-      description: "Removes a warning from the user",
-      options: [
-        {
-          name: "user",
-          type: ApplicationCommandOptionType.User,
-          description: "The user to remove a warning from",
-          required: true,
+            name: 'add',
+            description: 'Add a warning to a user',
+            type: ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'user',
+                    description: 'The user to warn',
+                    type: ApplicationCommandOptionType.User,
+                    required: true,
+                },
+                {
+                    name: 'reason',
+                    description: 'The reason for the warning',
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                },
+            ],
         },
         {
-          name: "id",
-          type: ApplicationCommandOptionType.String,
-          description: "The ID of the warning to remove",
-          required: true,
+            name: 'remove',
+            description: 'Remove a warning from a user',
+            type: ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'id',
+                    description: 'The ID of the warning to remove',
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                }
+            ],
         },
-      ],
-    },
-    {
-      type: ApplicationCommandOptionType.Subcommand,
-      name: "list",
-      description: "Lists all warnings for the user",
-      options: [
         {
-          name: "user",
-          type: ApplicationCommandOptionType.User,
-          description: "The user to list warnings for",
-          required: true,
-        },
-      ],
-    },
-  ],
+            name: 'list',
+            description: 'List all warnings for a user',
+            type: ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'user',
+                    description: 'The user to list warnings for',
+                    type: ApplicationCommandOptionType.User,
+                    required: false,
+                },
+            ],
+        }
+    ],
 
-  callback: async ({ guild, member: staff, interaction }) => {
-    const subCommand = interaction.options.getSubcommand();
-    const user = interaction.options.getUser("user");
-    const reason = interaction.options.getString("reason");
-    const id = interaction.options.getString("id");
+    /**
+     * @param {{interaction: import('discord.js').ChatInputCommandInteraction}} param0
+     */
+    callback: async ({ interaction }) => {
+        const subcommand = interaction.options.getSubcommand()
+        
+        if (subcommand == 'add') {
+            const user = interaction.options.getUser('user');
+            const reason = interaction.options.getString('reason');
 
-    if (subCommand === "add") {
-      const warning = await warnSchema.create({
-        userId: user?.id,
-        staffId: staff.id,
-        guildId: guild?.id,
-        reason,
-      });
-      const embed = new EmbedBuilder()
-      .setTitle('Success')
-      .setDescription(`Added warning to <@${user?.id}>\nReason: \`${reason}\``)
-      .setColor(0x40ff00)
-      .setFooter({
-        text: `ID: ${warning.id}`,
-        iconURL: user?.displayAvatarURL({ dynamic: true }),
-      })
+            const reportObject = {
+                subject: user.id,
+                by: interaction.user.id,
+                time: Date.now(),
+                id: crypto.randomBytes(4).toString('hex'),
+                reason,
+            };
 
-      user?.send(`You have been warned in ${guild?.name} for \`${reason}\``)
-      .then(() => {
-      })
-      .catch(() => {
-        interaction.channel.send(`<@${user?.id}>, you have been warned for \`${reason}\``)
-      });
+            await daalbot.db.managed.insert(interaction.guild.id, 'warns.json', reportObject);
 
-      return {
-        custom: true,
-        content: `Done!`,
-        embeds: [embed],
-        allowedMentions: {
-          users: [],
-        },
-        flags: MessageFlags.Ephemeral,
-      }
-      
-      
-    } else if (subCommand === "remove") {
-      daalbot.warnings.delete(id);
-      const embed = new EmbedBuilder()
-      .setTitle(`Success`)
-      .setDescription(`Removed warning from <@${user?.id}>`)
-      .setColor(0xff0000)
-      .setFooter({
-        text: `ID: ${id}`,
-      })
+            return interaction.reply({ content: `Warned <@${user.id}> for \`${reason}\` (${reportObject.id})`, flags: MessageFlags.Ephemeral });
+        }
 
-      return {
-        custom: true,
-        content: `Done!`,
-        embeds: [embed],
-        allowedMentions: {
-          users: [],
-        },
-        flags: MessageFlags.Ephemeral,
-      }
-    } else if (subCommand === "list") {
-      const warnings = await warnSchema.find({
-        userId: user?.id,
-        guildId: guild?.id,
-      });
+        if (subcommand == 'remove') {
+            const id = interaction.options.getString('id');
+            let warns = await daalbot.db.managed.get(interaction.guild.id, 'warns.json');
 
-      let description = `Warnings for <@${user?.id}>:\n\n`;
+            if (warns == 'File Not Found.')
+                return interaction.reply({ content: `Warning database missing, No users have any warnings.`, ephemeral: true });
+            else warns = JSON.parse(warns);
 
-      for (const warn of warnings) {
-        description += `**ID:** ${warn._id}\n`;
-        description += `**Date:** ${warn.createdAt.toLocaleString()}\n`;
-        description += `**Staff:** <@${warn.staffId}>\n`;
-        description += `**Reason:** ${warn.reason}\n\n`;
-      }
+            const warn = warns.find(warn => warn.id == id);
+            if (!warn) return interaction.reply({ content: `Warning not found.`, ephemeral: true });
 
-      const embed = new EmbedBuilder().setDescription(description);
+            warns = warns.filter(warn => warn.id != id);
 
-      return {
-        custom: true,
-        content: `Here are the warnings for <@${user?.id}>`,
-        embeds: [embed],
-        allowedMentions: {
-          users: [],
-        },
-        flags: MessageFlags.Ephemeral,
-      }
+            await daalbot.db.managed.set(interaction.guild.id, 'warns.json', JSON.stringify(warns));
+
+            return interaction.reply({
+                content: `Removed warning \`${id}\` from <@${warn.subject}>.\nReason: ${warn.reason}\nBy: <@${warn.by}>\nTime: <t:${Math.floor(warn.time / 1000)}:R>`,
+                flags: MessageFlags.Ephemeral,
+            })
+        }
+
+        if (subcommand == 'list') {
+            const user = interaction.options.getUser('user');
+            let warns = await daalbot.db.managed.get(interaction.guild.id, 'warns.json');
+
+            if (warns == 'File Not Found.')
+                return interaction.reply({ content: `Warning database missing, No users have any warnings.`, ephemeral: true });
+            else warns = JSON.parse(warns);
+
+            if (user) warns = warns.filter(warn => warn.subject == user.id);
+
+            if (warns.length == 0)
+                return interaction.reply({ content: `No users have any warnings.`, ephemeral: true });
+
+            const embed = new EmbedBuilder()
+                .setTitle(`Warnings (${warns.length})`)
+                .setDescription(`Warnings for ${user ? `<@${user.id}>` : 'all users'}`);
+
+            let overflown = 0;
+            for (let i = 0; i < warns.length; i++) {
+                const warn = warns[i];
+                if (embed.data.fields?.length >= 10) {
+                    overflown++;
+                    continue;
+                }
+            
+                const warnUser = user || (client.users.cache.get(warn.subject) ?? (await client.users.fetch(warn.subject)));
+            
+                embed.addFields({
+                    name: `\`${i + 1}.\` ${!user ? `${warnUser?.username} (${warn.subject}) - ` : ''}\`${warn.id}\``,
+                    value: `By: <@${warn.by}>\nReason: ${warn.reason.substring(0, 197) + (warn.reason.length > 197 ? '...' : '')}\nTime: <t:${Math.floor(warn.time / 1000)}:R>`,
+                    inline: false,
+                });
+            }
+
+            const row = new ActionRowBuilder()
+
+            if (overflown > 0) {
+                embed.setFooter({ text: `And ${overflown} more warnings...` })
+
+                const nextButton = new ButtonBuilder()
+                    .setLabel('Next')
+                    .setStyle(ButtonStyle.Primary)
+                    .setCustomId(`warns_${user?.id ?? 'all'}_2`)
+
+                const previousButton = new ButtonBuilder()
+                    .setLabel('Previous')
+                    .setDisabled(true)
+                    .setStyle(ButtonStyle.Primary)
+                    .setCustomId(`warns_${user?.id ?? 'all'}_1`)
+
+                const infoButton = new ButtonBuilder()
+                    .setLabel('Page #1')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true)
+                    .setCustomId(`neverclick`)
+
+                row.addComponents(
+                    previousButton,
+                    infoButton,
+                    nextButton
+                )
+            };
+
+            interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral, components: [row] });
+        }
     }
-  },
 }
+
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isButton() || !interaction.customId.startsWith('warns_')) return;
+    const [user, page] = interaction.customId.split('_').slice(1);
+
+    const userId = user == 'all' ? null : user;
+    const pageNum = parseInt(page) || 1;
+    const pageSize = 10;
+    const start = (pageNum - 1) * pageSize;
+    const end = start + pageSize;
+
+    const warns = daalbot.db.managed.exists(interaction.guild.id, 'warns.json') ? JSON.parse(await daalbot.db.managed.get(interaction.guild.id, 'warns.json')) : [];
+    const filteredWarns = userId ? warns.filter(warn => warn.subject == userId) : warns;
+
+    const totalPages = Math.ceil(filteredWarns.length / pageSize);
+    const embed = new EmbedBuilder()
+        .setTitle(`Warnings (${filteredWarns.length})`)
+        .setDescription(`Warnings for ${userId ? `<@${userId}>` : 'all users'}`);
+
+    for (let i = 0; i < filteredWarns.slice(start, end).length; i++) {
+        const warn = filteredWarns.slice(start, end)[i];
+        const warnUser = client.users.cache.get(userId || warn.subject) ?? (await client.users.fetch(userId || warn.subject));
+    
+        embed.addFields({
+            name: `\`${start + (i + 1)}.\` ${!userId ? `${warnUser?.username} (${warn.subject}) - ` : ''}\`${warn.id}\``,
+            value: `By: <@${warn.by}>\nReason: ${warn.reason.substring(0, 197) + (warn.reason.length > 197 ? '...' : '')}\nTime: <t:${Math.floor(warn.time / 1000)}:R>`,
+            inline: false,
+        });
+    }
+
+    const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setLabel('Previous')
+                .setStyle(ButtonStyle.Primary)
+                .setCustomId(`warns_${userId ?? 'all'}_${pageNum - 1}`)
+                .setDisabled(pageNum <= 1),
+            new ButtonBuilder()
+                .setLabel(`Page #${pageNum}`)
+                .setStyle(ButtonStyle.Secondary)
+                .setCustomId(`neverclick`)
+                .setDisabled(true),
+            new ButtonBuilder()
+                .setLabel('Next')
+                .setStyle(ButtonStyle.Primary)
+                .setCustomId(`warns_${userId ?? 'all'}_${pageNum + 1}`)
+                .setDisabled(pageNum >= totalPages),
+        );
+
+    await interaction.update({ embeds: [embed], components: [row] });
+})
