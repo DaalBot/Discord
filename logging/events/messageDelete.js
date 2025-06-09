@@ -33,7 +33,7 @@ client.on('messageDelete', async (message) => {
 
 <:Message:1117915334855360532> ${message.content}
 
-<:Trash:1118100123713540118> <@${message.author.id}> or a bot[*](https://pasteapi.com/u0RjF7j8)`)
+<:Trash:1118100123713540118> <@${message.author.id}> or a bot[*](https://daalbot.xyz/Details#message-deletion-attribution)`)
                 .setThumbnail('https://media.piny.dev/daalbot/embed/thumbnail/logs/Message.png')
                 .setColor('#EF3D48')
                 .setTimestamp();
@@ -55,7 +55,7 @@ client.on('messageDelete', async (message) => {
 
 <:Message:1117915334855360532> ${message.content}
 
-<:Trash:1118100123713540118> <@${executor}>[*](https://pasteapi.com/u0RjF7j8)`)
+<:Trash:1118100123713540118> <@${executor}>[*](https://daalbot.xyz/Details#message-deletion-attribution)`)
                     } catch (error) {
                         console.error(error);
                     }
