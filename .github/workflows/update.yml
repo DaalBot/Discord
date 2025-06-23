@@ -14,4 +14,4 @@ jobs:
     steps:
     - name: Send request
       run: |
-        curl -X POST -H "Authorization: ${{ secrets.API_KEY }}" https://link.bot.daalbot.xyz/api/update
+        curl -X POST -H "Authorization: ${{ secrets.API_KEY }}" https://discord.daalbot.xyz/api/update
