@@ -29,7 +29,7 @@ client.on('messageCreate', async message => {
     async function executeEvent(inputFile) {
         const input = require(inputFile);
         const inputData = message; // The line that should be changed to the actual input data
-        const inputFileContents = fs.readFileSync(inputFile, 'utf8');
+        const inputFileContents = daalbot.fs.read(inputFile, 'utf8');
 
         // Override console.log to do something (Wrote this comment before I wrote the code below, so I dont know what it does yet, but I think it should work fine)
         console.log = function() {
@@ -89,7 +89,7 @@ client.on('messageCreate', async message => {
                     if (!fs.existsSync(path.resolve(`./db/events/${input.id}`))) fs.mkdirSync(path.resolve(`./db/events/${input.id}`), { recursive: true });
                     const variableFileName = variableName.replace(/[^a-zA-Z0-9]/g, ''); // Strip out all non-alphanumeric / problematic characters
                     if (!fs.existsSync(path.resolve(`./db/events/${input.id}/${variableFileName}.var`))) return null;
-                    return fs.readFileSync(path.resolve(`./db/events/${input.id}/${variableFileName}.var`), 'utf8');
+                    return daalbot.fs.read(path.resolve(`./db/events/${input.id}/${variableFileName}.var`), 'utf8');
                 },
 
                 set: (variableName, value) => {

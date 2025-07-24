@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const Canvas = require('@napi-rs/canvas')
 const Discord = require('discord.js');
+const daalbot = require('../../daalbot.js');
 const { request } = require('undici');
 module.exports = {
     name: 'level',
@@ -33,7 +34,7 @@ module.exports = {
         if (user.bot) return interaction.reply({ content: `Humans have levels, Bots don't`, flags: Discord.MessageFlags.Ephemeral });
 
         if (fs.existsSync(`${botPath}/db/xp/${interaction.guild.id}/${user.id}.xp`)) {
-            let xp = fs.readFileSync(`${botPath}/db/xp/${interaction.guild.id}/${user.id}.xp`, 'utf8');
+            let xp = daalbot.fs.read(`${botPath}/db/xp/${interaction.guild.id}/${user.id}.xp`, 'utf8');
             let level = xp.slice(0, -3) || 0;
 
             // Test server

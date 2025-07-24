@@ -39,7 +39,7 @@ module.exports = {
         ]);
 
         if (lockeddown) {
-            const currentLockdown = JSON.parse(fs.readFileSync(path.resolve(`./db/lockdown/${guild.id}/current.json`), 'utf-8'));
+            const currentLockdown = JSON.parse(daalbot.fs.read(path.resolve(`./db/lockdown/${guild.id}/current.json`), 'utf-8'));
 
             embed.addFields([
                 {

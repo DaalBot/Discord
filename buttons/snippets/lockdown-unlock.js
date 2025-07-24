@@ -13,7 +13,7 @@ module.exports = async(interaction) => {
 
     if (!lockeddown) return interaction.reply({ content: 'The server is not currently locked down.', flags: MessageFlags.Ephemeral });
 
-    const currentLockdown = JSON.parse(fs.readFileSync(path.resolve(`./db/lockdown/${guild.id}/current.json`), 'utf-8'));
+    const currentLockdown = JSON.parse(daalbot.fs.read(path.resolve(`./db/lockdown/${guild.id}/current.json`), 'utf-8'));
 
     if (currentLockdown.isolation) {
         const isolationChannel = guild.channels.cache.get(currentLockdown.isolation);

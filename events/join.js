@@ -9,7 +9,7 @@ client.on('guildMemberAdd', (member) => {
     const welcomeData = path.resolve(`./db/welcome/${member.guild.id}.json`);
 
     if (fs.existsSync(`${welcomeData}`) && !member.user.bot) {
-        const welcome = JSON.parse(fs.readFileSync(`${welcomeData}`, 'utf8'));
+        const welcome = JSON.parse(daalbot.fs.read(`${welcomeData}`, 'utf8'));
         const channel = daalbot.getChannel(member.guild.id, welcome.channel);
 
         let variables = {
@@ -79,8 +79,8 @@ client.on('guildMemberAdd', (member) => {
     const lockeddown = fs.existsSync(path.resolve(`./db/lockdown/${member.guild.id}/current.json`))
 
     if (lockeddown) {
-        const lockdownConf = JSON.parse(fs.readFileSync(path.resolve(`./db/lockdown/${member.guild.id}/config.json`), 'utf8'));
-        const lockdownJSON = JSON.parse(fs.readFileSync(path.resolve(`./db/lockdown/${member.guild.id}/current.json`), 'utf8'));
+        const lockdownConf = JSON.parse(daalbot.fs.read(path.resolve(`./db/lockdown/${member.guild.id}/config.json`), 'utf8'));
+        const lockdownJSON = JSON.parse(daalbot.fs.read(path.resolve(`./db/lockdown/${member.guild.id}/current.json`), 'utf8'));
 
         if (member.user.bot && !lockdownConf.botAdding) member.kick(`Lockdown is active. Bots are not allowed to join.`)
         if (!member.user.bot && lockdownConf.newUsers === 'kick') member.kick(`Lockdown is active. New users are not allowed to join.`)

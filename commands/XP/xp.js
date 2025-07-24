@@ -65,7 +65,7 @@ module.exports = {
             // Check if the user has a XP file
             if (fs.existsSync(path.resolve(`./db/xp/${interaction.guild.id}/${user.id}.xp`))) {
                 // Read the XP file
-                let xp = parseInt(fs.readFileSync(path.resolve(`./db/xp/${interaction.guild.id}/${user.id}.xp`), 'utf8'));
+                let xp = parseInt(daalbot.fs.read(path.resolve(`./db/xp/${interaction.guild.id}/${user.id}.xp`), 'utf8'));
                 // Add the XP
                 xp += amount;
                 // Write the XP file
@@ -91,7 +91,7 @@ module.exports = {
             // Check if the user has a XP file
             if (fs.existsSync(path.resolve(`./db/xp/${interaction.guild.id}/${user.id}.xp`))) {
                 // Read the XP file
-                let xp = parseInt(fs.readFileSync(path.resolve(`./db/xp/${interaction.guild.id}/${user.id}.xp`), 'utf8'));
+                let xp = parseInt(daalbot.fs.read(path.resolve(`./db/xp/${interaction.guild.id}/${user.id}.xp`), 'utf8'));
                 
                 // Remove the XP
                 xp -= amount;

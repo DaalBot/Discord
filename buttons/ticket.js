@@ -34,11 +34,11 @@ client.on('interactionCreate', async (interaction) => {
             }
 
             if (fs.existsSync(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCREATE.enabled`))) {
-                const enabled = fs.readFileSync(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCREATE.enabled`), 'utf8');
+                const enabled = daalbot.fs.read(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCREATE.enabled`), 'utf8');
                 if (enabled == 'true') {
                     if (!fs.existsSync(`./db/logging/${interaction.guild.id}/channel.id`)) return;
 
-                    const channelID = fs.readFileSync(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`), 'utf8');
+                    const channelID = daalbot.fs.read(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`), 'utf8');
                     const logChannel = client.channels.cache.get(channelID);
 
                     const embed = new Discord.EmbedBuilder()
@@ -55,7 +55,7 @@ client.on('interactionCreate', async (interaction) => {
                 }
             }
 
-            const ticketCategory = daalbot.getChannel(interaction.guild.id, fs.readFileSync(`${config.botPath}/db/tickets/${interaction.guild.id}.category`, 'utf8'));
+            const ticketCategory = daalbot.getChannel(interaction.guild.id, daalbot.fs.read(`${config.botPath}/db/tickets/${interaction.guild.id}.category`, 'utf8'));
             if (!ticketCategory) return interaction.reply({ content: 'The ticket category is not set up.', flags: MessageFlags.Ephemeral });
 
             // Check the ticket amount
@@ -96,7 +96,7 @@ client.on('interactionCreate', async (interaction) => {
             const permsFolder = path.resolve(`./db/tickets/`);
 
             if (fs.existsSync(`${permsFolder}/${interaction.guild.id}.permissions`)) {
-                const permissions = fs.readFileSync(`${permsFolder}/${interaction.guild.id}.permissions`, 'utf8').split('\n');
+                const permissions = daalbot.fs.read(`${permsFolder}/${interaction.guild.id}.permissions`, 'utf8').split('\n');
 
                 for (let i = 0; i < permissions.length; i++) {
                     const data = permissions[i].split(':');
@@ -158,7 +158,7 @@ client.on('interactionCreate', async (interaction) => {
 
             fs.appendFileSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticketID}.txt`), `\n--Ticket closed by ${interaction.user.tag} / ${interaction.user.id}--\n`);
 
-            const ticketMessage = await interaction.channel.messages.fetch(fs.readFileSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticketID}.ticket`), 'utf8').split('\n')[1]);
+            const ticketMessage = await interaction.channel.messages.fetch(daalbot.fs.read(path.resolve(`./db/tickets/${interaction.guild.id}/${ticketID}.ticket`), 'utf8').split('\n')[1]);
 
             const row = new Discord.ActionRowBuilder()
 
@@ -191,7 +191,7 @@ client.on('interactionCreate', async (interaction) => {
 
             fs.appendFileSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticketID}.txt`), `\n--Ticket opened by ${interaction.user.tag} / ${interaction.user.id}--\n`);
 
-            const ticketMessage = await interaction.channel.messages.fetch(fs.readFileSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticketID}.ticket`), 'utf8').split('\n')[1]);
+            const ticketMessage = await interaction.channel.messages.fetch(daalbot.fs.read(path.resolve(`./db/tickets/${interaction.guild.id}/${ticketID}.ticket`), 'utf8').split('\n')[1]);
 
             const row = new Discord.ActionRowBuilder()
 
@@ -261,7 +261,7 @@ client.on('interactionCreate', async (interaction) => {
             ticketFiles.forEach(async(ticketFile) => {
                 const ticketID = ticketFile.split('.')[0];
 
-                const ticketFileData = fs.readFileSync(path.resolve(`./db/tickets/${interaction.guild.id}/${ticketID}.ticket`), 'utf8');
+                const ticketFileData = daalbot.fs.read(path.resolve(`./db/tickets/${interaction.guild.id}/${ticketID}.ticket`), 'utf8');
 
                 if (ticketFile.split('.')[1] != 'txt') return; // Dont loop over tickets twice
                     

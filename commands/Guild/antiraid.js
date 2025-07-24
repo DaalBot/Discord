@@ -127,7 +127,7 @@ module.exports = {
             
             if (subCommand == 'all') {
                 if (dataExists) {
-                    let data = fs.readFileSync(dir, 'utf8').split(',');
+                    let data = daalbot.fs.read(dir, 'utf8').split(',');
                     data[0] = enabled;
                     daalbot.fs.write(dir, `${data[0]},${data[1]},${data[2]}`);
                 } else {
@@ -137,7 +137,7 @@ module.exports = {
 
             if (subCommand == 'names') {
                 if (dataExists) {
-                    let data = fs.readFileSync(dir, 'utf8').split(',');
+                    let data = daalbot.fs.read(dir, 'utf8').split(',');
                     data[1] = enabled;
                     daalbot.fs.write(dir, `${data[0]},${data[1]},${data[2]}`);
                 } else {
@@ -147,7 +147,7 @@ module.exports = {
 
             if (subCommand == 'treshold') {
                 if (dataExists) {
-                    let data = fs.readFileSync(dir, 'utf8').split(',');
+                    let data = daalbot.fs.read(dir, 'utf8').split(',');
                     data[2] = enabled;
                     daalbot.fs.write(dir, `${data[0]},${data[1]},${data[2]}`);
                 } else {

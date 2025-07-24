@@ -36,7 +36,7 @@ client.on('channelUpdate', async (oldChannel, newChannel) => {
     const channelIdPath = `./db/logging/${oldChannel.guild.id}/channel.id`;
 
     if (fs.existsSync(path.resolve(cooldownPath))) {
-        const text = fs.readFileSync(path.resolve(cooldownPath), 'utf8');
+        const text = daalbot.fs.read(path.resolve(cooldownPath), 'utf8');
         if (text === 'true') return;
         fs.writeFileSync(path.resolve(cooldownPath), 'true');
         setTimeout(() => fs.writeFileSync(path.resolve(cooldownPath), 'false'), 1000);
@@ -46,17 +46,17 @@ client.on('channelUpdate', async (oldChannel, newChannel) => {
         setTimeout(() => fs.writeFileSync(path.resolve(cooldownPath), 'false'), 1000);
     }
 
-    const enabled = fs.readFileSync(path.resolve(enabledPath), 'utf8');
+    const enabled = daalbot.fs.read(path.resolve(enabledPath), 'utf8');
     if (enabled !== 'true') return;
 
     if (fs.existsSync(path.resolve(excludePath))) {
-        const excluded = fs.readFileSync(path.resolve(excludePath), 'utf8').split('\n');
+        const excluded = daalbot.fs.read(path.resolve(excludePath), 'utf8').split('\n');
         if (excluded.includes(oldChannel.id)) return;
     }
 
     if (!fs.existsSync(path.resolve(channelIdPath))) return;
 
-    const channelID = fs.readFileSync(path.resolve(channelIdPath), 'utf8');
+    const channelID = daalbot.fs.read(path.resolve(channelIdPath), 'utf8');
     const logChannel = client.channels.cache.get(channelID);
 
     const oldRawData = JSON.stringify(oldChannel, null, 4);

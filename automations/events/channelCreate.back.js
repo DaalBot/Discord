@@ -1,26 +1,29 @@
 // General modules
 const fs = require('fs');
 const path = require('path');
+const client = require('../../client.js');
 const toolsClass = require('../tools.js');
+const filenameWithoutExtension = path.basename(__filename, '.js');
+const daalbot = require('../../daalbot.js');
 
 const consoleOverrides = toolsClass.getConsoleOverrides();
 const utils = toolsClass.getUtils();
 const checkSecurityRules = toolsClass.getSecurityRules();
 const overridenProcessEnv = toolsClass.getOverridenProcessEnv();
 
-/**
- * @param {string} id The ID of the event to call
- * @param {object} data The data to send to the event
- */
-async function callEvent(id, data) {
+// Event handler
+client.on(`${filenameWithoutExtension}`, async(eventObject) => {
+
     async function executeEvent(inputFile) {
         // Unload input incase its already loaded
         delete require.cache[require.resolve(inputFile)];
 
         // Load event file
         const input = require(inputFile);
-        const inputData = data; // The line that should be changed to the actual input data
+        const inputData = eventObject; // The line that should be changed to the actual input data
         const inputFileContents = daalbot.fs.read(inputFile, 'utf8');
+
+        if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
 
         toolsClass.setId(input.id);
 
@@ -34,11 +37,17 @@ async function callEvent(id, data) {
 
         // Override process.env
         process.env = overridenProcessEnv;
-        
-        if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
     
+        eventObject.client = {};
+
         // All checks pass
-        input.execute(inputData, utils, input.id);
+        toolsClass.setup();
+
+        try {
+            input.execute(inputData, utils, input.id);
+        } catch (e) {
+            console.error(`${e}`);
+        }
 
         // Reset everything to normal
         toolsClass.reset();
@@ -47,9 +56,13 @@ async function callEvent(id, data) {
         delete require.cache[require.resolve(inputFile)];
     }
 
-    executeEvent(path.resolve(`./db/events/${id}/event.js`));
-}
+    const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json'), 'utf8'));
 
-module.exports = {
-    callEvent
-}
+    const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObject.guild.id);
+
+    for (let i = 0; i < validEvents.length; i++) {
+        const event = validEvents[i];
+
+        executeEvent(path.resolve(`./db/events/${event.id}/event.js`));
+    }
+})

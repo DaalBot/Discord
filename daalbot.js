@@ -160,7 +160,7 @@ async function getLogChannel(guild) {
 
 async function getLogChannelId(guild) {
     if (fs.existsSync(path.resolve(`./db/logging/${guild}/channel.id`))) {
-        return fs.readFileSync(path.resolve(`./db/logging/${guild}/channel.id`), 'utf8');
+        return betterFS_read(path.resolve(`./db/logging/${guild}/channel.id`), 'utf8');
     } else {
         return null;
     }
@@ -173,7 +173,7 @@ async function logEvent(guild, event, embed) {
         if (logChannel === 'Server not found.' || logChannel === 'Channel not found.' || logChannel == undefined) return;
 
         if (fs.existsSync(path.resolve(`./db/logging/${guild}/${event.toUpperCase()}.enabled`))) {
-            if (fs.readFileSync(path.resolve(`./db/logging/${guild}/${event.toUpperCase()}.enabled`), 'utf8') == 'true') {
+            if (betterFS_read(path.resolve(`./db/logging/${guild}/${event.toUpperCase()}.enabled`), 'utf8') == 'true') {
                 logChannel?.send({
                     content: embed.title,
                     embeds: [embed]
@@ -270,7 +270,7 @@ async function managedDBSet(guild, pathName, data, flags = 'w') {
  * @param {string} pathName 
  * @returns {Promise<string | "File not found.">}
  */
-async function managedDBGet(guild, pathName) {
+function managedDBGet(guild, pathName) {
     return betterFS_read(path.resolve(`./db/managed/${guild}/${pathName}`));
 }
 
@@ -278,8 +278,7 @@ async function managedDBGet(guild, pathName) {
  * @param {string} guild 
  * @param {string} pathName
 */
-async function managedDBExists(guild, pathName) {
-    // Why tf is this not working
+function managedDBExists(guild, pathName) {
     return fs.existsSync(path.resolve(`./db/managed/${guild}/${pathName}`)) ?? false;
 }
 
@@ -287,7 +286,7 @@ async function managedDBExists(guild, pathName) {
  * @param {string} guild
  * @param {string} pathName
 */
-async function managedDBDelete(guild, pathName) {
+function managedDBDelete(guild, pathName) {
     fs.unlinkSync(path.resolve(`./db/managed/${guild}/${pathName}`));
 }
 
@@ -300,7 +299,7 @@ async function managedDBDelete(guild, pathName) {
 async function managedDBInsert(guild, pathName, data, failures) {
     const dataType = typeof data;
 
-    const existingFile = await managedDBExists(guild, pathName) ? await managedDBGet(guild, pathName) : null;
+    const existingFile = managedDBExists(guild, pathName) ? await managedDBGet(guild, pathName) : null;
     
     if (dataType == 'object' && data.id) {
         if (existingFile) {
@@ -433,7 +432,7 @@ function premiumActivateServer(guild, user) {
     /**
      * @type {{users: {id: string, boosts: number, servers_activated: number, servers: string[]}[], guilds: {id: string, activated_by: string}[]}}
     */
-    const premiumJSON = JSON.parse(fs.readFileSync(path.resolve(`./db/premium.json`), 'utf8'));
+    const premiumJSON = JSON.parse(betterFS_read(path.resolve(`./db/premium.json`), 'utf8'));
 
     const premiumUser = premiumJSON.users.find(u => u.id === user);
 
@@ -469,7 +468,7 @@ function premiumDeactivateServer(guild, user) {
     /**
      * @type {{users: {id: string, boosts: number, servers_activated: number, servers: string[]}[], guilds: {id: string, activated_by: string}[]}}
     */
-    const premiumJSON = JSON.parse(fs.readFileSync(path.resolve(`./db/premium.json`), 'utf8'));
+    const premiumJSON = JSON.parse(betterFS_read(path.resolve(`./db/premium.json`), 'utf8'));
 
     const premiumUser = premiumJSON.users.find(u => u.id === user);
 
@@ -502,7 +501,7 @@ function premiumIsServerActivated(guild) {
     /**
      * @type {{users: {id: string, boosts: number, servers_activated: number, servers: string[]}[], guilds: {id: string, activated_by: string}[]}}
     */
-    const premiumJSON = JSON.parse(fs.readFileSync(path.resolve(`./db/premium.json`), 'utf8'));
+    const premiumJSON = JSON.parse(betterFS_read(path.resolve(`./db/premium.json`), 'utf8'));
 
     const premiumGuild = premiumJSON.guilds.find(g => g.id === guild);
 
@@ -660,7 +659,7 @@ async function addXP(guild, user, amount) {
         fs.mkdirSync(GuildXpFolder);
     }
 
-    const newXp = fs.existsSync(MemberXpFile) ? `${parseInt(fs.readFileSync(MemberXpFile)) + XPamount}` : `${XPamount}`;
+    const newXp = fs.existsSync(MemberXpFile) ? `${parseInt(betterFS_read(MemberXpFile)) + XPamount}` : `${XPamount}`;
 
     betterFS_write(MemberXpFile, `${newXp}`);
 
@@ -672,7 +671,7 @@ async function addXP(guild, user, amount) {
 
     if (!fs.existsSync(levelFile)) return;
 
-    const rewardRole = fs.readFileSync(levelFile, 'utf8')
+    const rewardRole = betterFS_read(levelFile, 'utf8')
 
     if (rewardRole == undefined) return;
 
@@ -686,7 +685,7 @@ async function addXP(guild, user, amount) {
 
     member.roles.add(role.id)
         .then(async() => {
-            const silentUsers = fs.readFileSync(path.resolve(`./db/xp/silent.users`), 'utf8').split('\n');
+            const silentUsers = betterFS_read(path.resolve(`./db/xp/silent.users`), 'utf8').split('\n');
 
             const levelUpChannel = getChannel(guild, await DatabaseGetChannel(guild, 'levels'));
 

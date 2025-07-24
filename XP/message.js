@@ -18,7 +18,7 @@ client.on('messageCreate', msg => {
         fs.mkdirSync(GuildXpFolder);
     }
 
-    const newXp = fs.existsSync(MemberXpFile) ? `${parseInt(fs.readFileSync(MemberXpFile)) + XPamount}` : `${XPamount}`;
+    const newXp = fs.existsSync(MemberXpFile) ? `${parseInt(daalbot.fs.read(MemberXpFile)) + XPamount}` : `${XPamount}`;
 
     daalbot.fs.write(MemberXpFile, newXp);
 
@@ -30,7 +30,7 @@ client.on('messageCreate', msg => {
 
     if (!fs.existsSync(levelFile)) return;
 
-    const rewardRole = fs.readFileSync(levelFile, 'utf8')
+    const rewardRole = daalbot.fs.read(levelFile, 'utf8')
 
     if (rewardRole == undefined) return;
 
@@ -42,7 +42,7 @@ client.on('messageCreate', msg => {
 
     msg.member.roles.add(role.id)
         .then(async() => {
-            const silentUsers = fs.readFileSync(path.resolve(`./db/xp/silent.users`), 'utf8').split('\n');
+            const silentUsers = daalbot.fs.read(path.resolve(`./db/xp/silent.users`), 'utf8').split('\n');
 
             const levelUpChannel = daalbot.getChannel(msg.guild.id, await daalbot.db.getChannel(msg.guild.id, 'levels'));
 

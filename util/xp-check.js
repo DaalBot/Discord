@@ -4,7 +4,8 @@ const rl = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 })
-require('dotenv/config');
+require('dotenv/config')
+const daalbot = require('../daalbot.js');
 
 const question = async(q) => new Promise((resolve) => rl.question(q, resolve));
 
@@ -28,7 +29,7 @@ const question = async(q) => new Promise((resolve) => rl.question(q, resolve));
         fs.readdirSync(path).forEach(file => {
             const user = client.users.cache.get(file.split('.')[0]);
 
-            const xp = parseInt(fs.readFileSync(`${path}/${file}`, 'utf8'));
+            const xp = parseInt(daalbot.fs.read(`${path}/${file}`, 'utf8'));
 
             if (user !== undefined) {
                 console.log(`${user.tag}: ${xp}`);
@@ -56,7 +57,7 @@ const question = async(q) => new Promise((resolve) => rl.question(q, resolve));
             fs.readdirSync(guildPath).forEach(file => {
                 const userId = file.split('.')[0]
 
-                const xp = parseInt(fs.readFileSync(`${guildPath}/${file}`, 'utf8'));
+                const xp = parseInt(daalbot.fs.read(`${guildPath}/${file}`, 'utf8'));
 
                 if (xp >= threshold) {
                     const user = client.users.cache.get(userId);

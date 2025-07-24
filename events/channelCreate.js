@@ -9,11 +9,11 @@
 
 //     if (fs.existsSync(path.resolve(`./db/verify/${channel.guild.id}.role`))) {
 //         if (fs.existsSync(path.resolve(`./db/verify/${channel.guild.id}.autoUpdate`))) {
-//             if (fs.readFileSync(path.resolve(`./db/verify/${channel.guild.id}.autoUpdate`)) == 'true') {
+//             if (daalbot.fs.read(path.resolve(`./db/verify/${channel.guild.id}.autoUpdate`)) == 'true') {
 //                 if (!channel.permissionsFor(channel.guild.roles.everyone).has('VIEW_CHANNEL')) return; // If the channel is not visible to everyone, don't do anything
 
 //                 // Gather the role
-//                 const roleId = fs.readFileSync(path.resolve(`./db/verify/${channel.guild.id}.role`));
+//                 const roleId = daalbot.fs.read(path.resolve(`./db/verify/${channel.guild.id}.role`));
 //                 const role = daalbot.getRole(channel.guild.id, roleId);
 
 //                 // Make sure the role exists

@@ -162,7 +162,7 @@ module.exports = {
                     channel = channelData.data.data[0].id
                 }
 
-                const startingRolesFile = JSON.parse(fs.readFileSync(path.resolve('./db/socialalert/twitch_roles.json'), 'utf8'))
+                const startingRolesFile = JSON.parse(daalbot.fs.read(path.resolve('./db/socialalert/twitch_roles.json'), 'utf8'))
 
                 const startingRoles = startingRolesFile.filter(i => i.id == channel)
 
@@ -189,7 +189,7 @@ module.exports = {
                     fs.writeFileSync(path.resolve('./db/socialalert/twitch_roles.json'), JSON.stringify(rolesFile, null, 4))
                 }
 
-                const twitchData = fs.readFileSync(path.resolve('./db/socialalert/twitch.txt'), 'utf8').split('\n');
+                const twitchData = daalbot.fs.read(path.resolve('./db/socialalert/twitch.txt'), 'utf8').split('\n');
 
                 const channelData = twitchData.filter((line) => line.split(',')[0] === channel);
 
@@ -222,7 +222,7 @@ module.exports = {
         //         const regex = new RegExp(`^${channel}.*?,.*?,${feedChannel.id}$`);
 
         //         // Read the file
-        //         const youtubeData = fs.readFileSync(path.resolve('./db/socialalert/youtube.csv'), 'utf8');
+        //         const youtubeData = daalbot.fs.read(path.resolve('./db/socialalert/youtube.csv'), 'utf8');
 
         //         if (youtubeData.split('\n').filter(i => regex.test(i)).length > 0) {
         //             return await interaction.reply({ content: 'That channel is already linked to that channel.', flags: MessageFlags.Ephemeral })
@@ -238,11 +238,11 @@ module.exports = {
         //         await interaction.reply({ content: `Successfully added ${channel} to the YouTube feed for <#${feedChannel.id}>.`, flags: MessageFlags.Ephemeral })
 
         //         // Update youtube lock file to prevent bot from throwing up all the current videos in the channel
-        //         const currentDetectedChannels = fs.readFileSync(path.resolve('./db/socialalert/youtube.detected'), 'utf8').split('\n').map(i => i.split('|')[0]);
+        //         const currentDetectedChannels = daalbot.fs.read(path.resolve('./db/socialalert/youtube.detected'), 'utf8').split('\n').map(i => i.split('|')[0]);
 
         //         if (currentDetectedChannels.includes(channel)) return; // If the channel already has its uploads detected then return because it will already know about the videos
 
-        //         let youtubeLock = fs.readFileSync(path.resolve('./db/socialalert/youtube.lock'), 'utf8').split(',');
+        //         let youtubeLock = daalbot.fs.read(path.resolve('./db/socialalert/youtube.lock'), 'utf8').split(',');
         //         youtubeLock.push(channel);
 
         //         fs.writeFileSync(path.resolve('./db/socialalert/youtube.lock'), youtubeLock.join(','))
@@ -276,7 +276,7 @@ module.exports = {
                 }
 
                 // Read the file
-                const blueskyData = fs.readFileSync(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
+                const blueskyData = daalbot.fs.read(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
 
                 // Check if the channel is already linked to the account
                 if (blueskyData.split('\n').filter(i => i.split(';;[DCS];;')[0] == account).length > 0) {
@@ -307,7 +307,7 @@ module.exports = {
                 // Account is not linked to any channel so we need to add the account and channel to the file
                 const newBlueskyData = `${account};;[DCS];;${JSON.stringify({ id: feedChannel.id, message: message })}`;
 
-                const blueskyPosts = fs.readFileSync(path.resolve('./db/socialalert/bsky.detected'), 'utf8').split('\n');
+                const blueskyPosts = daalbot.fs.read(path.resolve('./db/socialalert/bsky.detected'), 'utf8').split('\n');
                 const usersPostsReq = await axios.get(`https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${account}`);
                 const usersPosts = usersPostsReq.data.feed;
 
@@ -326,7 +326,7 @@ module.exports = {
             if (subCommand == 'remove') {
                 if (!accountInput) {
                     // Remove all accounts from the channel
-                    const file = fs.readFileSync(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
+                    const file = daalbot.fs.read(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
                     const accounts = file.split('\n').filter(i => i.split(';;[DCS];;')[1].includes(feedChannel.id));
                     if (accounts.length == 0) return await interaction.reply({ content: 'There are no accounts linked to that channel.', flags: MessageFlags.Ephemeral })
                     
@@ -365,7 +365,7 @@ module.exports = {
                     }
 
                     // Remove the account from the channel
-                    const file = fs.readFileSync(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
+                    const file = daalbot.fs.read(path.resolve('./db/socialalert/bsky.txt'), 'utf8');
                     const accountData = file.split('\n').filter(i => i.split(';;[DCS];;')[0] == account)[0];
                     if (!accountData) return await interaction.reply({ content: 'That account is not linked to that channel.', flags: MessageFlags.Ephemeral })
                     

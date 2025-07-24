@@ -1,8 +1,9 @@
 const fs = require('fs');
 const config = require("../config.json");
+const daalbot = require('../daalbot.js');
 function read(GuildId) {
     try {
-        return fs.readFileSync(`${config.botPath}/db/verify/${GuildId}.role`, 'utf8');
+        return daalbot.fs.read(`${config.botPath}/db/verify/${GuildId}.role`, 'utf8');
     } catch (err) {
         console.log(err);
     }

@@ -131,6 +131,45 @@ module.exports = {
                     choices: eventTypes
                 }
             ]
+        },
+        {
+            name: 'share',
+            description: 'Makes an event public so it can be used by other servers.',
+            type: DJS.ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'event',
+                    description: 'The id for the event you want to share',
+                    type: DJS.ApplicationCommandOptionType.String,
+                    required: true
+                }
+            ]
+        },
+        {
+            name: 'unshare',
+            description: 'Makes an event private so it can only be used by this server.',
+            type: DJS.ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'event',
+                    description: 'The id for the event you want to unshare',
+                    type: DJS.ApplicationCommandOptionType.String,
+                    required: true
+                }
+            ]
+        },
+        {
+            name: 'import',
+            description: 'Imports an event from a id.',
+            type: DJS.ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'event',
+                    description: 'The id for the event you want to import',
+                    type: DJS.ApplicationCommandOptionType.String,
+                    required: true
+                }
+            ]
         }
     ],
 
@@ -140,19 +179,10 @@ module.exports = {
     callback: async ({ interaction }) => {
         const subCommand = interaction.options.getSubcommand();
 
-        const betaData = fs.readFileSync(path.resolve('./db/beta/cmdevents.txt'))
-
-        if (!betaData.includes(interaction.guild.id)) {
-            return interaction.reply({
-                content: 'This server is not in the beta for events please use `/beta change` to opt in. (Note: Beta does not yet support code editing)',
-                flags: DJS.MessageFlags.Ephemeral
-            })
-        }
-
         /**
          * @type {Array<{ id: string, guild: string, on: string, enabled: boolean }>}
          */
-        const eventsJSON = JSON.parse(fs.readFileSync(path.resolve('./db/events/events.json')))
+        const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json')))
 
         if (subCommand === 'create') {
             // Create event
@@ -331,6 +361,108 @@ ID: \`${event.id}\``)
 
             interaction.reply({
                 embeds: [embed],
+                flags: DJS.MessageFlags.Ephemeral
+            })
+        } else if (subCommand === 'share') {
+            // Share event
+            const eventId = interaction.options.getString('event');
+            const event = eventsJSON.find(e => e.id === eventId);
+
+            if (!event) {
+                return interaction.reply({
+                    content: 'That event doesnt exist.',
+                    flags: DJS.MessageFlags.Ephemeral
+                })
+            }
+
+            if (event.guild !== interaction.guild.id) {
+                return interaction.reply({
+                    content: 'This server doesnt own that event',
+                    flags: DJS.MessageFlags.Ephemeral
+                })
+            }
+
+            if (event.shared) {
+                return interaction.reply({
+                    content: 'This event is already shared.',
+                    flags: DJS.MessageFlags.Ephemeral
+                })
+            }
+
+            event.shared = true;
+            fs.writeFileSync(path.resolve(`./db/events/events.json`), JSON.stringify(eventsJSON, null, 4))
+
+            interaction.reply({
+                content: `Successfully shared event \`${eventId}\`. It can now be used by other servers.`,
+                flags: DJS.MessageFlags.Ephemeral
+            })
+        } else if (subCommand === 'unshare') {
+            // Unshare event
+            const eventId = interaction.options.getString('event');
+
+            const event = eventsJSON.find(e => e.id === eventId)
+
+            if (!event) {
+                return interaction.reply({
+                    content: 'That event doesnt exist.',
+                    flags: DJS.MessageFlags.Ephemeral
+                })
+            }
+
+            if (event.guild !== interaction.guild.id) {
+                return interaction.reply({
+                    content: 'This server doesnt own that event',
+                    flags: DJS.MessageFlags.Ephemeral
+                })
+            }
+
+            if (!event.shared) {
+                return interaction.reply({
+                    content: 'This event is not shared.',
+                    flags: DJS.MessageFlags.Ephemeral
+                })
+            }
+
+            event.shared = false;
+            fs.writeFileSync(path.resolve(`./db/events/events.json`), JSON.stringify(eventsJSON, null, 4))
+
+            interaction.reply({
+                content: `Successfully unshared event \`${eventId}\`. It can no longer be used by other servers.`,
+                flags: DJS.MessageFlags.Ephemeral
+            })
+        } else if (subCommand === 'import') {
+            // Import event
+            const eventId = interaction.options.getString('event');
+
+            const event = eventsJSON.find(e => e.id === eventId)
+
+            if (!event) {
+                return interaction.reply({
+                    content: 'That event doesnt exist.',
+                    flags: DJS.MessageFlags.Ephemeral
+                })
+            }
+
+            if (!event.shared) {
+                return interaction.reply({
+                    content: 'This event is not shared.',
+                    flags: DJS.MessageFlags.Ephemeral
+                })
+            }
+
+            const newEvent = {
+                ...event,
+                guild: interaction.guild.id,
+                id: await daalbot.items.generateId(16),
+                shared: false
+            }
+            eventsJSON.push(newEvent);
+            fs.writeFileSync(path.resolve(`./db/events/events.json`), JSON.stringify(eventsJSON, null, 4))
+
+            fs.cpSync(path.resolve(`./db/events/${event.id}`), path.resolve(`./db/events/${newEvent.id}`), { recursive: true })
+
+            interaction.reply({
+                content: `Successfully imported event \`${eventId}\`. It can now be used by this server. You may want to check for [variables set by the event](https://dashboard.daalbot.xyz/Server/${interaction.guild.id}/events?varscope=${newEvent.id}#variables) to see if there's any config you need to do.`,
                 flags: DJS.MessageFlags.Ephemeral
             })
         }

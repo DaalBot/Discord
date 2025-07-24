@@ -149,11 +149,11 @@ client.on('interactionCreate', async (interaction) => {
 
                     try {
                         if (fs.existsSync(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCREATE.enabled`))) {
-                            const enabled = fs.readFileSync(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCREATE.enabled`), 'utf8');
+                            const enabled = daalbot.fs.read(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCREATE.enabled`), 'utf8');
                             if (enabled == 'true') {
                                 if (!fs.existsSync(`./db/logging/${interaction.guild.id}/channel.id`)) return;
             
-                                const channelID = fs.readFileSync(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`), 'utf8');
+                                const channelID = daalbot.fs.read(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`), 'utf8');
                                 /**
                                  * @type {DJS.TextChannel | null}
                                  */
@@ -260,11 +260,11 @@ client.on('interactionCreate', async (interaction) => {
 
                     try {
                         if (fs.existsSync(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCLOSE.enabled`))) {
-                            const enabled = fs.readFileSync(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCLOSE.enabled`), 'utf8');
+                            const enabled = daalbot.fs.read(path.resolve(`./db/logging/${interaction.guild.id}/TICKETCLOSE.enabled`), 'utf8');
                             if (enabled == 'true') {
                                 if (!fs.existsSync(`./db/logging/${interaction.guild.id}/channel.id`)) return;
             
-                                const channelID = fs.readFileSync(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`), 'utf8');
+                                const channelID = daalbot.fs.read(path.resolve(`./db/logging/${interaction.guild.id}/channel.id`), 'utf8');
                                 /**
                                  * @type {DJS.TextChannel | null}
                                  */
@@ -281,7 +281,12 @@ client.on('interactionCreate', async (interaction) => {
                                 logChannel.send({
                                     content: `Ticket Closed`,
                                     embeds: [embed],
-                                    files: [path.resolve(`./db/managed/${interaction.guild.id}/tickets/${ticketID}/transcript.json`)]
+                                    files: [
+                                        {
+                                            attachment: Buffer.from(JSON.stringify(transcript, null, 4)),
+                                            name: 'transcript.json'
+                                        }
+                                    ]
                                 })
 
                                 await ticketChannel.delete(`Ticket closed by ${member.user.username} (${member.user.id})`);

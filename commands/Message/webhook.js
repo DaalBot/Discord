@@ -26,6 +26,11 @@ module.exports = {
                     required: true
                 }
             ]
+        },
+        {
+            name: 'list',
+            description: 'Lists all webhooks owned by the bot in the current channel.',
+            type: ApplicationCommandOptionType.Subcommand
         }
     ],
 
@@ -50,6 +55,23 @@ module.exports = {
 
             await interaction.reply({
                 content: `Webhook created with the name \`${webhook.name}\` in <#${channel.id}>.`,
+                flags: MessageFlags.Ephemeral
+            });
+        }else if(subcommand === 'list'){
+            const webhooks = await interaction.channel.fetchWebhooks();
+            const botWebhooks = webhooks.filter(webhook => webhook.owner.id === client.user.id);
+
+            if(botWebhooks.size === 0){
+                return interaction.reply({
+                    content: 'No webhooks owned by the bot in this channel.',
+                    flags: MessageFlags.Ephemeral
+                });
+            }
+
+            const webhookList = botWebhooks.map(webhook => `**${webhook.name}** (ID: ${webhook.id})`).join('\n');
+
+            await interaction.reply({
+                content: `Webhooks owned by the bot in this channel:\n${webhookList}`,
                 flags: MessageFlags.Ephemeral
             });
         }

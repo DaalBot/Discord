@@ -35,7 +35,7 @@ async function updateBearer() {
             // Update the .env file
             const dotenvpath = path.resolve('./.env')
     
-            const currentEnv = fs.readFileSync(dotenvpath, 'utf8')
+            const currentEnv = daalbot.fs.read(dotenvpath, 'utf8')
             const newEnv = currentEnv.replace(startingBearer, Bearer)
     
             fs.writeFileSync(dotenvpath, newEnv)
@@ -79,8 +79,8 @@ async function main() {
     await updateBearer()
 
     setInterval(async() => {
-        const data = fs.readFileSync(path.resolve('./db/socialalert/twitch.txt'), 'utf8').split('\n')
-        const roleData = JSON.parse(fs.readFileSync(path.resolve('./db/socialalert/twitch_roles.json'), 'utf8'))
+        const data = daalbot.fs.read(path.resolve('./db/socialalert/twitch.txt'), 'utf8').split('\n')
+        const roleData = JSON.parse(daalbot.fs.read(path.resolve('./db/socialalert/twitch_roles.json'), 'utf8'))
 
         let users = []
         let userData = []
@@ -104,7 +104,7 @@ async function main() {
 
             const liveUserId = user.user_id
 
-            const detectedLiveUsers = fs.readFileSync(path.resolve('./db/socialalert/twitch.detected'), 'utf8').split('\n')
+            const detectedLiveUsers = daalbot.fs.read(path.resolve('./db/socialalert/twitch.detected'), 'utf8').split('\n')
 
             if (detectedLiveUsers.includes(liveUserId)) return; 
 
@@ -147,7 +147,7 @@ async function main() {
 
     setInterval(async () => {
         // Check if detected users are still live
-        const detectedLiveUsers = fs.readFileSync(
+        const detectedLiveUsers = daalbot.fs.read(
             path.resolve('./db/socialalert/twitch.detected'),
             'utf8'
         ).split('\n');

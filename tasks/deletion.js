@@ -2,6 +2,7 @@ const client = require('../client.js');
 const fs = require('fs/promises');
 const fss = require('fs');
 const path = require('path');
+const daalbot = require('../daalbot.js');
 
 async function deleteGuild(guild) {
     const deletionFile = path.resolve(`./temp/del/${guild}.json`);
@@ -68,7 +69,7 @@ client.on('guildCreate', async(guild) => {
     const deletionIsScheduled = fss.existsSync(path.resolve(`./temp/del/${guild.id}.json`));
 
     if (deletionIsScheduled) {
-        const deletionData = JSON.parse(fs.readFileSync(path.resolve(`./temp/del/${guild.id}.json`), 'utf8'));
+        const deletionData = JSON.parse(daalbot.fs.read(path.resolve(`./temp/del/${guild.id}.json`), 'utf8'));
         const { time, reason } = deletionData;
 
         if (reason === '[AUTO];;guildDelete') {

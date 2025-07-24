@@ -7,17 +7,17 @@ const daalbot = require('../../daalbot.js');
 
 client.on('messageDeleteBulk', async (messages) => {
     try {
-        const enabled = fs.readFileSync(path.resolve(`./db/logging/${messages.first().guild.id}/MESSAGEDELETEBULK.enabled`), 'utf8');
+        const enabled = daalbot.fs.read(path.resolve(`./db/logging/${messages.first().guild.id}/MESSAGEDELETEBULK.enabled`), 'utf8');
         if (enabled == 'true') {
             if (fs.existsSync(path.resolve(`./db/logging/${messages.first().channel.guild.id}/MESSAGEDELETEBULK.exclude`))) {
-                const excluded = fs.readFileSync(path.resolve(`./db/logging/${messages.first().channel.guild.id}/MESSAGEDELETEBULK.exclude`), 'utf8').split('\n');
+                const excluded = daalbot.fs.read(path.resolve(`./db/logging/${messages.first().channel.guild.id}/MESSAGEDELETEBULK.exclude`), 'utf8').split('\n');
     
                 if (excluded.includes(messages.first().channel.id)) return;
             }
 
             if (!fs.existsSync(`./db/logging/${messages.first().guild.id}/channel.id`)) return;
 
-            const channelID = fs.readFileSync(path.resolve(`./db/logging/${messages.first().guild.id}/channel.id`), 'utf8');
+            const channelID = daalbot.fs.read(path.resolve(`./db/logging/${messages.first().guild.id}/channel.id`), 'utf8');
             const logChannel = client.channels.cache.get(channelID);
 
             const embed = new EmbedBuilder()

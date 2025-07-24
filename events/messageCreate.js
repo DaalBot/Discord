@@ -72,13 +72,13 @@ ID: ${issueAuthorUser.id}`)
     }
 
     if (fs.existsSync(path.resolve(`./db/scamprot/${guild.id}.json`))) {
-        const scamprotData = JSON.parse(fs.readFileSync(path.resolve(`./db/scamprot/${guild.id}.json`), 'utf8'));
+        const scamprotData = JSON.parse(daalbot.fs.read(path.resolve(`./db/scamprot/${guild.id}.json`), 'utf8'));
         if (!scamprotData.enabled) return;
 
         // Scam protection is enabled
         let score = 0;
 
-        const knownBadLinks = fs.readFileSync(path.resolve(`./db/scamprot/badLinks.list`), 'utf8').split('\n').map(link => {
+        const knownBadLinks = daalbot.fs.read(path.resolve(`./db/scamprot/badLinks.list`), 'utf8').split('\n').map(link => {
             return {
                 value: `${link.replace('.'), '\\.'}`,
                 weight: 100,

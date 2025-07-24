@@ -2,10 +2,11 @@ const fs = require('fs');
 const config = require("../../config.json");
 const client = require('../../client.js');
 const { MessageFlags } = require('discord.js');
+const daalbot = require('../../daalbot.js');
 
 function read(GuildId) {
     try {
-        return fs.readFileSync(`${config.botPath}/db/verify/${GuildId}.role`, 'utf8');
+        return daalbot.fs.read(`${config.botPath}/db/verify/${GuildId}.role`, 'utf8');
     } catch (err) {
         console.log(err);
     }

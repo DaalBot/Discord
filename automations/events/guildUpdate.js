@@ -4,6 +4,7 @@ const path = require('path');
 const client = require('../../client.js');
 const toolsClass = require('../tools.js');
 const filenameWithoutExtension = path.basename(__filename, '.js');
+const daalbot = require('../../daalbot.js');
 
 const consoleOverrides = toolsClass.getConsoleOverrides();
 const utils = toolsClass.getUtils();
@@ -20,7 +21,7 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
         // Load event file
         const input = require(inputFile);
         const inputData = { old: eventObjectOld, new: eventObjectNew }; // The line that should be changed to the actual input data
-        const inputFileContents = fs.readFileSync(inputFile, 'utf8');
+        const inputFileContents = daalbot.fs.read(inputFile, 'utf8');
 
         if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
 
@@ -57,7 +58,7 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
         delete require.cache[require.resolve(inputFile)];
     }
 
-    const eventsJSON = JSON.parse(fs.readFileSync(path.resolve('./db/events/events.json'), 'utf8'));
+    const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json'), 'utf8'));
 
     const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObjectNew.guild.id);
 

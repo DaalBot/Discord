@@ -23,7 +23,7 @@ const originalConsoleTrace = console.trace;
 const originalProcessEnv = process.env;
 
 async function internal_getEventGuild(eventId) {
-    const eventsJSON = JSON.parse(fs.readFileSync(path.resolve('./db/events/events.json'), 'utf8'));
+    const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json')));
     const event = eventsJSON.find(event => event.id === eventId);
     return event.guild;
 }
@@ -100,7 +100,7 @@ const exportClass = new class {
                     if (!fs.existsSync(path.resolve(`./db/events/${folder}`))) fs.mkdirSync(path.resolve(`./db/events/${folder}`), { recursive: true });
                     const variableFileName = variableName.replace(/[^a-zA-Z0-9]/g, ''); // Strip out all non-alphanumeric / problematic characters
                     if (!fs.existsSync(path.resolve(`./db/events/${folder}/${variableFileName}.var`))) return null;
-                    return fs.readFileSync(path.resolve(`./db/events/${folder}/${variableFileName}.var`), 'utf8');
+                    return daalbot.fs.read(path.resolve(`./db/events/${folder}/${variableFileName}.var`), 'utf8');
                 },
         
                 /**
@@ -114,7 +114,7 @@ const exportClass = new class {
                     const folder = global ? `${await internal_getEventGuild(eventId)}` : eventId;
                     if (!fs.existsSync(path.resolve(`./db/events/${folder}/`))) fs.mkdirSync(path.resolve(`./db/events/${folder}`), { recursive: true });
                     const variableFileName = variableName.replace(/[^a-zA-Z0-9]/g, ''); // Strip out all non-alphanumeric / problematic characters
-                    daalbot.fs.write(path.resolve(`./db/events/${folder}/${variableFileName}.var`), `${value}`); // < Wrap value in template literal to ensure it is a string (i have made this mistake a lot so might as well make it user friendy and have it auto convert)
+                    daalbot.fs.write(path.resolve(`./db/events/${folder}/${variableFileName}.var`), `${value}`, true); // < Wrap value in template literal to ensure it is a string (i have made this mistake a lot so might as well make it user friendy and have it auto convert)
                 }
             },
         

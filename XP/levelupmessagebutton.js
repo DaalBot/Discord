@@ -102,7 +102,7 @@ client.on('interactionCreate', async interaction => {
                 })
             } else if (option === 'mutelevelupmessages') {
                 // Fetch the current silent user config from the database
-                const silentUserConfig = fs.readFileSync(path.resolve(`./db/xp/silent.users`), 'utf8');
+                const silentUserConfig = daalbot.fs.read(path.resolve(`./db/xp/silent.users`), 'utf8');
 
                 // Create the embed
                 let embed = new DJS.EmbedBuilder()

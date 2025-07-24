@@ -7,10 +7,10 @@ const daalbot = require('../../daalbot.js');
 
 client.on('messageUpdate', async (oldMessage, newMessage) => {
     try {
-        const enabled = fs.readFileSync(path.resolve(`./db/logging/${oldMessage.guild.id}/MESSAGEUPDATE.enabled`), 'utf8');
+        const enabled = daalbot.fs.read(path.resolve(`./db/logging/${oldMessage.guild.id}/MESSAGEUPDATE.enabled`), 'utf8');
         if (enabled == 'true') {
             if (fs.existsSync(path.resolve(`./db/logging/${oldMessage.channel.guild.id}/MESSAGEDELETE.exclude`))) {
-                const excluded = fs.readFileSync(path.resolve(`./db/logging/${oldMessage.channel.guild.id}/MESSAGEDELETE.exclude`), 'utf8').split('\n');
+                const excluded = daalbot.fs.read(path.resolve(`./db/logging/${oldMessage.channel.guild.id}/MESSAGEDELETE.exclude`), 'utf8').split('\n');
     
                 if (excluded.includes(oldMessage.channel.id)) return;
             }
@@ -18,7 +18,7 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
             if (!fs.existsSync(`./db/logging/${oldMessage.guild.id}/channel.id`)) return;
             if (oldMessage.author.bot) return;
 
-            const channelID = fs.readFileSync(path.resolve(`./db/logging/${oldMessage.guild.id}/channel.id`), 'utf8');
+            const channelID = daalbot.fs.read(path.resolve(`./db/logging/${oldMessage.guild.id}/channel.id`), 'utf8');
             const logChannel = client.channels.cache.get(channelID);
             const description = `**Before**
             Content: ${oldMessage.content}

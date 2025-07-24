@@ -12,7 +12,7 @@ client.on('ready', async() => {
 
     //     if (!fs.existsSync(`./db/logging/${guildID}/channel.id`)) continue;
 
-    //     const channelID = fs.readFileSync(`./db/logging/${guildID}/channel.id`, 'utf-8');
+    //     const channelID = daalbot.fs.read(`./db/logging/${guildID}/channel.id`, 'utf-8');
     //     /**
     //      * @type {Discord.TextChannel}
     //     */
@@ -21,7 +21,7 @@ client.on('ready', async() => {
 
     //     // Check for old webhook
     //     if (fs.existsSync(`./db/managed/${guildID}/logging/webhook.json`)) {
-    //         const webhookData = JSON.parse(fs.readFileSync(`./db/managed/${guildID}/logging/webhook.json`, 'utf-8'));
+    //         const webhookData = JSON.parse(daalbot.fs.read(`./db/managed/${guildID}/logging/webhook.json`, 'utf-8'));
     //         const webhook = new Discord.WebhookClient(webhookData);
 
     //         await webhook.delete('Triggered by logging webhook creation script.');
@@ -56,7 +56,7 @@ client.on('ready', async() => {
             continue;
         };
 
-        const webhookData = JSON.parse(fs.readFileSync(`./db/managed/${guildID}/logging/webhook.json`, 'utf-8'));
+        const webhookData = JSON.parse(daalbot.fs.read(`./db/managed/${guildID}/logging/webhook.json`, 'utf-8'));
         const webhook = new Discord.WebhookClient({
             id: webhookData.id,
             token: webhookData.token
