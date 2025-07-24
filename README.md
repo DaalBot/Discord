@@ -1,5 +1,6 @@
 # DaalBot
-[![Current Status](https://top.gg/api/widget/status/1016086353085222993.svg)](https://bot.daalbot.xyz)  ![Server Count](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fbot.daalbot.xyz%3A8923%2Fapi%2Fstatus&query=%24.guilds&label=Servers&style=flat)
+[![Current Status](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.daalbot.xyz%2Finfo&query=%24.status&style=for-the-badge&label=Status&color=2bffa1
+)](https://bot.daalbot.xyz)  ![Server Count](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.daalbot.xyz%2Fapi%2Fstatus&query=%24.guilds&label=Servers&style=for-the-badge)
 ## Features
 
 DaalBot is a versatile Discord bot with a range of useful features to help manage and improve your server, including:
