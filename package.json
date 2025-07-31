@@ -27,7 +27,7 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-rate-limit": "^8.0.1",
-    "isolated-vm": "^4.7.2",
+    "isolated-vm": "^6.0.1",
     "rss-to-json": "^2.1.1"
   }
 }
