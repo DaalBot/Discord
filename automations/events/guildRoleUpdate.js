@@ -65,6 +65,10 @@ client.on(`${filenameWithoutExtension}`, async(eventObjectOld, eventObjectNew) =
     for (let i = 0; i < validEvents.length; i++) {
         const event = validEvents[i];
 
-        executeEvent(path.resolve(`./db/events/${event.id}/event.js`));
+        try {
+            executeEvent(path.resolve(`./db/events/${event.id}/event.js`));
+        } catch (e) {
+            console.error(`Something went wrong trying to execute the event with the ID ${event.id}: \n${e}`);
+        }
     }
 })

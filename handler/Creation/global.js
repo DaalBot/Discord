@@ -1,6 +1,6 @@
 const client = require('../../client'); require('dotenv').config(); const DiscordJS = require('discord.js')
 
-client.on('ready', () => {
+client.on('clientReady', () => {
   const options = DiscordJS.Constants.ApplicationCommandOptionTypes
   const guildId = ''
   const guild = client.guilds.cache.get(guildId)

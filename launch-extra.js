@@ -22,7 +22,7 @@ require('./social/bluesky.js');
 // require('./social/youtube.js');
 
 // Monitoring
-require('./monitoring/monitor.js');
+require('./monitoring/protection.js');
 
 // Modals
 require('./modals/handler.js');
@@ -55,5 +55,14 @@ require('./modmail/dm.js');
 require('./tickets/button.js');
 require('./tickets/message.js');
 
-// Data privacy tools
+// Tasks
 require('./tasks/deletion.js'); // Deletes old unused and manually deleted data
+require('./tasks/backups.js'); // Creates backups of the database
+
+// Invite tracking
+require('./invitetracking/prefetch.js');
+require('./invitetracking/invitetracking.js');
+require('./invitetracking/membertracking.js');
+
+// Role links
+require('./rolelinks/membertracking.js');

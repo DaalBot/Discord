@@ -9,7 +9,7 @@ const daalbot = require('../daalbot.js')
 const startingBearer = process.env.TWITCH_BEARER // The bearer that is in the .env file when the bot starts
 let Bearer = process.env.TWITCH_BEARER // The bearer that will be updated if it's invalid
 
-client.on('ready', () => {
+client.on('clientReady', () => {
     console.log('Twitch link > Ready') 
 })
 

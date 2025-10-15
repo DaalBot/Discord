@@ -74,6 +74,18 @@ const eventTypes = [
     {
         name: 'Interaction Create',
         value: 'interactionCreate'
+    },
+    {
+        name: 'Voice State Update',
+        value: 'voiceStateUpdate'
+    },
+    {
+        name: 'Guild Warn Create',
+        value: 'guildWarnCreate'
+    },
+    {
+        name: 'Guild Warn Delete',
+        value: 'guildWarnDelete'
     }
 ]
 
@@ -263,6 +275,12 @@ module.exports = {
                     case 'guildban':
                         objectName = 'ban';
                         break;
+                    case 'guildrole':
+                        objectName = 'role';
+                        break;
+                    case 'guildwarn':
+                        objectName = 'warn';
+                        break;
                     default:
                         break;
                 }
@@ -280,7 +298,7 @@ module.exports = {
                 fs.writeFileSync(path.resolve(`./db/events/events.json`), JSON.stringify(eventsJSON, null, 4))
 
                 interaction.editReply({
-                    content: `Event created. To edit the code for the event click [here](https://daalbot.xyz/Dashboard/Guild/${interaction.guild.id}/feature/guild/events/edit?id=${eventId}).`,
+                    content: `Event created. To edit the code for the event click [here](https://dashboard.daalbot.xyz/Server/${interaction.guild.id}/events/${eventId}).`,
                     embeds: [embed],
                     flags: DJS.MessageFlags.Ephemeral
                 })

@@ -229,7 +229,7 @@ module.exports = {
 
                 if (type === 'auto') {
                     // Check if the user has requested a download in the last 24 hours
-                    if (requests[interaction.user.id] && requests[interaction.user.id] > Date.now() - 24 * 60 * 60 * 1000) {
+                    if ((requests[interaction.user.id] && requests[interaction.user.id] > Date.now() - 24 * 60 * 60 * 1000) && interaction.guildId !== '1017715574639431680') {
                         return interaction.reply({ content: 'You have already requested a download in the last 24 hours.', flags: DJS.MessageFlags.Ephemeral });
                     }
 

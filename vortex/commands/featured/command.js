@@ -5,7 +5,7 @@ require('./buttons/accept');
 require('./buttons/deny');
 require('./dropdown/deny');
 
-client.on('ready', () => {
+client.on('clientReady', () => {
     const VTXserver = client.guilds.cache.get('973711816226136095');
     const commands = VTXserver?.commands;
 

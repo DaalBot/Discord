@@ -12,24 +12,15 @@ const overridenProcessEnv = toolsClass.getOverridenProcessEnv();
 
 // Event handler
 client.on(`${filenameWithoutExtension}`, async(eventObject) => {
-    console.log(`Event ${filenameWithoutExtension} triggered`);
-    console.log('Event object:', eventObject);
-    
     async function executeEvent(eventDir) {
-        console.log(`Checking event directory: ${eventDir}`);
         const jsFile = path.join(eventDir, 'event.js');
         const jsonFile = path.join(eventDir, 'event.json');
         
-        console.log(`Looking for JS file: ${jsFile}`);
-        console.log(`Looking for JSON file: ${jsonFile}`);
-        
         // Check if event.js exists, if not, try event.json
         if (fs.existsSync(jsFile)) {
-            console.log('Found event.js, executing JavaScript event');
             // Execute JavaScript event (existing logic)
             await executeJavaScriptEvent(jsFile);
         } else if (fs.existsSync(jsonFile)) {
-            console.log('Found event.json, executing JSON event');
             // Execute JSON event (new logic)
             await executeJsonEvent(jsonFile);
         } else {
@@ -71,10 +62,8 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
     }
     
     async function executeJsonEvent(inputFile) {
-        console.log(`Executing JSON event from: ${inputFile}`);
         try {
             let jsonContent = daalbot.fs.read(inputFile, 'utf8');
-            console.log('Raw JSON content length:', jsonContent.length);
             
             // The JSON format doesn't have the features that would require security checks like in JS files, but if you want it it's here
             // if (!(await checkSecurityRules(jsonContent))) {
@@ -84,18 +73,14 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
             
             // Replace all placeholders in the JSON content before parsing
             jsonContent = await daalbot.convertMetaText(jsonContent, eventObject.guild, { obj: eventObject });
-            console.log('JSON content after placeholder replacement:', JSON.stringify(jsonContent));
             
             const eventConfig = JSON.parse(jsonContent);
-            console.log('Parsed event config:', JSON.stringify(eventConfig, null, 2));
             
             // Create function registry for this event execution
             const functionRegistry = {};
             
             // Process each block in the JSON event
             if (eventConfig.blocks && Array.isArray(eventConfig.blocks)) {
-                console.log(`Processing ${eventConfig.blocks.length} blocks`);
-                
                 // First pass: register all functions
                 for (const block of eventConfig.blocks) {
                     if (block.type === 'function') {
@@ -106,12 +91,10 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
                 // Second pass: execute non-function blocks
                 for (const block of eventConfig.blocks) {
                     if (block.type !== 'function') {
-                        console.log('Processing block:', JSON.stringify(block, null, 2));
                         await processBlock(block, eventObject, functionRegistry);
                     }
                 }
             } else {
-                console.log('No blocks found in event config');
             }
         } catch (e) {
             console.error(`Error processing JSON event: ${e}`);
@@ -121,7 +104,6 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
     
     function registerFunction(functionBlock, functionRegistry) {
         if (functionBlock.name && functionBlock.children) {
-            console.log(`Registering function: ${functionBlock.name}`);
             functionRegistry[functionBlock.name] = {
                 params: functionBlock.params || [],
                 children: functionBlock.children
@@ -130,7 +112,6 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
     }
     
     async function executeFunction(functionName, args, eventObject, functionRegistry) {
-        console.log(`Executing function: ${functionName} with args:`, args);
         
         if (!functionRegistry[functionName]) {
             console.error(`Function ${functionName} not found in registry`);
@@ -144,8 +125,6 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
         for (let i = 0; i < func.params.length; i++) {
             paramMap[func.params[i]] = args[i] || null;
         }
-        
-        console.log('Parameter mapping:', paramMap);
         
         // Create a new context with the parameters
         const originalEventObject = { ...eventObject };
@@ -169,8 +148,6 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
         
         // Restore original context
         eventObject.functionParams = originalEventObject.functionParams;
-        
-        console.log(`Function ${functionName} returned:`, returnValue);
         return returnValue;
     }
     
@@ -222,8 +199,6 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
                 const value = replaceParameters(condition.value, eventObject);
                 result = value === undefined || value === null || value === '';
             }
-            
-            console.log(`Condition result: ${result} (${leftValue} ${condition.type} ${rightValue})`);
             
             // Execute the appropriate branch
             if (result && branch.if_true && Array.isArray(branch.if_true)) {
@@ -308,16 +283,16 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
     }
     
     const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json'), 'utf8'));
-    console.log('All events from events.json:', eventsJSON);
     
     const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObject.guild.id);
-    console.log(`Found ${validEvents.length} valid events for ${filenameWithoutExtension} in guild ${eventObject.guild.id}`);
-    console.log('Valid events:', validEvents);
     
     for (let i = 0; i < validEvents.length; i++) {
         const event = validEvents[i];
-        console.log(`Processing event ${i + 1}/${validEvents.length}: ${event.id}`);
         // Pass the event directory path
-        await executeEvent(path.resolve(`./db/events/${event.id}/`));
+        try {
+            await executeEvent(path.resolve(`./db/events/${event.id}/`));
+        } catch (e) {
+            console.error(`Something went wrong trying to execute the event with the ID ${event.id}: \n${e}`);
+        }
     }
 })

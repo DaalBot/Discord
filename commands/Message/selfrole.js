@@ -166,6 +166,8 @@ module.exports = {
                         await message.edit({ components: [row] });
                     } else {
                         const webhook = await message.fetchWebhook();
+
+                        if (!webhook) return interaction.reply({ content: 'Unsupported message', flags: DJS.MessageFlags.Ephemeral });
         
                         if (webhook?.owner?.id === client.user.id) {
                             await webhook.editMessage(message.id, {

@@ -12,14 +12,17 @@ const normalOutputs = [
     'messageCreate',
     'messageDelete',
     'messageReactionAdd',
-    'messageReactionRemove'
+    'messageReactionRemove',
+    'guildWarnCreate',
+    'guildWarnDelete'
 ];
 
 const updateOutputs = [
     'guildMemberUpdate',
     'guildRoleUpdate',
     'guildUpdate',
-    'messageUpdate'
+    'messageUpdate',
+    'voiceStateUpdate'
 ];
 
 const normalInput = fs.readFileSync('../automations/events/channelCreate.js', 'utf8');
@@ -27,12 +30,12 @@ const updateInput = fs.readFileSync('../automations/events/channelUpdate.js', 'u
 
 normalOutputs.forEach(output => {
     const outputPath = `../automations/events/${output}.js`;
-    fs.writeFileSync(outputPath, normalInput);
+    fs.writeFileSync(outputPath, normalInput, { flag: 'w' });
     console.log(`Editied ${outputPath}`);
 });
 
 updateOutputs.forEach(output => {
     const outputPath = `../automations/events/${output}.js`;
-    fs.writeFileSync(outputPath, updateInput);
+    fs.writeFileSync(outputPath, updateInput, { flag: 'w' });
     console.log(`Editied ${outputPath}`);
 });

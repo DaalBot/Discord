@@ -5,7 +5,7 @@ client.setMaxListeners(0); // Sets max client listeners to infinity
 const fs = require('fs'); // File system
 const config = require('./config.json');
 
-client.on('ready', () => {
+client.on('clientReady', () => {
   require('./handler.js');
   console.log('Load > DaalBot is ready')
 })

@@ -17,7 +17,7 @@ async function checkSecurityRules(inputFileContents) {
 }
 
 /**
- * @type {{ id: string, modules: string[] }[]}
+ * @type {{ id?: string, code?: string, modules: string[] }[]}
 */
 const requireAllowedEvents = []; // Events that are allowed to use require statements
 

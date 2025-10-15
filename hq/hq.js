@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { default: axios } = require('axios');
 
-client.on('ready', () => {
+client.on('clientReady', () => {
     const server = client.guilds.cache.get('1001929445478781030');
     const commands = server?.commands
 
@@ -36,7 +36,7 @@ client.on('guildMemberAdd', member => {
         const welcomeEmbed = new EmbedBuilder()
             .setTitle(`Welcome to the official DaalBot HQ!`)
             .setDescription(`You are member #${member.guild.memberCount}`)
-            .setThumbnail(member.avatarURL)
+            .setThumbnail(member.avatarURL())
             .setImage('https://media.piny.dev/Daalbot.png')
             .setColor(0x9b24a9)
         client.channels.cache.find(channel => channel.id === '1010452045163143209').send({ content: `Everyone welcome <@${member.id}> to the server!`, embeds: [welcomeEmbed]});

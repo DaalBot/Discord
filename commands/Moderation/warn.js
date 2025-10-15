@@ -83,42 +83,54 @@ module.exports = {
 
             await daalbot.db.managed.insert(interaction.guild.id, 'warns.json', reportObject);
 
-            return interaction.reply({ content: `Warned <@${user.id}> for \`${reason}\` (${reportObject.id})`, flags: MessageFlags.Ephemeral });
+            interaction.reply({ content: `Warned <@${user.id}> for \`${reason}\` (${reportObject.id})`, flags: MessageFlags.Ephemeral });
+
+            client.emit('guildWarnCreate', {
+                guild: interaction.guild,
+                ...reportObject
+            });
+            return;
         }
 
         if (subcommand == 'remove') {
             const id = interaction.options.getString('id');
-            let warns = await daalbot.db.managed.get(interaction.guild.id, 'warns.json');
+            let warns = daalbot.db.managed.get(interaction.guild.id, 'warns.json');
 
             if (warns == 'File Not Found.')
-                return interaction.reply({ content: `Warning database missing, No users have any warnings.`, ephemeral: true });
+                return interaction.reply({ content: `Warning database missing, No users have any warnings.`, flags: MessageFlags.Ephemeral });
             else warns = JSON.parse(warns);
 
             const warn = warns.find(warn => warn.id == id);
-            if (!warn) return interaction.reply({ content: `Warning not found.`, ephemeral: true });
+            if (!warn) return interaction.reply({ content: `Warning not found.`, flags: MessageFlags.Ephemeral });
 
             warns = warns.filter(warn => warn.id != id);
 
             await daalbot.db.managed.set(interaction.guild.id, 'warns.json', JSON.stringify(warns));
 
-            return interaction.reply({
+            interaction.reply({
                 content: `Removed warning \`${id}\` from <@${warn.subject}>.\nReason: ${warn.reason}\nBy: <@${warn.by}>\nTime: <t:${Math.floor(warn.time / 1000)}:R>`,
                 flags: MessageFlags.Ephemeral,
-            })
+            });
+
+            client.emit('guildWarnDelete', {
+                guild: interaction.guild,
+                ...warn
+            });
+            return;
         }
 
         if (subcommand == 'list') {
             const user = interaction.options.getUser('user');
-            let warns = await daalbot.db.managed.get(interaction.guild.id, 'warns.json');
+            let warns = daalbot.db.managed.get(interaction.guild.id, 'warns.json');
 
             if (warns == 'File Not Found.')
-                return interaction.reply({ content: `Warning database missing, No users have any warnings.`, ephemeral: true });
+                return interaction.reply({ content: `Warning database missing, No users have any warnings.`, flags: MessageFlags.Ephemeral });
             else warns = JSON.parse(warns);
 
             if (user) warns = warns.filter(warn => warn.subject == user.id);
 
             if (warns.length == 0)
-                return interaction.reply({ content: `No users have any warnings.`, ephemeral: true });
+                return interaction.reply({ content: `No users have any warnings.`, flags: MessageFlags.Ephemeral });
 
             const embed = new EmbedBuilder()
                 .setTitle(`Warnings (${warns.length})`)
@@ -135,7 +147,7 @@ module.exports = {
                 const warnUser = user || (client.users.cache.get(warn.subject) ?? (await client.users.fetch(warn.subject)));
             
                 embed.addFields({
-                    name: `\`${i + 1}.\` ${!user ? `${warnUser?.username} (${warn.subject}) - ` : ''}\`${warn.id}\``,
+                    name: `\`${i + 1}.\` ${!user ? `${warnUser?.username} (<@${warn.subject}>) - ` : ''}\`${warn.id}\``,
                     value: `By: <@${warn.by}>\nReason: ${warn.reason.substring(0, 197) + (warn.reason.length > 197 ? '...' : '')}\nTime: <t:${Math.floor(warn.time / 1000)}:R>`,
                     inline: false,
                 });
@@ -170,7 +182,7 @@ module.exports = {
                 )
             };
 
-            interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral, components: [row] });
+            interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral, components: overflown > 0 ? [row] : [] });
         }
     }
 }

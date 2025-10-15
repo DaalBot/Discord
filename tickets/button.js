@@ -56,7 +56,7 @@ client.on('interactionCreate', async (interaction) => {
                         parent: ticketCategory,
                         permissionOverwrites: [
                             {
-                                id: interaction.guild.roles.everyone,
+                                id: interaction.guild.roles.everyone.id,
                                 deny: [
                                     DJS.PermissionsBitField.Flags.ViewChannel
                                 ]
@@ -207,7 +207,7 @@ client.on('interactionCreate', async (interaction) => {
 
                     const ticketID = meta.replace(/#/g, '-'); // Replace hashtags with hyphens
                     const ticketChannelID = await daalbot.db.managed.get(interaction.guild.id, `tickets/${ticketID}/channel`);
-                    if (ticketChannelID == 'File not found.') return interaction.reply({ content: 'This ticket does not exist.', ephemeral: true });
+                    if (ticketChannelID == 'File not found.') return interaction.editReply({ content: 'This ticket does not exist.', ephemeral: true });
 
                     /**
                      * @type {DJS.TextChannel | null}

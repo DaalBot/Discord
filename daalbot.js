@@ -268,7 +268,7 @@ async function managedDBSet(guild, pathName, data, flags = 'w') {
 /**
  * @param {string} guild 
  * @param {string} pathName 
- * @returns {Promise<string | "File not found.">}
+ * @returns {string | "File not found."}
  */
 function managedDBGet(guild, pathName) {
     return betterFS_read(path.resolve(`./db/managed/${guild}/${pathName}`));
@@ -705,17 +705,7 @@ async function addXP(guild, user, amount) {
                 .setEmoji('📖');
 
             row.addComponents(menuButton);
-
-            if (guild == config.servers.vortex.id) {
-                const vortexMoreInfoButton = new DJS.ButtonBuilder()
-                    .setLabel('More Info')
-                    .setStyle(DJS.ButtonStyle.Link)
-                    .setURL('https://discord.com/channels/973711816226136095/1001724255215558766')
-                    .setEmoji('🔗');
-
-                row.addComponents(vortexMoreInfoButton);
-            }
-
+            
             levelUpChannel.send({
                 content: silentUsers.includes(user) ? null : `<@${user}>`,
                 embeds: [levelUpEmbed],
@@ -809,30 +799,48 @@ const encryption_key = Buffer.from(process.env.DB_ENC_KEY, 'base64');
 /**
  * @param {string} data 
  * @returns {string}
-*/
+ */
 function encrypt(data) {
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-cbc', encryption_key, iv);
+    const iv = crypto.randomBytes(12); // GCM uses 12-byte IV
+    const cipher = crypto.createCipheriv('aes-256-gcm', encryption_key, iv);
     
-    let encrypted = cipher.update(data, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-
-    return iv.toString('hex') + ':' + encrypted;
+    const encrypted = cipher.update(data, 'utf8');
+    const final = cipher.final();
+    const tag = cipher.getAuthTag(); // 16 bytes
+    
+    return Buffer.concat([iv, tag, encrypted, final]).toString('base64');
 }
 
 /**
  * @param {string} data
-*/
+ * @returns {string}
+ */
 function decrypt(data) {
-    const parts = data.split(':')
-    const iv = Buffer.from(parts.shift(), 'hex');
-    const encryptedText = Buffer.from(parts.join(':'), 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', encryption_key, iv);
-    
-    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-
-    return decrypted;
+    // Check if it's the old hex format (contains ':' separator)
+    if (data.includes(':')) {
+        // Old CBC hex format
+        const parts = data.split(':');
+        const iv = Buffer.from(parts.shift(), 'hex');
+        const encryptedText = Buffer.from(parts.join(':'), 'hex');
+        const decipher = crypto.createDecipheriv('aes-256-cbc', encryption_key, iv);
+        
+        let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    } else {
+        // New GCM base64 format
+        const combined = Buffer.from(data, 'base64');
+        const iv = combined.subarray(0, 12);
+        const tag = combined.subarray(12, 28);
+        const encrypted = combined.subarray(28);
+        
+        const decipher = crypto.createDecipheriv('aes-256-gcm', encryption_key, iv);
+        decipher.setAuthTag(tag);
+        
+        let decrypted = decipher.update(encrypted, null, 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    }
 }
 
 const youtube = {
@@ -877,7 +885,36 @@ const db = {
 }
 
 const guilds = {
-    sendAlert
+    sendAlert,
+    log: {
+        /** 
+         * @param {string} guild
+         * @param {string} data
+        */
+        info: (guild, data) => {
+            let currentLogFile = managedDBGet(guild, 'logs/info.log');
+            if (currentLogFile == 'File not found.') currentLogFile = '';
+            const newLogFile = `${currentLogFile}\n[${new Date().toISOString()}] ${data}`;
+        },
+        /**
+         * @param {string} guild
+         * @param {string} data
+        */
+        warn: (guild, data) => {
+            let currentLogFile = managedDBGet(guild, 'logs/warn.log');
+            if (currentLogFile == 'File not found.') currentLogFile = '';
+            const newLogFile = `${currentLogFile}\n[${new Date().toISOString()}] ${data}`;
+        },
+        /**
+         * @param {string} guild
+         * @param {string} data
+        */
+        error: (guild, data) => {
+            let currentLogFile = managedDBGet(guild, 'logs/error.log');
+            if (currentLogFile == 'File not found.') currentLogFile = '';
+            const newLogFile = `${currentLogFile}\n[${new Date().toISOString()}] ${data}`;
+        }
+    }
 }
 
 const api = {

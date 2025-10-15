@@ -68,7 +68,7 @@ function applyNewStatus() {
     client.user.setActivity(newActivity, { type: ActivityType.Custom })
 }
 
-client.on('ready', () => {
+client.on('clientReady', () => {
     applyNewStatus(); // apply status on startup
     setInterval(() => applyNewStatus(), 5 * 60 * 1000); // apply status every 5 minutes
 })

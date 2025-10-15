@@ -27,3 +27,10 @@ require('./events/guildRoleDelete.js');
 
 // Interactions
 require('./events/interactionCreate.js');
+
+// Warnings
+require('./events/guildWarnCreate.js');
+require('./events/guildWarnDelete.js');
+
+// Voice
+require('./events/voiceStateUpdate.js');
