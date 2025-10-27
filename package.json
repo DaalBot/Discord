@@ -18,7 +18,7 @@
   },
   "homepage": "https://daalbot.xyz",
   "dependencies": {
-    "@napi-rs/canvas": "^0.1.80",
+    "@napi-rs/canvas": "^0.1.81",
     "@npiny/csvman": "^0.0.3",
     "abstract-syntax-tree": "^2.22.0",
     "archiver": "^7.0.1",
