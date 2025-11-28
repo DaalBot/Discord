@@ -1,5 +1,7 @@
 name: update
 run-name: ${{ github.actor }}
+permissions:
+  contents: read
 on:
   push:
     branches:
