@@ -1,0 +1,31 @@
+{
+    "message": {
+        "flags": 32768,
+        "components": [
+            {
+                "type": 17,
+                "accent_color": 15548997,
+                "spoiler": false,
+                "components": [
+                    {
+                        "type": 9,
+                        "accessory": {
+                            "type": 11,
+                            "media": {
+                                "url": "https://media.piny.dev/daalbot/embed/thumbnail/logs/Channel.png"
+                            },
+                            "description": null,
+                            "spoiler": false
+                        },
+                        "components": [
+                            {
+                                "type": 10,
+                                "content": "# Channel Deleted\nChannel: <#%%{channel.id}%%> (`%%{channel.id}%%`)\nType: %%{meta.type}%%\nDeleted by: %%{meta.executor.name}%% (`%%{meta.executor.id}%%`)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

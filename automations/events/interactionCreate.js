@@ -51,7 +51,7 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
         // All checks pass
         toolsClass.setup();
         try {
-            input.execute(inputData, utils, input.id);
+            await input.execute(inputData, utils, input.id);
         } catch (e) {
             console.error(`${e}`);
         }

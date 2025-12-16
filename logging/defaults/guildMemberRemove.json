@@ -1,0 +1,47 @@
+{
+    "message": {
+        "flags": 32768,
+        "components": [
+            {
+                "type": 17,
+                "accent_color": 15548997,
+                "spoiler": false,
+                "components": [
+                    {
+                        "type": 9,
+                        "accessory": {
+                            "type": 11,
+                            "media": {
+                                "url": "https://cdn.discordapp.com/avatars/%%{member.user.id}%%/%%{member.user.avatar}%%.png?size=1024"
+                            },
+                            "description": null,
+                            "spoiler": false
+                        },
+                        "components": [
+                            {
+                                "type": 10,
+                                "content": "# User Left\n## Profile"
+                            }
+                        ]
+                    },
+                    {
+                        "type": 12,
+                        "items": [
+                            {
+                                "media": {
+                                    "url": "https://cdn.discordapp.com/banners/%%{member.user.id}%%/%%{member.user.banner}%%.png?size=1024&animated=true"
+                                },
+                                "description": null,
+                                "spoiler": false
+                            }
+                        ]
+                    },
+                    {
+                        "type": 10,
+                        "content": "### %%{member.user.displayName}%% `(%%{#member.user.discriminator=\"0\"[\"@%%{member.user.username}%%\"][\"%%{member.user.displayName}%%#%%{member.user.discriminator}%%\"])`\nID: %%{member.user.id}%%\nBot: %%{#member.user.bot=\"true\"[\"Yes\"][\"No\"]}%%\nCreated at: <t:%%{meta.createdTimestamp}%%:F>"
+                    }
+                ]
+            }
+        ]
+    }
+}

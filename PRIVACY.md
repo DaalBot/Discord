@@ -13,6 +13,9 @@ Most data is stored within a plain text database on the bots server; however, so
 ### Encrypted data
 While data is encrypted it is **not stored in a way that is impossible to decrypt**. Decryption keys are never stored on the same server as the data or on disk at all if possible. This means that even if the server is compromised the data is still safe.
 
+### Temporary data collection
+We collect some data such as audit log entries temporarily to provide certain features, but this data is only ever stored in memory and is never written to disk or any database. This data is deleted as soon as it is no longer needed.
+
 ## 3rd party services
 DaalBot sometimes reaches out to 3rd party services to store / retrieve data. You can see what services are used and find links to their sites where you can find a privacy policy.
 

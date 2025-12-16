@@ -1,0 +1,31 @@
+{
+    "message": {
+        "flags": 32768,
+        "components": [
+            {
+                "type": 17,
+                "accent_color": 15548997,
+                "spoiler": false,
+                "components": [
+                    {
+                        "type": 9,
+                        "accessory": {
+                            "type": 11,
+                            "media": {
+                                "url": "https://media.daalbot.xyz/logs/Moderation-Danger.png"
+                            },
+                            "description": null,
+                            "spoiler": false
+                        },
+                        "components": [
+                            {
+                                "type": 10,
+                                "content": "# User Banned\nUser: %%{ban.user.username}%% (`%%{ban.user.id}%%`)\nBanned by: %%{meta.executor.name}%% (`%%{meta.executor.id}%%`)\nReason: %%{meta.reason}%%"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,11 +1,6 @@
-// Channels
-require('./events/channelCreate.js');
-require('./events/channelDelete.js');
-require('./events/channelUpdate.js');
-
-// Bans
-require('./events/guildBanAdd.js');
-require('./events/guildBanDelete.js');
+require('./events/channels.js');
+require('./events/bans.js');
+// require('./events/members.js');
 
 // Members
 require('./events/guildMemberAdd.js');

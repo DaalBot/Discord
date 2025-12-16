@@ -134,6 +134,10 @@ module.exports = {
                                 {
                                     name: 'Guild',
                                     value: 'guild'
+                                },
+                                {
+                                    name: 'Member',
+                                    value: 'member'
                                 }
                             ]
                         }
@@ -319,9 +323,10 @@ module.exports = {
                 const id = options.getString('id');
                 const type = options.getString('type');
 
+                const baseObject = type == 'member' ? interaction.guild : interaction.client;
                 let obj = null;
 
-                obj = await interaction.client[`${type}s`].fetch(id);
+                obj = await baseObject[`${type}s`].fetch(id);
 
                 if (obj === null) return interaction.reply({
                     content: 'No object found',

@@ -8,7 +8,7 @@ module.exports = {
     testOnly: true,
   
     callback: ({ interaction }) => {
-        client.emit('guildMemberAdd', member)
+        // client.emit('guildMemberAdd', interaction.member)
         
         interaction.reply('Simulated join.')
     },

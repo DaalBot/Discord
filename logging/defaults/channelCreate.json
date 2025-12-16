@@ -1,0 +1,31 @@
+{
+    "message": {
+        "flags": 32768,
+        "components": [
+            {
+                "type": 17,
+                "accent_color": 5763719,
+                "spoiler": false,
+                "components": [
+                    {
+                        "type": 9,
+                        "accessory": {
+                            "type": 11,
+                            "media": {
+                                "url": "https://media.piny.dev/daalbot/embed/thumbnail/logs/Channel.png"
+                            },
+                            "description": null,
+                            "spoiler": false
+                        },
+                        "components": [
+                            {
+                                "type": 10,
+                                "content": "# Channel Created\nChannel: <#%%{channel.id}%%> (`%%{channel.id}%%`)\nType: %%{meta.type}%%\nCreated by: %%{meta.executor.name}%% (`%%{meta.executor.id}%%`)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

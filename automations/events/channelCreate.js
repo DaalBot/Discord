@@ -292,7 +292,8 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
         try {
             await executeEvent(path.resolve(`./db/events/${event.id}/`));
         } catch (e) {
-            console.error(`Something went wrong trying to execute the event with the ID ${event.id}: \n${e}`);
+            daalbot.guilds.log.error(event.guild, `Error executing event ${event.id} on ${filenameWithoutExtension}: ${e}`);
+            console.error(`Error executing event ${event.id} on ${filenameWithoutExtension}: ${e}`);
         }
     }
 })

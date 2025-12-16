@@ -94,26 +94,28 @@ let commands = [];
                 exists = false;
             }
 
+            // Convert permissions array to default_member_permissions if present
+            let defaultMemberPermissions = null;
+            if (command.permissions && command.permissions.length > 0) {
+                // Combine all permission flags using bitwise OR
+                defaultMemberPermissions = command.permissions.reduce((acc, perm) => acc | BigInt(perm), 0n).toString();
+            }
+
+            const commandData = {
+                name: command.name,
+                description: command.description,
+                options: command.options,
+                default_member_permissions: defaultMemberPermissions
+            };
+
             if (existingCommand && exists) {
-                await existingCommand.edit({
-                    name: command.name,
-                    description: command.description,
-                    options: command.options
-                });
+                await existingCommand.edit(commandData);
             } else {
                 try {
                     if (command.testOnly) {
-                        await client.guilds.cache.get(testGuild).commands.create({
-                            name: command.name,
-                            description: command.description,
-                            options: command.options
-                        });
+                        await client.guilds.cache.get(testGuild).commands.create(commandData);
                     } else {
-                        await client.application.commands.create({
-                            name: command.name,
-                            description: command.description,
-                            options: command.options
-                        });
+                        await client.application.commands.create(commandData);
                     }
                 } catch (error) {
                     console.error(error)
@@ -160,40 +162,9 @@ client.on('interactionCreate', async interaction => {
                     flags: MessageFlags.Ephemeral
                 })
             } else {
-                if (!command.permissions) { // The command does not require any permissions
-                    const response = await command.callback({ interaction });
-                    if (response) interaction.reply(response); // This is a very old way of replying to an interaction but need to keep it for backwards compatibility
-                } else {
-                    // Now this is where it gets interesting
-                    const memberPermissions = interaction.memberPermissions;
-    
-                    if (!memberPermissions) {
-                        interaction.reply({
-                            content: 'This command requires special permissions to use however you do not have any permissions.',
-                            flags: MessageFlags.Ephemeral
-                        })
-                    }
-    
-                    let hasPermissions = true;
-    
-                    for (let i = 0; i < command.permissions.length; i++) {
-                        if (!memberPermissions.has(command.permissions[i])) {
-                            hasPermissions = false;
-                            break;
-                        }
-                    }
-    
-                    if (hasPermissions) {
-                        const response = await command.callback({ interaction });
-                        
-                        if (response && !interaction.replied) interaction.reply(response); // This is a very old way of replying to an interaction but hey, it works
-                    } else {
-                        interaction.reply({
-                            content: 'You do not have the required permissions to use this command.',
-                            flags: MessageFlags.Ephemeral
-                        })
-                    }
-                }
+                // Discord now handles permission checks via default_member_permissions
+                const response = await command.callback({ interaction });
+                if (response) interaction.reply(response); // This is a very old way of replying to an interaction but need to keep it for backwards compatibility
             }
         } 
         // else if (!interaction?.guild?.commands?.cache?.find(c => c.name === interaction.commandName)) { // Fail if its not a custom command and not in the commands array

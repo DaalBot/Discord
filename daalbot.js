@@ -10,6 +10,24 @@ const { EventEmitter } = require('events');
 const net = require('net');
 const crypto = require('crypto');
 
+const AUDIT_LOG_HISTORY_LIMIT = 5;
+
+/**
+ * @type {Map<string, Discord.GuildAuditLogsEntry>}
+*/
+let auditLogEntryHistory = new Map();
+
+client.on('guildAuditLogEntryCreate', (entry, guild) => {
+    // Add the entry to the map
+    if (!auditLogEntryHistory.has(guild.id))
+        auditLogEntryHistory.set(guild.id, []);
+
+    const guildHistory = auditLogEntryHistory.get(guild.id);
+    guildHistory.push(entry);
+    if (guildHistory.length > AUDIT_LOG_HISTORY_LIMIT) guildHistory.shift(); // Remove the oldest entry if we exceed the limit
+    auditLogEntryHistory.set(guild.id, guildHistory);
+});
+
 const serverAmount = client.guilds.cache.size
 
 function findServerVanity(server) {
@@ -732,25 +750,467 @@ async function getFutureDiscordTimestamp(ms) {
 }
 
 /**
- * @param {string} message
- * @param {string} guild
- * @param {Object | undefined} data
-*/
+ * @param {string} message - Template string to process
+ * @param {string} guild - Guild identifier
+ * @param {Object | undefined} data - Data object for placeholder resolution
+ */
 async function convertMetaText(message, guild, data) {
-    if (!data) return message;
-    
-    // Remove the client object from the data object incase it's there because of the token property o~o
-    const replacementData = data.client ? {
-        ...data,
-        client: {}
-    } : data;
-    replacementData.guild = guild;
+  if (!data) return message;
 
-    // Replace the placeholders in the message with their values
-    return message.replace(/%%{([^}]+)}%%/g, (match, path) => {
-        const value = path.split('.').reduce((obj, key) => obj?.[key], replacementData);
-        return value !== undefined ? value : match;
-    });
+  // Recursively remove client objects and handle circular references
+  function removeClientObjects(obj, visited = new WeakSet()) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (visited.has(obj)) return {};
+    visited.add(obj);
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => removeClientObjects(item, visited));
+    }
+
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      cleaned[key] = key === 'client' ? {} : removeClientObjects(value, visited);
+    }
+    return cleaned;
+  }
+
+  let replacementData = removeClientObjects(data);
+  replacementData.guild = guild;
+
+  // Parse and resolve a single placeholder with all features
+  function resolvePlaceholder(path, depth = 0, customContext = null) {
+    const currentContext = customContext || replacementData;
+    if (depth > 50) {
+      return null; // Prevent stack overflow
+    }
+    
+    // Check for array slicing first: Array<start,end>
+    const sliceMatch = path.match(/^(.+?)<(-?\d+),(-?\d+)>(.*)$/s);
+    if (sliceMatch) {
+      const [, arrayPath, start, end, rest] = sliceMatch;
+      const arr = resolveSimplePath(arrayPath, currentContext);
+      if (!Array.isArray(arr)) {
+        return null;
+      }
+      
+      const startIdx = parseInt(start);
+      const endIdx = parseInt(end);
+      const sliced = arr.slice(
+        startIdx < 0 ? arr.length + startIdx : startIdx,
+        endIdx < 0 ? arr.length + endIdx + 1 : endIdx + 1
+      );
+      
+      if (rest) {
+        // If rest starts with *, it's a loop on the sliced array
+        if (rest.startsWith('*')) {
+          const tempData = { ...currentContext, _tempSliced: sliced };
+          const result = resolvePlaceholder('_tempSliced' + rest, depth + 1, tempData);
+          return result;
+        }
+        return resolvePlaceholder(JSON.stringify(sliced) + rest, depth + 1);
+      }
+      return sliced;
+    }
+    
+    // Check for array loop syntax: Array*varName[expression]
+    const loopMatch = path.match(/^(.+?)\*(\w+)\[(.+)\]$/s);
+    if (loopMatch) {
+      const [, arrayPath, varName, expression] = loopMatch;
+      const arr = resolveSimplePath(arrayPath, currentContext);
+      if (!Array.isArray(arr)) {
+        return null;
+      }
+      
+      const result = arr.map(item => {
+        const tempData = { ...replacementData, [varName]: item };
+        return processTemplate(expression, tempData);
+      }).join('');
+      return result;
+    }
+
+    // Check for array indexing: Array[index]
+    const indexMatch = path.match(/^(.+?)\[(-?\d+)\](.*)$/);
+    if (indexMatch) {
+      const [, arrayPath, index, rest] = indexMatch;
+      const arr = resolveSimplePath(arrayPath, currentContext);
+      if (!Array.isArray(arr)) {
+        return null;
+      }
+      
+      const idx = parseInt(index);
+      const item = arr[idx < 0 ? arr.length + idx : idx];
+      
+      if (rest) {
+        // Continue resolving with the rest of the path
+        const itemStr = typeof item === 'object' ? item : { value: item };
+        const tempData = { ...currentContext, _tempItem: itemStr };
+        return resolvePlaceholder(`_tempItem${rest}`, depth + 1, tempData);
+      }
+      return item;
+    }
+
+    // Check for conditional: #condition[true][false]
+    if (path.startsWith('#')) {
+      
+      // Find the condition part and the two bracket sections
+      let conditionEnd = -1;
+      let bracketCount = 0;
+      let inQuotes = false;
+      
+      for (let i = 1; i < path.length; i++) {
+        const char = path[i];
+        const prevChar = i > 0 ? path[i-1] : '';
+        
+        // Check if this is an actual quote (not part of escaped quote marker)
+        if (char === '"') {
+          // Look backwards to see if this is part of an escaped quote marker
+          const beforeQuote = path.slice(Math.max(0, i-21), i);
+          const isEscapedQuote = beforeQuote.includes('\uE000ESCAPED_QUOTE\uE000');
+          
+          if (!isEscapedQuote) {
+            inQuotes = !inQuotes;
+          }
+        } else if (!inQuotes && char === '[') {
+          if (bracketCount === 0) {
+            conditionEnd = i;
+          }
+          bracketCount++;
+          break;
+        }
+      }
+      
+      if (conditionEnd > 0) {
+        const condition = path.slice(1, conditionEnd);
+        
+        // Find the true and false values
+        let pos = conditionEnd + 1;
+        let depth = 1;
+        let trueEnd = -1;
+        inQuotes = false;
+        
+        for (let i = pos; i < path.length; i++) {
+          const char = path[i];
+          
+          // Check if this is an actual quote (not part of escaped quote marker)
+          if (char === '"') {
+            // Look backwards to see if this is part of an escaped quote marker
+            const beforeQuote = path.slice(Math.max(0, i-21), i);
+            const isEscapedQuote = beforeQuote.includes('\uE000ESCAPED_QUOTE\uE000');
+            
+            if (!isEscapedQuote) {
+              inQuotes = !inQuotes;
+            }
+          } else if (!inQuotes) {
+            if (char === '[') {
+              depth++;
+            } else if (char === ']') {
+              depth--;
+              if (depth === 0) {
+                trueEnd = i;
+                break;
+              }
+            }
+          }
+        }
+        
+        if (trueEnd > 0) {
+          const trueVal = path.slice(conditionEnd + 1, trueEnd);
+          
+          // Find false value
+          let falseStart = trueEnd + 2; // Skip ][
+          if (falseStart < path.length && path.slice(trueEnd, falseStart) === '][') {
+            let falseEnd = path.lastIndexOf(']');
+            const falseVal = path.slice(falseStart, falseEnd);
+            
+            const result = evaluateCondition(condition, currentContext);
+            const chosen = result ? trueVal : falseVal;
+            
+            // Remove quotes if present (handle both regular quotes and escaped quote markers)
+            let finalValue = chosen;
+            
+            // First restore escaped quotes
+            finalValue = finalValue.replace(/\uE000ESCAPED_QUOTE\uE000/g, '"');
+            
+            // Then remove outer quotes if present
+            finalValue = finalValue.replace(/^"(.*)"$/, '$1');
+            
+            return finalValue;
+          }
+        }
+      }
+    }
+
+    // Check for defaults: placeholder|default1|default2
+    const parts = path.split('|');
+    for (const part of parts) {
+      // Check if it's a quoted string
+      if (part.match(/^".*"$/)) {
+        const unquoted = part.slice(1, -1);
+        return unquoted;
+      }
+      
+      const trimmedPart = part.trim();
+      // Skip parts that contain escaped characters (these are from broken escape sequences)
+      if (trimmedPart.includes('\x00')) {
+        continue;
+      }
+      
+      const value = resolveSimplePath(trimmedPart, currentContext);
+      if (value !== null && value !== undefined) {
+        // If it's an array, return it as-is for further processing
+        if (Array.isArray(value)) {
+          return value;
+        }
+        // For non-arrays, convert to string with any modifiers
+        return String(value);
+      }
+    }
+
+    return null;
+  }
+
+  // Resolve simple dot-notation path with modifiers
+  function resolveSimplePath(path, customContext = null) {
+    const contextData = customContext || replacementData;
+    let modifier = null;
+    let cleanPath = path;
+
+    // Check for modifiers - but only if it's not a special key like _tempSliced or _tempItem
+    if (path.startsWith('_') && !path.startsWith('_temp')) {
+      modifier = 'lower';
+      cleanPath = path.slice(1);
+    } else if (path.startsWith('-')) {
+      modifier = 'upper';
+      cleanPath = path.slice(1);
+    }
+
+    // Handle nested placeholders in path - process them first
+    let processedPath = cleanPath;
+    let lastPath;
+    let iterations = 0;
+    
+    
+    do {
+      lastPath = processedPath;
+      let i = 0;
+      let newPath = '';
+      
+      while (i < processedPath.length) {
+        if (processedPath.slice(i, i + 3) === '%%{') {
+          // Find matching }%%
+          let depth = 1;
+          let j = i + 3;
+          
+          while (j < processedPath.length && depth > 0) {
+            if (processedPath.slice(j, j + 3) === '%%{') {
+              depth++;
+              j += 3;
+            } else if (processedPath.slice(j, j + 3) === '}%%') {
+              depth--;
+              if (depth === 0) {
+                const innerPath = processedPath.slice(i + 3, j);
+                const resolved = resolvePlaceholder(innerPath);
+                newPath += resolved !== null ? String(resolved) : processedPath.slice(i, j + 3);
+                i = j + 3;
+                break;
+              }
+              j += 3;
+            } else {
+              j++;
+            }
+          }
+          
+          if (depth > 0) {
+            newPath += processedPath[i];
+            i++;
+          }
+        } else {
+          newPath += processedPath[i];
+          i++;
+        }
+      }
+      
+      processedPath = newPath;
+      iterations++;
+    } while (processedPath !== lastPath && iterations < 5);
+
+    // Split path and resolve
+    const keys = processedPath.split('.');
+    let value = contextData;
+    
+    for (const key of keys) {
+      // Handle array indexing in paths like "array[0]"
+      const arrayMatch = key.match(/^(.+?)\[(-?\d+)\]$/);
+      if (arrayMatch) {
+        const [, arrayKey, index] = arrayMatch;
+        value = value?.[arrayKey];
+        if (Array.isArray(value)) {
+          const idx = parseInt(index);
+          value = value[idx < 0 ? value.length + idx : idx];
+        } else {
+          return null;
+        }
+      } else {
+        value = value?.[key];
+      }
+      
+      if (value === null || value === undefined) {
+        return null;
+      }
+    }
+
+    let result = value; // Don't convert to string yet if it's an array
+    
+    // Only convert to string if we're not dealing with an array that might be used for further processing
+    if (!Array.isArray(value)) {
+      result = String(value);
+      if (modifier === 'lower') {
+        result = result.toLowerCase();
+      }
+      if (modifier === 'upper') {
+        result = result.toUpperCase();
+      }
+    } else {
+      // For arrays, we might still need to apply modifiers to string representation later
+    }
+
+    return result;
+  }
+
+  // Evaluate conditional expressions
+  function evaluateCondition(condition, context = null) {
+    const currentContext = context || replacementData;
+    const operators = ['!==', '===', '!=', '==', '>=', '<=', '>', '<', '^=', '$=', '~=', '*=', '='];
+    
+    for (const op of operators) {
+      const idx = condition.indexOf(op);
+      if (idx === -1) continue;
+
+      const leftPart = condition.slice(0, idx).trim();
+      const rightPart = condition.slice(idx + op.length).trim();
+      
+      const left = String(resolvePlaceholder(leftPart, 0, currentContext) || '');
+      let right = rightPart;
+      
+      // Handle escaped quotes in the right part first
+      if (right.includes('\uE000ESCAPED_QUOTE\uE000')) {
+        right = right.replace(/\uE000ESCAPED_QUOTE\uE000/g, '"');
+      }
+      
+      // Handle quoted strings more carefully
+      if (right.startsWith('"') && right.endsWith('"')) {
+        right = right.slice(1, -1);
+      }
+      
+
+      let result;
+      switch (op) {
+        case '!==': result = left !== right; break;
+        case '===': result = left === right; break;
+        case '!=': result = left != right; break;
+        case '==': result = left == right; break;
+        case '>': result = parseFloat(left) > parseFloat(right); break;
+        case '<': result = parseFloat(left) < parseFloat(right); break;
+        case '>=': result = parseFloat(left) >= parseFloat(right); break;
+        case '<=': result = parseFloat(left) <= parseFloat(right); break;
+        case '^=': result = left.startsWith(right); break;
+        case '$=': result = left.endsWith(right); break;
+        case '*=': result = left.includes(right); break;
+        case '~=': result = new RegExp(`\\b${right}\\b`).test(left); break;
+        case '=': result = left == right; break;
+      }
+      return result;
+    }
+    return false;
+  }
+
+  // Process template with given data context
+  function processTemplate(template, contextData = replacementData) {
+    const originalData = replacementData;
+    if (contextData !== replacementData) {
+      replacementData = contextData;
+    }
+    
+    // First handle JSON-style escaped quotes specifically
+    let preprocessed = template.replace(/\\"/g, '\uE000ESCAPED_QUOTE\uE000');
+    
+    // Then handle other escaping
+    let escaped = preprocessed.replace(/\\(%%{|}%%|\||\\|\[|\])/g, '\x00$1\x00');
+    
+    // Parse placeholders manually to handle nesting and complex syntax
+    let result = '';
+    let i = 0;
+    
+    while (i < escaped.length) {
+      // Look for placeholder start
+      if (escaped.slice(i, i + 3) === '%%{') {
+        // Find matching }%%
+        let depth = 1;
+        let j = i + 3;
+        
+        while (j < escaped.length && depth > 0) {
+          if (escaped.slice(j, j + 3) === '%%{') {
+            depth++;
+            j += 3;
+          } else if (escaped.slice(j, j + 3) === '}%%') {
+            depth--;
+            if (depth === 0) {
+              // Found matching closing
+              const placeholder = escaped.slice(i + 3, j);
+              const value = resolvePlaceholder(placeholder);
+              
+              if (value !== null && value !== undefined) {
+                const stringValue = String(value);
+                result += stringValue;
+              } else {
+                // For null/undefined values, use empty string instead of leaving placeholder
+                result += '';
+              }
+              
+              i = j + 3;
+              break;
+            }
+            j += 3;
+          } else {
+            j++;
+          }
+        }
+        
+        if (depth > 0) {
+          // Unmatched placeholder
+          result += escaped[i];
+          i++;
+        }
+      } else {
+        result += escaped[i];
+        i++;
+      }
+    }
+    
+    // Restore escaped characters including JSON-style escaped quotes
+    const unescaped = result.replace(/\x00(.+?)\x00/g, '$1').replace(/\uE000ESCAPED_QUOTE\uE000/g, '"');
+    
+    if (contextData !== originalData) {
+      replacementData = originalData;
+    }
+    return unescaped;
+  }
+
+  const replacedOutput = processTemplate(message);
+
+  // Handle encoded client ID replacement (original functionality)
+  if (typeof client !== 'undefined' && client?.user?.id) {
+    const encodedClientId = Buffer.from(client.user.id).toString('base64');
+    const words = replacedOutput.split(' ');
+    for (let i = 0; i < words.length; i++) {
+      if (words[i].startsWith(`${encodedClientId}.`)) {
+        words[i] = `${encodedClientId}.Sombo.dyOnceToldMeTheWorldWasGonnaRollMe`;
+      }
+    }
+    return words.join(' ');
+  }
+
+  return replacedOutput;
 }
 
 /**
@@ -843,6 +1303,33 @@ function decrypt(data) {
     }
 }
 
+/**
+ * @param {string} guild The guild to fetch audit log entries for
+ * @param {number} limit The maximum amount of entries to fix (Max defined by AUDIT_LOG_HISTORY_LIMIT constant when not fetching new data)
+ * @param {boolean} fetch Whether to fetch new entries from Discord or use the cached ones
+ * @param {number} delay The delay in milliseconds before fetching new entries (to allow Discord to process the action, default 1000ms)
+ * @returns {Promise<Discord.GuildAuditLogsEntry[]>}
+ */
+async function getLatestAuditLogEntries(guild, limit = 5, fetch = false, delay = 1000) {
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    if (fetch) {
+        // Fetch new entries from Discord
+        const results = await client.guilds.cache.get(guild).fetchAuditLogs({
+            limit
+        });
+        return results;
+    }
+
+    if (!auditLogEntryHistory.has(guild)) {
+        console.warn(`No audit log history found for guild ${guild}. Returning empty array.`);
+        return [];
+    }
+
+    // Use cached entries
+    return auditLogEntryHistory.get(guild).slice(-limit);
+}
+
 const youtube = {
     getChannelUploads: youtube_GetChannelUploads,
     isVideoValid: youtube_isVideoValid,
@@ -895,6 +1382,7 @@ const guilds = {
             let currentLogFile = managedDBGet(guild, 'logs/info.log');
             if (currentLogFile == 'File not found.') currentLogFile = '';
             const newLogFile = `${currentLogFile}\n[${new Date().toISOString()}] ${data}`;
+            managedDBSet(guild, 'logs/info.log', newLogFile);
         },
         /**
          * @param {string} guild
@@ -904,6 +1392,7 @@ const guilds = {
             let currentLogFile = managedDBGet(guild, 'logs/warn.log');
             if (currentLogFile == 'File not found.') currentLogFile = '';
             const newLogFile = `${currentLogFile}\n[${new Date().toISOString()}] ${data}`;
+            managedDBSet(guild, 'logs/warn.log', newLogFile);
         },
         /**
          * @param {string} guild
@@ -913,6 +1402,7 @@ const guilds = {
             let currentLogFile = managedDBGet(guild, 'logs/error.log');
             if (currentLogFile == 'File not found.') currentLogFile = '';
             const newLogFile = `${currentLogFile}\n[${new Date().toISOString()}] ${data}`;
+            managedDBSet(guild, 'logs/error.log', newLogFile);
         }
     }
 }
@@ -1002,6 +1492,7 @@ module.exports = {
     convertMetaText,
     encrypt,
     decrypt,
+    getLatestAuditLogEntries,
     api,
     embed: Discord.EmbedBuilder,
     DatabaseEntry
