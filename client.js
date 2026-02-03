@@ -1,4 +1,4 @@
-const { Client, IntentsBitField, Partials } = require('discord.js');
+const { Client, IntentsBitField } = require('discord.js');
 
 const client = new Client({
     intents: [
@@ -12,6 +12,6 @@ const client = new Client({
         IntentsBitField.Flags.GuildVoiceStates,
         IntentsBitField.Flags.DirectMessages
     ]
-})
+});
 
 module.exports = client;

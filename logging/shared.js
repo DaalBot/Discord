@@ -42,50 +42,123 @@ async function handleEvent(type, objectName, meta, object, object2) {
         const auditLog = await daalbot.getLatestAuditLogEntries(object.guild.id);
         const auditLogEntry = auditLog.find(entry => entry.action === auditLogEventTypeMapping[type] && entry.target?.id === object.id);
         
-        // Create a simplified version of the Discord.js objects for templating
-        function simplifyDiscordObject(obj, properties = [
-            'id', 'name', 'type', 'guildId', 'nsfw', 'topic', 
-            'rateLimitPerUser', 'parentId', 'rawPosition', 'flags', 'reason'
-        ]) {
+        // Create a safe copy of Discord.js objects, preserving as much data as possible
+        // The convertMetaText function already handles circular references and client removal
+        function simplifyDiscordObject(obj, visited = new WeakSet()) {
             if (!obj) return null;
+            if (typeof obj !== 'object') return obj;
             
-            const simplified = {};
+            // Prevent infinite recursion
+            if (visited.has(obj)) return null;
+            visited.add(obj);
             
-            // Copy specified properties, ensuring we only copy primitive values
-            properties.forEach(prop => {
-                if (obj[prop] !== undefined && obj[prop] !== null) {
-                    const value = obj[prop];
-                    // Only copy primitive values to avoid circular references
-                    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-                        simplified[prop] = value;
+            const copy = {};
+            
+            // Get all own properties including non-enumerable ones (like _roles)
+            const ownKeys = Object.getOwnPropertyNames(obj);
+            
+            // Also get properties from the prototype chain (getters from Discord.js classes)
+            const prototypeKeys = new Set();
+            let proto = Object.getPrototypeOf(obj);
+            while (proto && proto !== Object.prototype) {
+                for (const key of Object.getOwnPropertyNames(proto)) {
+                    const descriptor = Object.getOwnPropertyDescriptor(proto, key);
+                    // Only include getters, not methods
+                    if (descriptor && descriptor.get && !descriptor.set) {
+                        prototypeKeys.add(key);
                     }
                 }
-            });
-            
-            // Handle parent channel specially - only copy safe properties
-            if (obj.parent && obj.parent.id) {
-                simplified.parent = {
-                    id: obj.parent.id,
-                    name: obj.parent.name || 'Unknown',
-                    type: obj.parent.type || 'Unknown'
-                };
+                proto = Object.getPrototypeOf(proto);
             }
             
-            // Handle ban user specially - copy user properties
-            if (obj.user && obj.user.id) {
-                simplified.user = {
-                    id: obj.user.id,
-                    username: obj.user.username || 'Unknown',
-                    discriminator: obj.user.discriminator || '0000',
-                    tag: obj.user.tag || `${obj.user.username || 'Unknown'}#${obj.user.discriminator || '0000'}`,
-                    displayName: obj.user.displayName || obj.user.globalName || obj.user.username || 'Unknown',
-                    avatar: obj.user.avatar || null,
-                    banner: obj.user.banner || null,
-                    bot: obj.user.bot || false
-                };
+            // Combine both sets of keys, filtering out underscore-suffixed raw data properties
+            // if we have the clean getter version
+            const allKeys = new Set([...ownKeys, ...prototypeKeys]);
+            
+            for (const key of allKeys) {
+                // Skip underscore-suffixed properties (raw API data) if present
+                if (key.endsWith('_') && allKeys.has(key.slice(0, -1))) {
+                    continue;
+                }
+                
+                // Skip problematic properties that cause circular references
+                if (key === 'client' || key === 'guild' || 
+                    key.endsWith('Manager') || key === 'manager' ||
+                    key === 'cache' || key === 'members' || key === 'channels' ||
+                    key === 'roles' || key === 'emojis' || key === 'stickers' ||
+                    key === 'messages' || key === 'presences' || key === 'voiceStates') {
+                    continue;
+                }
+                
+                let value;
+                try {
+                    value = obj[key];
+                } catch (e) {
+                    // Skip properties that throw errors when accessed
+                    continue;
+                }
+                
+                // Skip functions but NOT undefined - undefined should become null for templates
+                if (typeof value === 'function') {
+                    continue;
+                }
+                
+                // Convert undefined to null for better template handling
+                if (value === undefined) {
+                    copy[key] = null;
+                    continue;
+                }
+                
+                const valueType = typeof value;
+                
+                // Copy primitives directly
+                if (value === null || 
+                    valueType === 'string' || valueType === 'number' || 
+                    valueType === 'boolean' || valueType === 'bigint') {
+                    copy[key] = value;
+                }
+                // Handle Discord.js Collections (Map-like objects)
+                else if (value && typeof value.toJSON === 'function' && 
+                         (value.constructor.name === 'Collection' || value instanceof Map)) {
+                    // Convert Collection/Map to array or plain object
+                    try {
+                        const jsonValue = value.toJSON();
+                        copy[key] = jsonValue;
+                    } catch (e) {
+                        // If toJSON fails, try converting to array
+                        copy[key] = Array.from(value.values());
+                    }
+                }
+                // Handle plain arrays
+                else if (Array.isArray(value)) {
+                    // Copy arrays, recursively simplifying object elements
+                    copy[key] = value.map(item => {
+                        if (typeof item === 'object' && item !== null) {
+                            return simplifyDiscordObject(item, visited);
+                        }
+                        return item;
+                    });
+                }
+                // Handle nested objects (like parent, user, etc)
+                else if (valueType === 'object') {
+                    // Check if it's a Discord.js object (has id property) or plain object
+                    if (value.id || value.constructor === Object) {
+                        copy[key] = simplifyDiscordObject(value, visited);
+                    }
+                }
             }
             
-            return simplified;
+            // For properties that might be null but templates expect to access nested properties,
+            // create placeholder objects so template paths don't break
+            const nestedNullableProps = ['parent'];
+            for (const prop of nestedNullableProps) {
+                if ((prop in obj) && (obj[prop] === null || obj[prop] === undefined) && !(prop in copy)) {
+                    // Create a placeholder object with null id so templates can safely access .id
+                    copy[prop] = { id: null, name: null };
+                }
+            }
+            
+            return copy;
         }
 
         // Create templating object with proper structure

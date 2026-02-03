@@ -109,7 +109,7 @@ function getMember(server, member) {
         }
     }
 }
-   
+
 function db_mongo_warn_create(userId, guildId, staffId, reason) {
     const warnSchema = require('./models/warn-schema.js');
     warnSchema.create({
@@ -164,11 +164,44 @@ function betterFS_read(path) {
             // The data inside is encrypted
             const encryptedData = data.replace('ENC\n', '');
             return decrypt(encryptedData);
-        } 
+        }
 
         else return data;
     } else {
         return "File not found.";
+    }
+}
+
+async function promiseBetterFS_write(path, data, encryptContents = false) {
+    // Get file directory
+    const fileDirectory = path.split('/').slice(0, -1).join('/');
+
+    // Check if the directory exists
+    try {
+        await fs.promises.access(fileDirectory);
+    } catch {
+        await fs.promises.mkdir(fileDirectory, { recursive: true });
+    }
+
+    const wData = encryptContents ? `ENC\n${encrypt(data)}` : data;
+    await fs.promises.writeFile(path, wData, { flag: 'w' });
+}
+
+async function promiseBetterFS_read(path) {
+    try {
+        await fs.promises.access(path);
+
+        const data = await fs.promises.readFile(path, 'utf8');
+
+        if (data.startsWith('ENC\n')) {
+            // The data inside is encrypted
+            const encryptedData = data.replace('ENC\n', '');
+            return decrypt(encryptedData);
+        }
+
+        else return data;
+    } catch (e) {
+        return null;
     }
 }
 
@@ -202,7 +235,7 @@ async function logEvent(guild, event, embed) {
 }
 
 class DatabaseEntry {
-    constructor({category, subcategory, entry, data}) {
+    constructor({ category, subcategory, entry, data }) {
         this.category = `${category}`;
         this.subcategory = `${subcategory ? subcategory : ''}`;
         this.entry = `${entry}`;
@@ -276,7 +309,7 @@ async function managedDBSet(guild, pathName, data, flags = 'w') {
             // If the file exists, It may be encrypted or not, so we need to use the betterFS_read function to get the data and manually append the data to it
             const existingData = betterFS_read(path.resolve(`./db/managed/${guild}/${pathName}`));
             const newData = existingData + data;
-            
+
             betterFS_write(path.resolve(`./db/managed/${guild}/${pathName}`), newData, true);
 
             break;
@@ -318,7 +351,7 @@ async function managedDBInsert(guild, pathName, data, failures) {
     const dataType = typeof data;
 
     const existingFile = managedDBExists(guild, pathName) ? await managedDBGet(guild, pathName) : null;
-    
+
     if (dataType == 'object' && data.id) {
         if (existingFile) {
             const existingData = JSON.parse(existingFile);
@@ -571,7 +604,7 @@ async function youtube_GetChannelUploads(channelId, minified = false) {
         } else {
             return data.relatedStreams;
         }
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         return null;
     }
@@ -605,7 +638,7 @@ async function id_generatestring(length = 32) {
     const charactersLength = characters.length;
 
     // Default settings: 2.08592483976E93 possible combinations [length ^ 62 (< charset length)]
-    
+
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
@@ -702,7 +735,7 @@ async function addXP(guild, user, amount) {
     if (member.roles.cache.has(role.id)) return;
 
     member.roles.add(role.id)
-        .then(async() => {
+        .then(async () => {
             const silentUsers = betterFS_read(path.resolve(`./db/xp/silent.users`), 'utf8').split('\n');
 
             const levelUpChannel = getChannel(guild, await DatabaseGetChannel(guild, 'levels'));
@@ -723,7 +756,7 @@ async function addXP(guild, user, amount) {
                 .setEmoji('📖');
 
             row.addComponents(menuButton);
-            
+
             levelUpChannel.send({
                 content: silentUsers.includes(user) ? null : `<@${user}>`,
                 embeds: [levelUpEmbed],
@@ -750,467 +783,520 @@ async function getFutureDiscordTimestamp(ms) {
 }
 
 /**
- * @param {string} message - Template string to process
- * @param {string} guild - Guild identifier
- * @param {Object | undefined} data - Data object for placeholder resolution
+ * Parses template strings with placeholders and returns resolved output.
+ * 
+ * @param {string} template - Template string to process
+ * @param {string} guild - The guild ID
+ * @param {Object} data - Data object for placeholder resolution
+ * @returns {string} - Processed template with placeholders resolved
  */
-async function convertMetaText(message, guild, data) {
-  if (!data) return message;
+function convertMetaText(template, guild, data = {}) {
+    if (!template || typeof template !== 'string') return template;
+    if (!data || typeof data !== 'object') return template;
 
-  // Recursively remove client objects and handle circular references
-  function removeClientObjects(obj, visited = new WeakSet()) {
-    if (obj === null || typeof obj !== 'object') return obj;
-    if (visited.has(obj)) return {};
-    visited.add(obj);
+    data.guild = guild;
 
-    if (Array.isArray(obj)) {
-      return obj.map(item => removeClientObjects(item, visited));
-    }
+    const MAX_DEPTH = 50;
 
-    const cleaned = {};
-    for (const [key, value] of Object.entries(obj)) {
-      cleaned[key] = key === 'client' ? {} : removeClientObjects(value, visited);
-    }
-    return cleaned;
-  }
+    // Recursively remove client objects and handle circular references
+    function removeClientObjects(obj, visited = new WeakSet()) {
+        if (obj === null || typeof obj !== 'object') return obj;
+        if (visited.has(obj)) return {};
+        visited.add(obj);
 
-  let replacementData = removeClientObjects(data);
-  replacementData.guild = guild;
-
-  // Parse and resolve a single placeholder with all features
-  function resolvePlaceholder(path, depth = 0, customContext = null) {
-    const currentContext = customContext || replacementData;
-    if (depth > 50) {
-      return null; // Prevent stack overflow
-    }
-    
-    // Check for array slicing first: Array<start,end>
-    const sliceMatch = path.match(/^(.+?)<(-?\d+),(-?\d+)>(.*)$/s);
-    if (sliceMatch) {
-      const [, arrayPath, start, end, rest] = sliceMatch;
-      const arr = resolveSimplePath(arrayPath, currentContext);
-      if (!Array.isArray(arr)) {
-        return null;
-      }
-      
-      const startIdx = parseInt(start);
-      const endIdx = parseInt(end);
-      const sliced = arr.slice(
-        startIdx < 0 ? arr.length + startIdx : startIdx,
-        endIdx < 0 ? arr.length + endIdx + 1 : endIdx + 1
-      );
-      
-      if (rest) {
-        // If rest starts with *, it's a loop on the sliced array
-        if (rest.startsWith('*')) {
-          const tempData = { ...currentContext, _tempSliced: sliced };
-          const result = resolvePlaceholder('_tempSliced' + rest, depth + 1, tempData);
-          return result;
+        // Check if this object looks like a Discord.js client
+        // Discord clients typically have: token, user, ws, and other specific properties
+        if (isLikelyClientObject(obj)) {
+            return {};
         }
-        return resolvePlaceholder(JSON.stringify(sliced) + rest, depth + 1);
-      }
-      return sliced;
-    }
-    
-    // Check for array loop syntax: Array*varName[expression]
-    const loopMatch = path.match(/^(.+?)\*(\w+)\[(.+)\]$/s);
-    if (loopMatch) {
-      const [, arrayPath, varName, expression] = loopMatch;
-      const arr = resolveSimplePath(arrayPath, currentContext);
-      if (!Array.isArray(arr)) {
-        return null;
-      }
-      
-      const result = arr.map(item => {
-        const tempData = { ...replacementData, [varName]: item };
-        return processTemplate(expression, tempData);
-      }).join('');
-      return result;
-    }
 
-    // Check for array indexing: Array[index]
-    const indexMatch = path.match(/^(.+?)\[(-?\d+)\](.*)$/);
-    if (indexMatch) {
-      const [, arrayPath, index, rest] = indexMatch;
-      const arr = resolveSimplePath(arrayPath, currentContext);
-      if (!Array.isArray(arr)) {
-        return null;
-      }
-      
-      const idx = parseInt(index);
-      const item = arr[idx < 0 ? arr.length + idx : idx];
-      
-      if (rest) {
-        // Continue resolving with the rest of the path
-        const itemStr = typeof item === 'object' ? item : { value: item };
-        const tempData = { ...currentContext, _tempItem: itemStr };
-        return resolvePlaceholder(`_tempItem${rest}`, depth + 1, tempData);
-      }
-      return item;
-    }
-
-    // Check for conditional: #condition[true][false]
-    if (path.startsWith('#')) {
-      
-      // Find the condition part and the two bracket sections
-      let conditionEnd = -1;
-      let bracketCount = 0;
-      let inQuotes = false;
-      
-      for (let i = 1; i < path.length; i++) {
-        const char = path[i];
-        const prevChar = i > 0 ? path[i-1] : '';
-        
-        // Check if this is an actual quote (not part of escaped quote marker)
-        if (char === '"') {
-          // Look backwards to see if this is part of an escaped quote marker
-          const beforeQuote = path.slice(Math.max(0, i-21), i);
-          const isEscapedQuote = beforeQuote.includes('\uE000ESCAPED_QUOTE\uE000');
-          
-          if (!isEscapedQuote) {
-            inQuotes = !inQuotes;
-          }
-        } else if (!inQuotes && char === '[') {
-          if (bracketCount === 0) {
-            conditionEnd = i;
-          }
-          bracketCount++;
-          break;
+        if (Array.isArray(obj)) {
+            return obj.map(item => removeClientObjects(item, visited));
         }
-      }
-      
-      if (conditionEnd > 0) {
-        const condition = path.slice(1, conditionEnd);
-        
-        // Find the true and false values
-        let pos = conditionEnd + 1;
-        let depth = 1;
-        let trueEnd = -1;
-        inQuotes = false;
-        
-        for (let i = pos; i < path.length; i++) {
-          const char = path[i];
-          
-          // Check if this is an actual quote (not part of escaped quote marker)
-          if (char === '"') {
-            // Look backwards to see if this is part of an escaped quote marker
-            const beforeQuote = path.slice(Math.max(0, i-21), i);
-            const isEscapedQuote = beforeQuote.includes('\uE000ESCAPED_QUOTE\uE000');
-            
-            if (!isEscapedQuote) {
-              inQuotes = !inQuotes;
-            }
-          } else if (!inQuotes) {
-            if (char === '[') {
-              depth++;
-            } else if (char === ']') {
-              depth--;
-              if (depth === 0) {
-                trueEnd = i;
-                break;
-              }
-            }
-          }
-        }
-        
-        if (trueEnd > 0) {
-          const trueVal = path.slice(conditionEnd + 1, trueEnd);
-          
-          // Find false value
-          let falseStart = trueEnd + 2; // Skip ][
-          if (falseStart < path.length && path.slice(trueEnd, falseStart) === '][') {
-            let falseEnd = path.lastIndexOf(']');
-            const falseVal = path.slice(falseStart, falseEnd);
-            
-            const result = evaluateCondition(condition, currentContext);
-            const chosen = result ? trueVal : falseVal;
-            
-            // Remove quotes if present (handle both regular quotes and escaped quote markers)
-            let finalValue = chosen;
-            
-            // First restore escaped quotes
-            finalValue = finalValue.replace(/\uE000ESCAPED_QUOTE\uE000/g, '"');
-            
-            // Then remove outer quotes if present
-            finalValue = finalValue.replace(/^"(.*)"$/, '$1');
-            
-            return finalValue;
-          }
-        }
-      }
-    }
 
-    // Check for defaults: placeholder|default1|default2
-    const parts = path.split('|');
-    for (const part of parts) {
-      // Check if it's a quoted string
-      if (part.match(/^".*"$/)) {
-        const unquoted = part.slice(1, -1);
-        return unquoted;
-      }
-      
-      const trimmedPart = part.trim();
-      // Skip parts that contain escaped characters (these are from broken escape sequences)
-      if (trimmedPart.includes('\x00')) {
-        continue;
-      }
-      
-      const value = resolveSimplePath(trimmedPart, currentContext);
-      if (value !== null && value !== undefined) {
-        // If it's an array, return it as-is for further processing
-        if (Array.isArray(value)) {
-          return value;
-        }
-        // For non-arrays, convert to string with any modifiers
-        return String(value);
-      }
-    }
-
-    return null;
-  }
-
-  // Resolve simple dot-notation path with modifiers
-  function resolveSimplePath(path, customContext = null) {
-    const contextData = customContext || replacementData;
-    let modifier = null;
-    let cleanPath = path;
-
-    // Check for modifiers - but only if it's not a special key like _tempSliced or _tempItem
-    if (path.startsWith('_') && !path.startsWith('_temp')) {
-      modifier = 'lower';
-      cleanPath = path.slice(1);
-    } else if (path.startsWith('-')) {
-      modifier = 'upper';
-      cleanPath = path.slice(1);
-    }
-
-    // Handle nested placeholders in path - process them first
-    let processedPath = cleanPath;
-    let lastPath;
-    let iterations = 0;
-    
-    
-    do {
-      lastPath = processedPath;
-      let i = 0;
-      let newPath = '';
-      
-      while (i < processedPath.length) {
-        if (processedPath.slice(i, i + 3) === '%%{') {
-          // Find matching }%%
-          let depth = 1;
-          let j = i + 3;
-          
-          while (j < processedPath.length && depth > 0) {
-            if (processedPath.slice(j, j + 3) === '%%{') {
-              depth++;
-              j += 3;
-            } else if (processedPath.slice(j, j + 3) === '}%%') {
-              depth--;
-              if (depth === 0) {
-                const innerPath = processedPath.slice(i + 3, j);
-                const resolved = resolvePlaceholder(innerPath);
-                newPath += resolved !== null ? String(resolved) : processedPath.slice(i, j + 3);
-                i = j + 3;
-                break;
-              }
-              j += 3;
+        const cleaned = {};
+        for (const [key, value] of Object.entries(obj)) {
+            // Remove if key is named 'client' (any case)
+            if (key.toLowerCase() === 'client') {
+                cleaned[key] = {};
             } else {
-              j++;
+                cleaned[key] = removeClientObjects(value, visited);
             }
-          }
-          
-          if (depth > 0) {
-            newPath += processedPath[i];
-            i++;
-          }
-        } else {
-          newPath += processedPath[i];
-          i++;
         }
-      }
-      
-      processedPath = newPath;
-      iterations++;
-    } while (processedPath !== lastPath && iterations < 5);
+        return cleaned;
+    }
 
-    // Split path and resolve
-    const keys = processedPath.split('.');
-    let value = contextData;
-    
-    for (const key of keys) {
-      // Handle array indexing in paths like "array[0]"
-      const arrayMatch = key.match(/^(.+?)\[(-?\d+)\]$/);
-      if (arrayMatch) {
-        const [, arrayKey, index] = arrayMatch;
-        value = value?.[arrayKey];
+    // Detect if an object looks like a Discord.js client
+    function isLikelyClientObject(obj) {
+        if (!obj || typeof obj !== 'object') return false;
+
+        // Check for Discord.js client indicators
+        // A client typically has: token, user, ws, options, and other properties
+        const clientIndicators = ['token', 'user', 'ws', 'options'];
+        const hasToken = 'token' in obj;
+        const hasUser = 'user' in obj;
+        const hasWs = 'ws' in obj;
+
+        // If has token + (user or ws), likely a client
+        if (hasToken && (hasUser || hasWs)) return true;
+
+        // Check for other suspicious combinations
+        if (hasToken && 'api' in obj) return true;
+        if (hasUser && hasWs && 'channels' in obj) return true;
+        if (hasUser && hasWs && 'guilds' in obj) return true;
+
+        return false;
+    }
+
+    // Clean the data to remove client objects and circular references
+    data = removeClientObjects(data);
+
+    // Dangerous keys that should not be accessible
+    const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+    /**
+     * Resolve a simple dot-notation path from data object
+     */
+    function resolveSimplePath(path, context) {
+        if (path === null || path === undefined || path === '') return null;
+
+        let modifier = null;
+        let cleanPath = path;
+
+        // Check for modifiers (but not internal temp keys)
+        if (path.startsWith('_') && !path.startsWith('_temp')) {
+            modifier = 'lower';
+            cleanPath = path.slice(1);
+        } else if (path.startsWith('-')) {
+            modifier = 'upper';
+            cleanPath = path.slice(1);
+        }
+
+        // Handle array indexing in the path like "array[0].property"
+        const keys = cleanPath.split('.');
+        let value = context;
+
+        for (const key of keys) {
+            if (value === null || value === undefined) return null;
+
+            // Block dangerous prototype access
+            if (BLOCKED_KEYS.has(key)) return null;
+
+            // Only access own properties to prevent prototype leakage
+            if (typeof value === 'object' && !Object.prototype.hasOwnProperty.call(value, key)) {
+                return null;
+            }
+
+            // Check for array indexing syntax in key: arr[0]
+            const arrayMatch = key.match(/^(.+?)\[(-?\d+)\]$/);
+            if (arrayMatch) {
+                const [, arrayKey, indexStr] = arrayMatch;
+                if (BLOCKED_KEYS.has(arrayKey)) return null;
+                value = value[arrayKey];
+                if (!Array.isArray(value)) return null;
+                const idx = parseInt(indexStr);
+                const actualIdx = idx < 0 ? value.length + idx : idx;
+                if (actualIdx < 0 || actualIdx >= value.length) return null;
+                value = value[actualIdx];
+            } else {
+                value = value[key];
+            }
+        }
+
+        if (value === null || value === undefined) return null;
+
+        // Apply modifiers based on value type
+        if (modifier === 'lower') {
+            return String(value).toLowerCase();
+        }
+        if (modifier === 'upper') {
+            // If it's a number, negate it; otherwise uppercase the string
+            if (typeof value === 'number' || !isNaN(Number(value))) {
+                return -Number(value);
+            }
+            return String(value).toUpperCase();
+        }
+
+        // Return arrays as-is, otherwise convert to string
         if (Array.isArray(value)) {
-          const idx = parseInt(index);
-          value = value[idx < 0 ? value.length + idx : idx];
-        } else {
-          return null;
+            return value;
         }
-      } else {
-        value = value?.[key];
-      }
-      
-      if (value === null || value === undefined) {
-        return null;
-      }
+        return value;
     }
 
-    let result = value; // Don't convert to string yet if it's an array
-    
-    // Only convert to string if we're not dealing with an array that might be used for further processing
-    if (!Array.isArray(value)) {
-      result = String(value);
-      if (modifier === 'lower') {
-        result = result.toLowerCase();
-      }
-      if (modifier === 'upper') {
-        result = result.toUpperCase();
-      }
-    } else {
-      // For arrays, we might still need to apply modifiers to string representation later
-    }
+    /**
+     * Evaluate a conditional expression
+     */
+    function evaluateCondition(condition, context) {
+        // Order matters - check longer operators first
+        const operators = ['!==', '===', '!=', '==', '>=', '<=', '^=', '$=', '~=', '*=', '>', '<', '='];
 
-    return result;
-  }
+        for (const op of operators) {
+            const idx = condition.indexOf(op);
+            if (idx === -1) continue;
 
-  // Evaluate conditional expressions
-  function evaluateCondition(condition, context = null) {
-    const currentContext = context || replacementData;
-    const operators = ['!==', '===', '!=', '==', '>=', '<=', '>', '<', '^=', '$=', '~=', '*=', '='];
-    
-    for (const op of operators) {
-      const idx = condition.indexOf(op);
-      if (idx === -1) continue;
+            const leftPart = condition.slice(0, idx).trim();
+            const rightPart = condition.slice(idx + op.length).trim();
 
-      const leftPart = condition.slice(0, idx).trim();
-      const rightPart = condition.slice(idx + op.length).trim();
-      
-      const left = String(resolvePlaceholder(leftPart, 0, currentContext) || '');
-      let right = rightPart;
-      
-      // Handle escaped quotes in the right part first
-      if (right.includes('\uE000ESCAPED_QUOTE\uE000')) {
-        right = right.replace(/\uE000ESCAPED_QUOTE\uE000/g, '"');
-      }
-      
-      // Handle quoted strings more carefully
-      if (right.startsWith('"') && right.endsWith('"')) {
-        right = right.slice(1, -1);
-      }
-      
+            // Resolve the left side as a placeholder
+            const leftValue = resolvePlaceholder(leftPart, 0, context);
+            const left = leftValue !== null ? String(leftValue) : '';
 
-      let result;
-      switch (op) {
-        case '!==': result = left !== right; break;
-        case '===': result = left === right; break;
-        case '!=': result = left != right; break;
-        case '==': result = left == right; break;
-        case '>': result = parseFloat(left) > parseFloat(right); break;
-        case '<': result = parseFloat(left) < parseFloat(right); break;
-        case '>=': result = parseFloat(left) >= parseFloat(right); break;
-        case '<=': result = parseFloat(left) <= parseFloat(right); break;
-        case '^=': result = left.startsWith(right); break;
-        case '$=': result = left.endsWith(right); break;
-        case '*=': result = left.includes(right); break;
-        case '~=': result = new RegExp(`\\b${right}\\b`).test(left); break;
-        case '=': result = left == right; break;
-      }
-      return result;
-    }
-    return false;
-  }
-
-  // Process template with given data context
-  function processTemplate(template, contextData = replacementData) {
-    const originalData = replacementData;
-    if (contextData !== replacementData) {
-      replacementData = contextData;
-    }
-    
-    // First handle JSON-style escaped quotes specifically
-    let preprocessed = template.replace(/\\"/g, '\uE000ESCAPED_QUOTE\uE000');
-    
-    // Then handle other escaping
-    let escaped = preprocessed.replace(/\\(%%{|}%%|\||\\|\[|\])/g, '\x00$1\x00');
-    
-    // Parse placeholders manually to handle nesting and complex syntax
-    let result = '';
-    let i = 0;
-    
-    while (i < escaped.length) {
-      // Look for placeholder start
-      if (escaped.slice(i, i + 3) === '%%{') {
-        // Find matching }%%
-        let depth = 1;
-        let j = i + 3;
-        
-        while (j < escaped.length && depth > 0) {
-          if (escaped.slice(j, j + 3) === '%%{') {
-            depth++;
-            j += 3;
-          } else if (escaped.slice(j, j + 3) === '}%%') {
-            depth--;
-            if (depth === 0) {
-              // Found matching closing
-              const placeholder = escaped.slice(i + 3, j);
-              const value = resolvePlaceholder(placeholder);
-              
-              if (value !== null && value !== undefined) {
-                const stringValue = String(value);
-                result += stringValue;
-              } else {
-                // For null/undefined values, use empty string instead of leaving placeholder
-                result += '';
-              }
-              
-              i = j + 3;
-              break;
+            // Handle right side - could be quoted string or another placeholder
+            let right = rightPart;
+            if (right.startsWith('"') && right.endsWith('"')) {
+                right = right.slice(1, -1);
+            } else {
+                // Try to resolve as placeholder
+                const rightResolved = resolvePlaceholder(right, 0, context);
+                if (rightResolved !== null) {
+                    right = String(rightResolved);
+                }
             }
-            j += 3;
-          } else {
-            j++;
-          }
+
+            switch (op) {
+                case '===': return left === right;
+                case '==': return left == right;
+                case '!==': return left !== right;
+                case '!=': return left != right;
+                case '>': return parseFloat(left) > parseFloat(right);
+                case '<': return parseFloat(left) < parseFloat(right);
+                case '>=': return parseFloat(left) >= parseFloat(right);
+                case '<=': return parseFloat(left) <= parseFloat(right);
+                case '^=': return left.startsWith(right);
+                case '$=': return left.endsWith(right);
+                case '*=': return left.includes(right);
+                case '~=': return new RegExp(`\\b${escapeRegex(right)}\\b`, 'i').test(left);
+                case '=': return left == right;
+            }
         }
-        
-        if (depth > 0) {
-          // Unmatched placeholder
-          result += escaped[i];
-          i++;
+
+        return false;
+    }
+
+    /**
+     * Escape special regex characters
+     */
+    function escapeRegex(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    /**
+     * Find matching bracket, respecting quotes and nesting
+     */
+    function findMatchingBracket(str, startPos, openChar = '[', closeChar = ']') {
+        let depth = 1;
+        let inQuotes = false;
+        let i = startPos;
+
+        while (i < str.length && depth > 0) {
+            const char = str[i];
+            const prevChar = i > 0 ? str[i - 1] : '';
+
+            if (char === '"' && prevChar !== '\\') {
+                inQuotes = !inQuotes;
+            } else if (!inQuotes) {
+                if (char === openChar) depth++;
+                else if (char === closeChar) depth--;
+            }
+            i++;
         }
-      } else {
-        result += escaped[i];
-        i++;
-      }
-    }
-    
-    // Restore escaped characters including JSON-style escaped quotes
-    const unescaped = result.replace(/\x00(.+?)\x00/g, '$1').replace(/\uE000ESCAPED_QUOTE\uE000/g, '"');
-    
-    if (contextData !== originalData) {
-      replacementData = originalData;
-    }
-    return unescaped;
-  }
 
-  const replacedOutput = processTemplate(message);
-
-  // Handle encoded client ID replacement (original functionality)
-  if (typeof client !== 'undefined' && client?.user?.id) {
-    const encodedClientId = Buffer.from(client.user.id).toString('base64');
-    const words = replacedOutput.split(' ');
-    for (let i = 0; i < words.length; i++) {
-      if (words[i].startsWith(`${encodedClientId}.`)) {
-        words[i] = `${encodedClientId}.Sombo.dyOnceToldMeTheWorldWasGonnaRollMe`;
-      }
+        return depth === 0 ? i - 1 : -1;
     }
-    return words.join(' ');
-  }
 
-  return replacedOutput;
+    /**
+     * Parse and resolve a placeholder expression
+     */
+    function resolvePlaceholder(path, depth = 0, context = data) {
+        if (depth > MAX_DEPTH) return null;
+        if (path === null || path === undefined || path === '') return null;
+
+        // Trim whitespace from path
+        path = path.trim();
+
+        // First, resolve any nested placeholders in the path
+        path = resolveNestedPlaceholders(path, depth, context);
+
+        // Check for array slicing: Array<start,end>
+        const sliceMatch = path.match(/^(.+?)<(-?\d+),(-?\d+)>(.*)$/s);
+        if (sliceMatch) {
+            const [, arrayPath, startStr, endStr, rest] = sliceMatch;
+            const arr = resolveSimplePath(arrayPath, context);
+            if (!Array.isArray(arr)) return null;
+
+            const startIdx = parseInt(startStr);
+            const endIdx = parseInt(endStr);
+
+            // Handle negative indices and slice
+            const start = startIdx < 0 ? arr.length + startIdx : startIdx;
+            const end = endIdx < 0 ? arr.length + endIdx + 1 : endIdx + 1;
+            const sliced = arr.slice(start, end);
+
+            if (rest) {
+                // Continue processing with the sliced array
+                const tempContext = { ...context, _tempSliced: sliced };
+                return resolvePlaceholder('_tempSliced' + rest, depth + 1, tempContext);
+            }
+            return sliced;
+        }
+
+        // Check for array loop: Array*varName[expression]
+        const loopMatch = path.match(/^(.+?)\*(\w+)\[(.+)\]$/s);
+        if (loopMatch) {
+            const [, arrayPath, varName, expression] = loopMatch;
+            const arr = resolveSimplePath(arrayPath, context);
+            if (!Array.isArray(arr)) return null;
+
+            // Strip surrounding quotes from expression if present
+            let expr = expression;
+            if (expr.startsWith('"') && expr.endsWith('"')) {
+                expr = expr.slice(1, -1);
+            }
+
+            return arr.map(item => {
+                const loopContext = { ...context, [varName]: item };
+                return processTemplate(expr, loopContext);
+            }).join('');
+        }
+
+        // Check for array indexing: Array[index] (not part of a loop)
+        const indexMatch = path.match(/^(.+?)\[(-?\d+)\](.*)$/);
+        if (indexMatch && !path.includes('*')) {
+            const [, arrayPath, indexStr, rest] = indexMatch;
+            const arr = resolveSimplePath(arrayPath, context);
+            if (!Array.isArray(arr)) return null;
+
+            const idx = parseInt(indexStr);
+            const actualIdx = idx < 0 ? arr.length + idx : idx;
+            if (actualIdx < 0 || actualIdx >= arr.length) return null;
+            const item = arr[actualIdx];
+
+            if (rest && typeof item === 'object') {
+                // Continue resolving with the rest of the path
+                const tempContext = { ...context, _tempItem: item };
+                return resolvePlaceholder('_tempItem' + rest, depth + 1, tempContext);
+            }
+            return item;
+        }
+
+        // Check for conditional: #condition[true_value][false_value]
+        if (path.startsWith('#')) {
+            const conditionPath = path.slice(1);
+
+            // Find where the condition ends and [true] begins
+            let bracketStart = -1;
+            let inQuotes = false;
+
+            for (let i = 0; i < conditionPath.length; i++) {
+                if (conditionPath[i] === '"' && (i === 0 || conditionPath[i - 1] !== '\\')) {
+                    inQuotes = !inQuotes;
+                } else if (!inQuotes && conditionPath[i] === '[') {
+                    bracketStart = i;
+                    break;
+                }
+            }
+
+            if (bracketStart > 0) {
+                const condition = conditionPath.slice(0, bracketStart);
+
+                // Find [true_value]
+                const trueEnd = findMatchingBracket(conditionPath, bracketStart + 1);
+                if (trueEnd === -1) return null;
+
+                const trueValue = conditionPath.slice(bracketStart + 1, trueEnd);
+
+                // Find [false_value]
+                if (conditionPath[trueEnd + 1] !== '[') return null;
+                const falseEnd = findMatchingBracket(conditionPath, trueEnd + 2);
+                if (falseEnd === -1) return null;
+
+                const falseValue = conditionPath.slice(trueEnd + 2, falseEnd);
+
+                // Evaluate condition and choose value
+                const result = evaluateCondition(condition, context);
+                const chosen = result ? trueValue : falseValue;
+
+                // Remove surrounding quotes if present
+                if (chosen.startsWith('"') && chosen.endsWith('"')) {
+                    return chosen.slice(1, -1);
+                }
+                return chosen;
+            }
+        }
+
+        // Check for default values: placeholder|default1|"string"
+        if (path.includes('|')) {
+            const parts = splitByPipe(path);
+
+            for (const part of parts) {
+                const trimmed = part.trim();
+
+                // Check if it's a quoted string literal
+                if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                    return trimmed.slice(1, -1);
+                }
+
+                // Try to resolve as a path
+                const value = resolveSimplePath(trimmed, context);
+                if (value !== null && value !== undefined) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Simple path resolution
+        return resolveSimplePath(path, context);
+    }
+
+    /**
+     * Split string by pipe, respecting quotes
+     */
+    function splitByPipe(str) {
+        const parts = [];
+        let current = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+            const prevChar = i > 0 ? str[i - 1] : '';
+
+            if (char === '"' && prevChar !== '\\') {
+                inQuotes = !inQuotes;
+                current += char;
+            } else if (char === '|' && !inQuotes) {
+                parts.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        parts.push(current);
+
+        return parts;
+    }
+
+    /**
+     * Resolve nested placeholders within a path
+     */
+    function resolveNestedPlaceholders(path, depth, context) {
+        if (depth > MAX_DEPTH) return path;
+
+        let result = '';
+        let i = 0;
+
+        while (i < path.length) {
+            if (path.slice(i, i + 3) === '%%{') {
+                // Find matching }%%
+                let nestDepth = 1;
+                let j = i + 3;
+
+                while (j < path.length && nestDepth > 0) {
+                    if (path.slice(j, j + 3) === '%%{') {
+                        nestDepth++;
+                        j += 3;
+                    } else if (path.slice(j, j + 3) === '}%%') {
+                        nestDepth--;
+                        if (nestDepth === 0) {
+                            const innerPath = path.slice(i + 3, j);
+                            const resolved = resolvePlaceholder(innerPath, depth + 1, context);
+                            result += resolved !== null ? String(resolved) : path.slice(i, j + 3);
+                            i = j + 3;
+                            break;
+                        }
+                        j += 3;
+                    } else {
+                        j++;
+                    }
+                }
+
+                if (nestDepth > 0) {
+                    result += path[i];
+                    i++;
+                }
+            } else {
+                result += path[i];
+                i++;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Process the template string
+     */
+    function processTemplate(template, context = data) {
+        // Handle escape sequences - replace with null character placeholders
+        // Use unique markers that won't appear in normal text
+        let escaped = template
+            .replace(/\\%%\{/g, '\x00ESC_OPEN\x00')
+            .replace(/\\\}%%/g, '\x00ESC_CLOSE\x00')
+            .replace(/\\\|/g, '\x00ESC_PIPE\x00')
+            .replace(/\\\\/g, '\x00ESC_SLASH\x00')
+            .replace(/\\\[/g, '\x00ESC_LBRACKET\x00')
+            .replace(/\\\]/g, '\x00ESC_RBRACKET\x00');
+
+        let result = '';
+        let i = 0;
+
+        while (i < escaped.length) {
+            // Look for placeholder start %%{
+            if (escaped.slice(i, i + 3) === '%%{') {
+                // Find matching }%%
+                let depth = 1;
+                let j = i + 3;
+
+                while (j < escaped.length && depth > 0) {
+                    if (escaped.slice(j, j + 3) === '%%{') {
+                        depth++;
+                        j += 3;
+                    } else if (escaped.slice(j, j + 3) === '}%%') {
+                        depth--;
+                        if (depth === 0) {
+                            // Found complete placeholder
+                            const placeholder = escaped.slice(i + 3, j);
+                            const value = resolvePlaceholder(placeholder, 0, context);
+
+                            if (value !== null && value !== undefined) {
+                                result += String(value);
+                            } else {
+                                // Keep original if not resolved
+                                result += escaped.slice(i, j + 3);
+                            }
+
+                            i = j + 3;
+                            break;
+                        }
+                        j += 3;
+                    } else {
+                        j++;
+                    }
+                }
+
+                if (depth > 0) {
+                    // Unmatched placeholder start
+                    result += escaped[i];
+                    i++;
+                }
+            } else {
+                result += escaped[i];
+                i++;
+            }
+        }
+
+        // Restore escaped characters
+        return result
+            .replace(/\x00ESC_OPEN\x00/g, '%%{')
+            .replace(/\x00ESC_CLOSE\x00/g, '}%%')
+            .replace(/\x00ESC_PIPE\x00/g, '|')
+            .replace(/\x00ESC_SLASH\x00/g, '\\')
+            .replace(/\x00ESC_LBRACKET\x00/g, '[')
+            .replace(/\x00ESC_RBRACKET\x00/g, ']');
+    }
+
+    return processTemplate(template, data);
 }
 
 /**
@@ -1263,11 +1349,11 @@ const encryption_key = Buffer.from(process.env.DB_ENC_KEY, 'base64');
 function encrypt(data) {
     const iv = crypto.randomBytes(12); // GCM uses 12-byte IV
     const cipher = crypto.createCipheriv('aes-256-gcm', encryption_key, iv);
-    
+
     const encrypted = cipher.update(data, 'utf8');
     const final = cipher.final();
     const tag = cipher.getAuthTag(); // 16 bytes
-    
+
     return Buffer.concat([iv, tag, encrypted, final]).toString('base64');
 }
 
@@ -1283,7 +1369,7 @@ function decrypt(data) {
         const iv = Buffer.from(parts.shift(), 'hex');
         const encryptedText = Buffer.from(parts.join(':'), 'hex');
         const decipher = crypto.createDecipheriv('aes-256-cbc', encryption_key, iv);
-        
+
         let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
@@ -1293,10 +1379,10 @@ function decrypt(data) {
         const iv = combined.subarray(0, 12);
         const tag = combined.subarray(12, 28);
         const encrypted = combined.subarray(28);
-        
+
         const decipher = crypto.createDecipheriv('aes-256-gcm', encryption_key, iv);
         decipher.setAuthTag(tag);
-        
+
         let decrypted = decipher.update(encrypted, null, 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
@@ -1356,7 +1442,11 @@ const text = {
 
 const better_fs = {
     write: betterFS_write,
-    read: betterFS_read
+    read: betterFS_read,
+    promises: {
+        write: promiseBetterFS_write,
+        read: promiseBetterFS_read
+    }
 }
 
 const db = {
@@ -1435,7 +1525,7 @@ const emojis = {
     },
     coin: '<:Coin:1247554973512896533>',
     xp: '<:XP:1245805234115313747>',
-    /**@param {string} name; @param {string?} guild*/get: (name,guild)=>{}
+    /**@param {string} name; @param {string?} guild*/get: (name, guild) => { }
 }
 
 /**

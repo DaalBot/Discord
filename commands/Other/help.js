@@ -3,7 +3,7 @@ const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, MessageFlags
 module.exports = {
     name: 'help',
     description: 'Bring up the help panel',
-    category: 'Info',
+    category: 'Other',
     testOnly: false,
     ownerOnly: false,
     type: 'SLASH',

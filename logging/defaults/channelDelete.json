@@ -20,7 +20,7 @@
                         "components": [
                             {
                                 "type": 10,
-                                "content": "# Channel Deleted\nChannel: <#%%{channel.id}%%> (`%%{channel.id}%%`)\nType: %%{meta.type}%%\nDeleted by: %%{meta.executor.name}%% (`%%{meta.executor.id}%%`)"
+                                "content": "# Channel Deleted\nChannel: %%{channel.name}%% (`%%{channel.id}%%`)\nType: %%{meta.type}%%\nDeleted by: %%{meta.executor.name}%% (`%%{meta.executor.id}%%`)"
                             }
                         ]
                     }

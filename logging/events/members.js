@@ -11,15 +11,20 @@ const daalbot = require("../../daalbot");
  * @param {GuildMember} [object2] The new event object (for updates)
 */
 function handleEvent(type, objectName, meta, object, object2) {
+    console.log('Handling member event with invite tracking');
     const memberId = object.user.id;
+    console.log('Member ID:', memberId);
     if (!daalbot.db.managed.exists(object.guild.id, 'inviteTracking.json')) return handleEventOriginal(type, objectName, meta, object, object2);
+    console.log('Invite tracking exists for guild:', object.guild.id);
 
     setTimeout(() => { // Delay to ensure that invite tracking has updated
         /** @type {import('../../invitetracking/membertracking').InviteTracking} */
         const inviteTracking = JSON.parse(daalbot.db.managed.get(object.guild.id, 'inviteTracking.json'));
         if (inviteTracking && inviteTracking.enabled) {
+            console.log('Invite tracking is enabled for guild:', object.guild.id);
             for (const invite of inviteTracking.invites) {
                 if (invite.users.includes(memberId)) {
+                    console.log('Found invite for member:', memberId, 'with invite:', invite);
                     return handleEventOriginal(type, objectName, {
                         ...meta,
                         invite
@@ -27,6 +32,8 @@ function handleEvent(type, objectName, meta, object, object2) {
                 }
             }
         }
+        
+        console.log('No invite found for member:', memberId);
         return handleEventOriginal(type, objectName, meta, object, object2);
     }, 2000)
 }
@@ -37,7 +44,7 @@ function handleEvent(type, objectName, meta, object, object2) {
  */
 function getMeta(member) {
     return {
-        createdTimestamp: member.user.createdTimestamp / 1000 // For Discord timestamp formatting
+        createdTimestamp: Math.floor(member.user.createdTimestamp / 1000) // For Discord timestamp formatting
     }
 }
 

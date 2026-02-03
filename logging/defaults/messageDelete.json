@@ -1,6 +1,33 @@
 {
     "message": {
         "flags": 32768,
-        "components": []
+        "components": [
+            {
+                "id": 1,
+                "type": 17,
+                "components": [
+                    {
+                        "id": 1235,
+                        "type": 9,
+                        "components": [
+                            {
+                                "id": 1224,
+                                "type": 10,
+                                "content": "# Message Deleted\n<:icon_Person:1043647937487589446> <@%%{message.author.id}%%>\n<:discordReply:1043869882921533450> <#%%{message.channel.id}%%>\n\n<:Message:1117915334855360532> %%{message.content|\"[No Content]\"}%%\n\n<:Trash:1118100123713540118> <@%%{meta.executor.id|message.author.id}%%>%%{#meta.executor.id=false[\" or a bot.[*](https://daalbot.xyz/Details#message-deletion-attribution)\"][\"\"]}%%"
+                            }
+                        ],
+                        "accessory": {
+                            "id": 1116,
+                            "type": 11,
+                            "media": {
+                                "url": "https://media.daalbot.xyz/logs/Message-Primary.png"
+                            }
+                        }
+                    }
+                ],
+                "spoiler": false,
+                "accent_color": 16146769
+            }
+        ]
     }
 }

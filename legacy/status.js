@@ -2,6 +2,9 @@ const { ActivityType } = require('discord.js');
 const client = require('../client');
 const config = require('../config.json')
 
+let isJolly = false;
+let isConfused = false;
+
 function applyNewStatus() {
     // generate random number between 1 and list length.
     const randomIndex = Math.floor(Math.random() * (config.activities.length - 1) + 1);
@@ -63,6 +66,43 @@ function applyNewStatus() {
         ]
         
         newActivity = pool[Math.floor(Math.random() * pool.length)]
+
+        if (!isConfused) {
+            // We love being confused by the new year
+            isConfused = true;
+            client.user.setAvatar('https://media.daalbot.xyz/profile/icon/NewYears.png');
+            client.user.setBanner('https://media.daalbot.xyz/profile/banner/NewYears.png');
+        }
+    } else
+
+    // IT'S CHRISTMASSS (No matter what Matt Gray says)
+    if (date.getMonth() === 11 && date.getDate() <= 25) {
+        const christmasPool = [
+            `Merry Christmas!`,
+            `Happy Holidays!`,
+            `It's beginning to look a lot like Christmas ...wait, it kinda is huh.`,
+            `Okay I know there's all this about cookie tracking but come on, it's Christmas!`,
+            `Don't tell Santa, but I may have broken a few important rules this year...`,
+            `All I want for Christmas is youuuuu! (I NEED DATA)`,
+            `Hey Doc... I'm feeling a little bit weird. It's just all so jolly inside now.`,
+            ``
+        ]
+
+        newActivity = christmasPool[Math.floor(Math.random() * christmasPool.length)]
+
+        if (!isJolly) {
+            // If we're not already jolly, make the bot jolly
+            isJolly = true;
+            client.user.setAvatar('https://media.daalbot.xyz/profile/icon/Christmas.png')
+        }
+    } else {
+        if (isJolly || isConfused) {
+            // If we're jolly, but it's not christmas, revert back to normal
+            isJolly = false;
+            isConfused = false;
+            client.user.setAvatar('https://media.daalbot.xyz/profile/icon/Default.png')
+            client.user.setBanner('https://media.daalbot.xyz/profile/banner/Default.png')
+        }
     }
     
     client.user.setActivity(newActivity, { type: ActivityType.Custom })

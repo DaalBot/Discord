@@ -1,6 +1,6 @@
 const { ChatInputCommandInteraction } = require('discord.js');
 module.exports = {
-    category: 'Testing',
+    category: 'Other',
     description: 'Replies with pong',
   
     slash: 'both',

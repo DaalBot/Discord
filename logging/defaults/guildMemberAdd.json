@@ -25,20 +25,8 @@
                         ]
                     },
                     {
-                        "type": 12,
-                        "items": [
-                            {
-                                "media": {
-                                    "url": "https://cdn.discordapp.com/banners/%%{member.user.id}%%/%%{member.user.banner}%%.png?size=1024&animated=true"
-                                },
-                                "description": null,
-                                "spoiler": false
-                            }
-                        ]
-                    },
-                    {
                         "type": 10,
-                        "content": "### %%{member.user.displayName}%% `(%%{#member.user.discriminator=\"0\"[\"@%%{member.user.username}%%\"][\"%%{member.user.displayName}%%#%%{member.user.discriminator}%%\"])`\nID: %%{member.user.id}%%\nBot: %%{#member.user.bot=\"true\"[\"Yes\"][\"No\"]}%%\nCreated at: <t:%%{meta.createdTimestamp}%%:F>\n\n## Invite Data\nInvited By: %%{#meta.invite.creator[\"<@%%{meta.invite.creator}%%\"][\"Unknown\"]}%%\nInvite Code: %%{meta.invite.code|\"Unknown\"}%%\nUses: %%{meta.invite.uses}%%"
+                        "content": "### %%{member.user.displayName}%% `(%%{#member.user.discriminator=\"0\"[\"@%%{member.user.username}%%\"][\"%%{member.user.username}%%#%%{member.user.discriminator}%%\"]}%%)`\nID: %%{member.user.id}%%\nBot: %%{#member.user.bot=\"true\"[\"Yes\"][\"No\"]}%%\nCreated at: <t:%%{meta.createdTimestamp}%%:F>\n\n## Invite Data\nInvited By: %%{#meta.invite.creator[\"<@%%{meta.invite.creator}%%>\"][\"Unknown\"]}%%\nInvite Code: %%{meta.invite.code|\"Unknown\"}%%\nUses: %%{meta.invite.uses|\"Unknown\"}%%"
                     }
                 ]
             }

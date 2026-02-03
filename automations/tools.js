@@ -23,7 +23,7 @@ const originalConsoleTrace = console.trace;
 const originalProcessEnv = process.env;
 
 async function internal_getEventGuild(eventId) {
-    const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json')));
+    const eventsJSON = JSON.parse(await daalbot.fs.promises.read(path.resolve('./db/events/events.json')));
     const event = eventsJSON.find(event => event.id === eventId);
     return event.guild;
 }
@@ -87,11 +87,10 @@ const exportClass = new class {
                     const eventId = this.getId();
                     const folder = global ? `${await internal_getEventGuild(eventId)}` : eventId;
                     // Get variable from database
-                    if (!fs.existsSync(path.resolve(`./db/events/${folder}`))) fs.mkdirSync(path.resolve(`./db/events/${folder}`), { recursive: true });
                     const variableFileName = variableName.replace(/[^a-zA-Z0-9]/g, ''); // Strip out all non-alphanumeric / problematic characters
                     if (variableFileName.includes('..')) throw new Error('Invalid variable name'); // Prevent directory traversal
-                    if (!fs.existsSync(path.resolve(`./db/events/${folder}/${variableFileName}.var`))) return null;
-                    return daalbot.fs.read(path.resolve(`./db/events/${folder}/${variableFileName}.var`), 'utf8');
+                    const data = await daalbot.fs.promises.read(path.resolve(`./db/events/${folder}/${variableFileName}.var`));
+                    return data;
                 },
         
                 /**
@@ -103,10 +102,9 @@ const exportClass = new class {
                     // Set variable in database
                     const eventId = this.getId();
                     const folder = global ? `${await internal_getEventGuild(eventId)}` : eventId;
-                    if (!fs.existsSync(path.resolve(`./db/events/${folder}/`))) fs.mkdirSync(path.resolve(`./db/events/${folder}`), { recursive: true });
                     const variableFileName = variableName.replace(/[^a-zA-Z0-9]/g, ''); // Strip out all non-alphanumeric / problematic characters
                     if (variableFileName.includes('..')) throw new Error('Invalid variable name'); // Prevent directory traversal
-                    daalbot.fs.write(path.resolve(`./db/events/${folder}/${variableFileName}.var`), `${value}`, true); // < Wrap value in template literal to ensure it is a string (i have made this mistake a lot so might as well make it user friendy and have it auto convert)
+                    await daalbot.fs.promises.write(path.resolve(`./db/events/${folder}/${variableFileName}.var`), `${value}`, true); // < Wrap value in template literal to ensure it is a string (i have made this mistake a lot so might as well make it user friendy and have it auto convert)
                 }
             },
 
@@ -116,6 +114,18 @@ const exportClass = new class {
                     const guildId = `${await internal_getEventGuild(eventId)}`;
                     if (key.includes('..')) throw new Error('Invalid key'); // Prevent directory traversal
                     return daalbot.db.managed.get(guildId, key);
+                },
+                set: async (key, value) => {
+                    const eventId = this.getId();
+                    const guildId = `${await internal_getEventGuild(eventId)}`;
+                    if (key.includes('..')) throw new Error('Invalid key'); // Prevent directory traversal
+                    return daalbot.db.managed.set(guildId, key, value);
+                },
+                delete: async (key) => {
+                    const eventId = this.getId();
+                    const guildId = `${await internal_getEventGuild(eventId)}`;
+                    if (key.includes('..')) throw new Error('Invalid key'); // Prevent directory traversal
+                    return daalbot.db.managed.delete(guildId, key);
                 }
             },
         
@@ -200,6 +210,181 @@ const exportClass = new class {
                     if (allowed) return originalRequire(module);
 
                     throw new Error(`The module '${module}' is not allowed to be used in this event. (Event ID: ${eventId}, Hash: ${hashedId})`);
+                }
+            },
+
+            features: {
+                xp: {
+                    /**
+                     * @param {string} userId
+                    */
+                    get: async (userId) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+
+                        if (userId.includes('..')) throw new Error('Invalid userId'); // Fun
+                        
+                        const xpData = await daalbot.fs.promises.read(path.resolve(`./db/xp/${guildId}/${userId}.xp`));
+                        if (!xpData) return 0;
+                        return parseInt(xpData);
+                    },
+
+                    /**
+                     * @param {string} userId
+                     * @param {number} amount
+                    */
+                    set: async (userId, amount) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+
+                        if (userId.includes('..')) throw new Error('Invalid userId'); // Fun
+                        
+                        await daalbot.fs.promises.write(path.resolve(`./db/xp/${guildId}/${userId}.xp`), `${amount}`, false);
+                    }
+                },
+
+                welcomer: {
+                    get: async() => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+                        return await daalbot.fs.promises.read(path.resolve(`./db/welcome/${guildId}.json`));
+                    },
+
+                    setChannel: async(channelId) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+                        let welcomeData = await daalbot.fs.promises.read(path.resolve(`./db/welcome/${guildId}.json`));
+                        welcomeData = welcomeData ? JSON.parse(welcomeData) : {};
+                        welcomeData.channel = channelId;
+                        await daalbot.fs.promises.write(path.resolve(`./db/welcome/${guildId}.json`), JSON.stringify(welcomeData, null, 4));
+                    },
+
+                    setMessage: async(message) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+                        let welcomeData = await daalbot.fs.promises.read(path.resolve(`./db/welcome/${guildId}.json`));
+                        welcomeData = welcomeData ? JSON.parse(welcomeData) : {};
+                        welcomeData.message = message;
+                        await daalbot.fs.promises.write(path.resolve(`./db/welcome/${guildId}.json`), JSON.stringify(welcomeData, null, 4));
+                    },
+
+                    setEmbed: async(embed) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+                        let welcomeData = await daalbot.fs.promises.read(path.resolve(`./db/welcome/${guildId}.json`));
+                        welcomeData = welcomeData ? JSON.parse(welcomeData) : {};
+                        welcomeData.embed = embed;
+                        await daalbot.fs.promises.write(path.resolve(`./db/welcome/${guildId}.json`), JSON.stringify(welcomeData, null, 4));
+                    }
+                },
+
+                autorole: {
+                    has: async(role) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+                        
+                        const data = await daalbot.fs.promises.read(path.resolve(`./db/autorole/${guildId}/${role}.id`));
+                        return data !== null;
+                    },
+
+                    add: async(role) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+
+                        await daalbot.fs.promises.write(path.resolve(`./db/autorole/${guildId}/${role}.id`), `${role}`);
+                    },
+
+                    remove: async(role) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+
+                        const filePath = path.resolve(`./db/autorole/${guildId}/${role}.id`);
+                        const data = await daalbot.fs.promises.read(filePath);
+                        if (data !== null) {
+                            fs.unlinkSync(filePath);
+                        }
+                    },
+
+                    list: async() => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+
+                        try {
+                            const roleFiles = await fs.promises.readdir(path.resolve(`./db/autorole/${guildId}/`));
+                            return roleFiles.map(file => file.replace('.id', ''));
+                        } catch {
+                            return [];
+                        }
+                    }
+                },
+
+                logging: {
+                    get: async(gatewayEvent) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+                        const logFilePath = path.resolve(`./db/logging/${guildId}/${gatewayEvent.toUpperCase()}.enabled`);
+                        const logData = await daalbot.fs.promises.read(logFilePath);
+                        if (!logData) return null;
+                        return logData === 'true';
+                    },
+
+                    set: async(gatewayEvent, enabled) => {
+                        const eventId = this.getId();
+                        const guildId = `${await internal_getEventGuild(eventId)}`;
+                        const logFilePath = path.resolve(`./db/logging/${guildId}/${gatewayEvent.toUpperCase()}.enabled`);
+                        await daalbot.fs.promises.write(logFilePath, enabled ? 'true' : 'false');
+                    }
+                },
+
+                tickets: {
+                    legacy: {
+                        getCategory: async() => {
+                            const eventId = this.getId();
+                            const guildId = `${await internal_getEventGuild(eventId)}`;
+                            const categoryPath = path.resolve(`./db/tickets/${guildId}.category`);
+                            return await daalbot.fs.promises.read(categoryPath);
+                        },
+
+                        setCategory: async(categoryId) => {
+                            const eventId = this.getId();
+                            const guildId = `${await internal_getEventGuild(eventId)}`;
+                            const categoryPath = path.resolve(`./db/tickets/${guildId}.category`);
+                            await daalbot.fs.promises.write(categoryPath, categoryId);
+                        },
+
+                        getPermissions: async() => {
+                            const eventId = this.getId();
+                            const guildId = `${await internal_getEventGuild(eventId)}`;
+                            const permissionsPath = path.resolve(`./db/tickets/${guildId}.permissions`);
+                            const permissionsData = await daalbot.fs.promises.read(permissionsPath);
+                            if (!permissionsData) return null;
+                            
+                            return permissionsData.split('\n').map(statement => {
+                                return {
+                                    role: statement.split(':')[0],
+                                    action: statement.split(':')[1] // allow or deny
+                                }
+                            });
+                        },
+
+                        setPermissions: async(roleId, allow) => {
+                            const eventId = this.getId();
+                            const guildId = `${await internal_getEventGuild(eventId)}`;
+                            const permissionsPath = path.resolve(`./db/tickets/${guildId}.permissions`);
+                            let permissionsData = [];
+                            const existingData = await daalbot.fs.promises.read(permissionsPath);
+                            if (existingData) {
+                                permissionsData = existingData.split('\n').filter(line => line.trim() !== '');
+                            }
+                            // Remove existing entry for roleId if exists
+                            permissionsData = permissionsData.filter(statement => statement.split(':')[0] !== roleId);
+                            // Add new entry
+                            permissionsData.push(`${roleId}:${allow ? 'allow' : 'deny'}`);
+                            await daalbot.fs.promises.write(permissionsPath, permissionsData.join('\n'));
+                        }
+                    },
+
+                    // TODO: V2 ticket system utils - All data for test server is encrypted so data types are unknown
                 }
             }
         };

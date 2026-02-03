@@ -5,6 +5,7 @@ const daalbot = require('../../daalbot');
 module.exports = {
     name: 'cc',
     description: 'Everything to do with custom commands',
+    category: 'Guild',
 
     slash: true,
     testOnly: false,

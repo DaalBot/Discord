@@ -96,8 +96,8 @@ module.exports = {
 
         if (subcommand === 'grant') {
             // Check permissions for grant subcommand
-            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-                return interaction.reply({ content: 'You need the Manage Channels permission to use this command.', flags: MessageFlags.Ephemeral });
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
+                return interaction.reply({ content: 'You need the `Moderate Members` permission to use this command.', flags: MessageFlags.Ephemeral });
             }
 
             // Looks strange by here but its just for intellisense
@@ -152,8 +152,8 @@ module.exports = {
             }
         } else if (subcommand === 'reward') {
             // Check permissions for reward subcommand
-            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-                return interaction.reply({ content: 'You need the Manage Guild permission to use this command.', flags: MessageFlags.Ephemeral });
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
+                return interaction.reply({ content: 'You need the `Manage Roles` permission to use this command.', flags: MessageFlags.Ephemeral });
             }
 
             // Get the level and role from the interaction.
@@ -187,6 +187,16 @@ module.exports = {
 
             if (role == undefined) {
                 const embed = generateErrorEmbed('The role just returned undefined and has no explanation as to why.');
+                return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+            }
+
+            if (role.position >= interaction.guild.members.me.roles.highest.position) {
+                const embed = generateErrorEmbed('The role you specified is higher than or equal to the bots highest role. Please move the bot\'s role higher in the role list.');
+                return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+            }
+
+            if (role.position >= interaction.member.roles.highest.position && interaction.guild.ownerId !== interaction.user.id) {
+                const embed = generateErrorEmbed('The role you specified is higher than or equal to your highest role. You cannot assign roles higher than or equal to your highest role.');
                 return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             }
 

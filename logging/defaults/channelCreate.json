@@ -20,7 +20,7 @@
                         "components": [
                             {
                                 "type": 10,
-                                "content": "# Channel Created\nChannel: <#%%{channel.id}%%> (`%%{channel.id}%%`)\nType: %%{meta.type}%%\nCreated by: %%{meta.executor.name}%% (`%%{meta.executor.id}%%`)"
+                                "content": "# Channel Created\nChannel: %%{channel.name}%% (<#%%{channel.id}%%> / `%%{channel.id}%%`)\nType: %%{meta.type}%%\nCreated by: %%{meta.executor.name}%% (`%%{meta.executor.id}%%`)"
                             }
                         ]
                     }
