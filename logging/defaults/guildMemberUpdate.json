@@ -3,6 +3,10 @@
         "flags": 32768,
         "components": [
             {
+                "type": 10,
+                "content": "# User Updated\nID: %%{member.old.user.id}%%\nBot: %%{#member.old.user.bot=\"true\"[Yes][No]}%%\nCreated at: <t:%%{meta.createdTimestamp}%%:F>"
+            },
+            {
                 "type": 17,
                 "accent_color": 16705372,
                 "spoiler": false,
@@ -12,7 +16,7 @@
                         "accessory": {
                             "type": 11,
                             "media": {
-                                "url": "https://cdn.discordapp.com/avatars/%%{member.old.user.id}%%/%%{member.new.user.avatar}%%.png?size=1024"
+                                "url": "https://cdn.discordapp.com/avatars/%%{member.old.user.id}%%/%%{member.old.user.avatar}%%.png?size=1024"
                             },
                             "description": null,
                             "spoiler": false
@@ -20,41 +24,41 @@
                         "components": [
                             {
                                 "type": 10,
-                                "content": "# User Updated\n## Old Profile"
-                            }
-                        ]
-                    },
-                    {
-                        "type": 12,
-                        "items": [
-                            {
-                                "media": {
-                                    "url": "https://cdn.discordapp.com/banners/%%{member.old.user.id}%%/%%{member.old.user.banner}%%.png?size=1024&animated=true"
-                                },
-                                "description": null,
-                                "spoiler": false
+                                "content": "## Old Profile"
                             }
                         ]
                     },
                     {
                         "type": 10,
-                        "content": "### %%{member.old.user.displayName}%% `(%%{#member.old.user.discriminator=\"0\"[\"@%%{member.old.user.username}%%\"][\"%%{member.old.user.displayName}%%#%%{member.old.user.discriminator}%%\"])`\nID: %%{member.old.user.id}%%\nBot: %%{#member.old.user.bot=\"true\"[\"Yes\"][\"No\"]}%%\nCreated at: <t:%%{meta.createdTimestamp}%%:F>\n\nRoles:\n%%{member.old._roles*role[\"<@&%%{role}%%> \"]}%%\n\n## New Profile"
-                    },
+                        "content": "### %%{member.old.user.displayName}%% `(%%{#member.old.user.discriminator=\"0\"[@%%{member.old.user.username}%%][%%{member.old.user.displayName}%%#%%{member.old.user.discriminator}%%]}%%)`\n\nRoles:\n%%{member.old._roles*role[\"<@&%%{role}%%> \"]}%%"
+                    }
+                ]
+            },
+            {
+                "type": 17,
+                "accent_color": 16705372,
+                "spoiler": false,
+                "components": [
                     {
-                        "type": 12,
-                        "items": [
+                        "type": 9,
+                        "accessory": {
+                            "type": 11,
+                            "media": {
+                                "url": "https://cdn.discordapp.com/avatars/%%{member.new.user.id}%%/%%{member.new.user.avatar}%%.png?size=1024"
+                            },
+                            "description": null,
+                            "spoiler": false
+                        },
+                        "components": [
                             {
-                                "media": {
-                                    "url": "https://cdn.discordapp.com/banners/%%{member.old.user.id}%%/%%{member.new.user.banner}%%.png?size=1024&animated=true"
-                                },
-                                "description": null,
-                                "spoiler": false
+                                "type": 10,
+                                "content": "## New Profile"
                             }
                         ]
                     },
                     {
                         "type": 10,
-                        "content": "### %%{member.new.user.displayName}%% `(%%{#member.new.user.discriminator=\"0\"[\"@%%{member.new.user.username}%%\"][\"%%{member.new.user.displayName}%%#%%{member.new.user.discriminator}%%\"])`\nID: %%{member.new.user.id}%%\nBot: %%{#member.new.user.bot=\"true\"[\"Yes\"][\"No\"]}%%\nCreated at: <t:%%{meta.createdTimestamp}%%:F>\n\nRoles:\n%%{member.new._roles*role[\"<@&%%{role}%%> \"]}%%"
+                        "content": "### %%{member.new.user.displayName}%% `(%%{#member.new.user.discriminator=\"0\"[@%%{member.new.user.username}%%][%%{member.new.user.displayName}%%#%%{member.new.user.discriminator}%%]}%%)`\n\nRoles:\n%%{member.new._roles*role[\"<@&%%{role}%%> \"]}%%"
                     }
                 ]
             }
