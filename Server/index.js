@@ -61,8 +61,7 @@ app.get('/md/tos', (req, res) => {
     res.sendFile(path.resolve(`./TERMS.md`)) // Send the terms of service file
 })
 
-// Events
-app.get('/events/:event', async (req, res) => {
+async function handleEventReq(req, res) {
     const eventId = req.params.event;
 
     const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json'), 'utf8'));
@@ -82,7 +81,13 @@ app.get('/events/:event', async (req, res) => {
             }
         }
     }
-});
+}
+
+// Events
+app.get('/events/:event', async (req, res) => handleEventReq(req, res));
+app.post('/events/:event', async (req, res) => handleEventReq(req, res));
+app.put('/events/:event', async (req, res) => handleEventReq(req, res));
+app.delete('/events/:event', async (req, res) => handleEventReq(req, res));
 
 app.listen(port, () => {
     console.log(`Internal API listening on port ${port}`);
