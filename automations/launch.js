@@ -2,6 +2,9 @@
 require('./events/messageCreate.js');
 require('./events/messageUpdate.js');
 require('./events/messageDelete.js');
+// >Reactions
+require('./events/messageReactionAdd.js');
+require('./events/messageReactionRemove.js');
 
 // Channels
 require('./events/channelCreate.js');

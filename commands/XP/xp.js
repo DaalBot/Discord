@@ -88,6 +88,11 @@ module.exports = {
                     required: false
                 }
             ]
+        },
+        {
+            name: 'leaderboard',
+            description: 'Shows the level leaderboard for the server',
+            type: ApplicationCommandOptionType.Subcommand
         }
     ],
 
@@ -139,7 +144,7 @@ module.exports = {
                 if (fs.existsSync(path.resolve(`./db/xp/${interaction.guild.id}/${user.id}.xp`))) {
                     // Read the XP file
                     let xp = parseInt(daalbot.fs.read(path.resolve(`./db/xp/${interaction.guild.id}/${user.id}.xp`), 'utf8'));
-                    
+
                     // Remove the XP
                     xp -= amount;
 
@@ -242,10 +247,10 @@ module.exports = {
                 // Test server
                 const canvas = Canvas.createCanvas(700, 250);
                 const ctx = canvas.getContext('2d');
-        
+
                 const background = await Canvas.loadImage(path.resolve(`./assets/level.png`));
                 ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-        
+
                 Canvas.GlobalFonts.registerFromPath(path.resolve('./assets/Poppins-Black.ttf'), 'Poppins-Black');
                 Canvas.GlobalFonts.registerFromPath(path.resolve('./assets/Poppins-Light.ttf'), 'Poppins-Light');
                 Canvas.GlobalFonts.registerFromPath(path.resolve('./assets/Poppins-SemiBold.ttf'), 'Poppins-SemiBold');
@@ -266,11 +271,11 @@ module.exports = {
                 ctx.arc(125, 125, 75, 0, Math.PI * 2, true);
                 ctx.closePath();
                 ctx.clip();
-        
+
                 ctx.drawImage(avatar, 50, 50, 150, 150);
 
                 ctx.restore();
-        
+
                 // Level
                 ctx.font = '40px Poppins-SemiBold';
                 ctx.fillStyle = '#ffffff';
@@ -330,6 +335,60 @@ module.exports = {
             } else {
                 interaction.reply({ content: `We were unable to find a entry for ${user.username}`, flags: MessageFlags.Ephemeral });
             }
+        } else if (subcommand === 'leaderboard') {
+            const xpDir = path.resolve(`./db/xp/${interaction.guild.id}/`);
+
+            if (!fs.existsSync(xpDir)) {
+                return interaction.reply({ content: 'No XP data found for this server.', flags: MessageFlags.Ephemeral });
+            }
+
+            const files = fs.readdirSync(xpDir).filter(file => file.endsWith('.xp'));
+
+            if (files.length === 0) {
+                return interaction.reply({ content: 'No XP data found for this server.', flags: MessageFlags.Ephemeral });
+            }
+
+            const leaderboard = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                const userID = file.replace('.xp', '');
+                const xp = parseInt(daalbot.fs.read(path.resolve(`./db/xp/${interaction.guild.id}/${file}`), 'utf8'));
+                const level = `${xp}`.slice(0, -3) || 0;
+                leaderboard.push({ userID, xp, level });
+            }
+
+            leaderboard.sort((a, b) => b.xp - a.xp);
+
+            const components = [
+                {
+                    "id": 1,
+                    "type": 17,
+                    "components": [
+                        {
+                            "id": 1080,
+                            "type": 10,
+                            "content": "# XP Leaderboard\n## Top 5\n" + leaderboard.slice(0, 5).map((entry, index) => `**${index + 1}.** <@${entry.userID}> - Level ${entry.level} (${entry.xp} XP)`).join('\n') 
+                        },
+                        {
+                            "id": 1946,
+                            "type": 14
+                        },
+                        {
+                            "id": 1862,
+                            "type": 10,
+                            "content": leaderboard.length > 5 ? leaderboard.slice(5, 25).map((entry, index) => `**${index + 6}.** <@${entry.userID}> - Level ${entry.level} (${entry.xp} XP)`).join('\n') : 'No more entries'
+                        }
+                    ],
+                    "spoiler": false
+                }
+            ]
+
+            return interaction.reply({ components, flags: [
+                MessageFlags.Ephemeral,
+                MessageFlags.IsComponentsV2
+            ] });
         }
     }
 }

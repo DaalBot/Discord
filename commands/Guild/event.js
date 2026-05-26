@@ -69,7 +69,7 @@ const eventTypes = [
     },
     {
         name: 'Message Reaction Remove',
-        value: 'messageReactionAdd'
+        value: 'messageReactionRemove'
     },
     {
         name: 'Interaction Create',
@@ -86,6 +86,10 @@ const eventTypes = [
     {
         name: 'Guild Warn Delete',
         value: 'guildWarnDelete'
+    },
+    {
+        name: 'HTTP',
+        value: 'http'
     }
 ]
 

@@ -6,8 +6,10 @@ const express = require('express');
 const app = express();
 const port = 8923;
 const axios = require('axios');
+const daalbot = require('../daalbot');
 const path = require('path');
 const { execSync } = require('child_process');
+const { handleRequest } = require('../automations/events/http');
 
 app.use(express.json());
 
@@ -58,6 +60,29 @@ app.get('/md/tos', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.sendFile(path.resolve(`./TERMS.md`)) // Send the terms of service file
 })
+
+// Events
+app.get('/events/:event', async (req, res) => {
+    const eventId = req.params.event;
+
+    const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json'), 'utf8'));
+    const event = eventsJSON.find(event => event.id === `${eventId}` && event.enabled === true);
+
+    if (!event) {
+        return res.status(404).send('Event not found or disabled');
+    } else {
+        try {
+            await handleRequest(event, req, res);
+            if (!res.headersSent) {
+                res.status(200).send('Events didn\'t return any data');
+            }
+        } catch (e) {
+            if (!res.headersSent) {
+                res.status(500).send('Internal Server Error');
+            }
+        }
+    }
+});
 
 app.listen(port, () => {
     console.log(`Internal API listening on port ${port}`);

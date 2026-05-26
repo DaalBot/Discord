@@ -11,7 +11,17 @@ const checkSecurityRules = toolsClass.getSecurityRules();
 const overridenProcessEnv = toolsClass.getOverridenProcessEnv();
 
 // Event handler
-client.on(`${filenameWithoutExtension}`, async(eventObject) => {
+/**
+ * @param {Object} event - The event object containing event details
+ * @param {import('express').Request} req - The HTTP request object
+ * @param {import('express').Response} res - The HTTP response object
+ * @returns {Promise<void>}
+ */
+module.exports.handleRequest = async function handleRequest(event, req, res) {
+    const eventObject = {
+        req, res, guild: client.guilds.cache.get(event.guild)
+    };
+
     async function executeEvent(eventDir) {
         const jsFile = path.join(eventDir, 'event.js');
         const jsonFile = path.join(eventDir, 'event.json');
@@ -34,7 +44,7 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
         delete require.cache[require.resolve(inputFile)];
         // Load event file
         const input = require(inputFile);
-        const inputData = eventObject; // The line that should be changed to the actual input data
+        const inputData = eventObject;
         const inputFileContents = daalbot.fs.read(inputFile, 'utf8');
         if (!(await checkSecurityRules(inputFileContents))) return; // Exit and do not execute the event
         toolsClass.setId(input.id);
@@ -51,7 +61,7 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
         // All checks pass
         toolsClass.setup();
         try {
-            input.execute(inputData, utils, input.id);
+            await input.execute(inputData, utils, input.id);
         } catch (e) {
             console.error(`${e}`);
         }
@@ -72,7 +82,7 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
             // }
             
             // Replace all placeholders in the JSON content before parsing
-            jsonContent = daalbot.convertMetaText(jsonContent, eventObject.message?.guild, { obj: eventObject });
+            jsonContent = await daalbot.convertMetaText(jsonContent, eventObject.guild, { obj: eventObject });
             
             const eventConfig = JSON.parse(jsonContent);
             
@@ -282,17 +292,10 @@ client.on(`${filenameWithoutExtension}`, async(eventObject) => {
         }
     }
     
-    const eventsJSON = JSON.parse(daalbot.fs.read(path.resolve('./db/events/events.json'), 'utf8'));
-    
-    const validEvents = eventsJSON.filter(event => event.on === `${filenameWithoutExtension}` && event.enabled === true && event.guild === eventObject.message?.guild?.id);
-    
-    for (let i = 0; i < validEvents.length; i++) {
-        const event = validEvents[i];
-        // Pass the event directory path
-        try {
-            await executeEvent(path.resolve(`./db/events/${event.id}/`));
-        } catch (e) {
-            console.error(`Something went wrong trying to execute the event with the ID ${event.id}: \n${e}`);
-        }
+    try {
+        await executeEvent(path.resolve(`./db/events/${event.id}/`));
+    } catch (e) {
+        daalbot.guilds.log.error(event.guild, `Error executing event ${event.id} on ${filenameWithoutExtension}: ${e}`);
+        console.error(`Error executing event ${event.id} on ${filenameWithoutExtension}: ${e}`);
     }
-})
+}
