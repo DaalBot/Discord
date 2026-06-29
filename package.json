@@ -20,7 +20,7 @@
   "dependencies": {
     "@napi-rs/canvas": "^1.0.1",
     "@npiny/csvman": "^0.0.3",
-    "abstract-syntax-tree": "^2.22.0",
+    "abstract-syntax-tree": "^2.23.0",
     "archiver": "^8.0.0",
     "axios": "^1.18.1",
     "discord.js": "^14.26.4",
